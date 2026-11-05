@@ -1,0 +1,362 @@
+key,tr
+gaseous form,Gaz Formu
+death ward,Ölüm Koruması
+raise dead,Ölüyü Diriltme
+mirror image,Ayna Hayali
+lightning bolt,Yıldırım Oku
+fire shield,Ateş Kalkanı
+greater invisibility,Üstün Görünmezlik
+burning hands,Yanan Eller
+flame strike,Alev Darbesi
+spike growth,Dikenli Büyüme
+plant growth,Bitki Büyümesi
+insect plague,Böcek Salgını
+tree stride,Ağaç Adımı
+call lightning,Yıldırım Çağırma
+sleet storm,Sulu Kar Fırtınası
+control water,Suyu Kontrol Etme
+pass without trace,İz Bırakmadan Geçme
+dispel magic,Büyü Bozma
+freedom of movement,Hareket Özgürlüğü
+protection from energy,Enerjiden Korunma
+Way of the Open Hand,Açık El Yolu
+Open Hand,Açık El
+"Monks of the Way of the Open Hand are the ultimate masters of martial arts combat, whether armed or unarmed. They learn techniques to push and trip their opponents, manipulate ki to heal damage to their bodies, and practice advanced meditation that can protect them from harm.","Açık El Yolu keşişleri, silahlı ya da silahsız, dövüş sanatları savaşının nihai ustalarıdır. Rakiplerini itmek ve düşürmek için teknikler öğrenir, bedenlerindeki hasarı iyileştirmek için ki'yi yönlendirir ve onları zarardan koruyabilen ileri düzey meditasyon uygularlar."
+• Open Hand Technique,• Açık El Tekniği
+Open Hand Technique,Açık El Tekniği
+"You can manipulate your enemy's ki when you harness your own. Whenever you hit a creature with one of the attacks granted by your Flurry of Blows, you can impose one of the following effects on that target.","Kendi ki'ni yönlendirirken düşmanının ki'sini de manipüle edebilirsin. Darbe Yağmuru özelliğinin verdiği saldırılardan biriyle bir yaratığa isabet ettirdiğinde, o hedefe aşağıdaki etkilerden birini uygulayabilirsin."
+• It must succeed on a Dexterity saving throw or be knocked prone.,"• Çeviklik kurtarma zarını geçmelidir, yoksa yere serilir."
+"• It must make a Strength saving throw. If it fails, you can push it up to 15 feet away from you.","• Bir Güç kurtarma zarı atmalıdır. Başarısız olursa, onu senden 15 fit'e kadar uzağa itebilirsin."
+• It can't take reactions until the end of your next turn.,• Bir sonraki turunun sonuna kadar tepki veremez.
+Wholeness of Body,Bedenin Bütünlüğü
+"You gain the ability to heal yourself. As an action, you can regain hit points equal to three times your monk level. You must finish a long rest before you can use this feature again.","Kendini iyileştirme yeteneği kazanırsın. Eylem olarak, keşiş seviyenin üç katına eşit can puanı geri kazanabilirsin. Bu özelliği tekrar kullanmadan önce uzun bir dinlenmeyi bitirmen gerekir."
+Tranquility,Dinginlik
+"Beginning at 11th level, you can enter a special meditation that surrounds you with an aura of peace. At the end of a long rest, you gain the effect of a sanctuary spell that lasts until the start of your next long rest (the spell can end early as normal). The saving throw DC for the spell equals 8 + your Wisdom modifier + your proficiency bonus.","11. seviyeden itibaren, seni bir huzur aurasıyla saran özel bir meditasyona girebilirsin. Uzun bir dinlenmenin sonunda, bir sonraki uzun dinlenmenin başlangıcına kadar süren bir sığınak büyüsünün etkisini kazanırsın (büyü normal şekilde erken sona erebilir). Büyünün kurtarma ZS'si 8 + Bilgelik değiştiricin + ustalık bonusuna eşittir."
+Quivering Palm,Titreyen Avuç
+"You gain the ability to set up lethal vibrations in someone's body. When you hit a creature with an unarmed strike, you can spend 3 ki points to start these imperceptible vibrations, which last for a number of days equal to your monk level. The vibrations are harmless unless you use your action to end them. To do so, you and the target must be on the same plane of existence. When you use this action, the creature must make a Constitution saving throw. If it fails, it is reduced to 0 hit points. If it succeeds, it takes 10d10 necrotic damage.","Birinin vücudunda ölümcül titreşimler başlatma yeteneği kazanırsın. Silahsız bir vuruşla bir yaratığa isabet ettirdiğinde, keşiş seviyene eşit sayıda gün süren bu algılanamaz titreşimleri başlatmak için 3 ki puanı harcayabilirsin. Titreşimler, eylemini kullanarak onları sonlandırmadıkça zararsızdır. Bunu yapmak için senin ve hedefin aynı varoluş düzleminde olması gerekir. Bu eylemi kullandığında yaratık bir Dayanıklılık kurtarma zarı atmalıdır. Başarısız olursa, can puanı 0'a düşer. Başarılı olursa 10d10 nekrotik hasar alır."
+You can have only one creature under the effect of this feature at a time. You can choose to end the vibrations harmlessly without using an action.,Bu özelliğin etkisi altında aynı anda yalnızca bir yaratığa sahip olabilirsin. Titreşimleri eylem kullanmadan zararsızca sonlandırmayı seçebilirsin.
+Thief,Hırsız
+"You hone your skills in the larcenous arts. Burglars, bandits, cutpurses, and other criminals typically follow this archetype, but so do rogues who prefer to think of themselves as professional treasure seekers, explorers, delvers, and investigators. In addition to improving your agility and stealth, you learn skills useful for delving into ancient ruins, reading unfamiliar languages, and using magic items you normally couldn't employ.","Hırsızlık sanatlarında becerilerini geliştirirsin. Soyguncular, haydutlar, yankesiciler ve diğer suçlular genellikle bu arketipi izler, ancak kendilerini profesyonel hazine avcıları, kaşifler, zindan araştırmacıları ve müfettişler olarak görmeyi tercih eden düzenbazlar da öyle. Çevikliğini ve gizliliğini geliştirmenin yanı sıra, kadim kalıntıları araştırmak, yabancı dilleri okumak ve normalde kullanamayacağın büyülü eşyaları kullanmak için yararlı beceriler öğrenirsin."
+• Fast Hands,• Hızlı Eller
+• Second-Story Work,• İkinci Kat İşi
+Fast Hands,Hızlı Eller
+"Starting at 3rd level, you can use the bonus action granted by your Cunning Action to make a Dexterity (Sleight of Hand) check, use your thieves' tools to disarm a trap or open a lock, or take the Use an Object action.","3. seviyeden itibaren, Kurnaz Eylem'in verdiği bonus eylemi Çeviklik (El Çabukluğu) zarı atmak, hırsız aletlerini kullanarak bir tuzağı etkisiz hale getirmek veya bir kilidi açmak ya da Nesne Kullanma eylemini yapmak için kullanabilirsin."
+Second-Story Work,İkinci Kat İşi
+"When you choose this archetype at 3rd level, you gain the ability to climb faster than normal; climbing no longer costs you extra movement.","Bu arketipi 3. seviyede seçtiğinde, normalden daha hızlı tırmanma yeteneği kazanırsın; tırmanmak artık sana fazladan hareket maliyeti getirmez."
+"In addition, when you make a running jump, the distance you cover increases by a number of feet equal to your Dexterity modifier.","Ayrıca, koşarak atlama yaptığında kat ettiğin mesafe, Çeviklik değiştiricine eşit sayıda fit kadar artar."
+Supreme Sneak,Üstün Sinsilik
+"Starting at 9th level, you have advantage on a Dexterity (Stealth) check if you move no more than half your speed on the same turn.","9. seviyeden itibaren, aynı turda hızının yarısından fazla hareket etmediysen Çeviklik (Gizlilik) zarında avantajın vardır."
+Use Magic Device,Büyülü Alet Kullanımı
+"By 13th level, you have learned enough about the workings of magic that you can improvise the use of items even when they are not intended for you. You ignore all class, race, and level requirements on the use of magic items.","13. seviyeye geldiğinde, büyünün işleyişi hakkında yeterince bilgi edindin ve eşyaları sana yönelik olmasa bile doğaçlama kullanabilirsin. Büyülü eşyaların kullanımına ilişkin tüm sınıf, ırk ve seviye gereksinimlerini yok sayarsın."
+Thief's Reflexes,Hırsızın Refleksleri
+"When you reach 17th level, you have become adept at laying ambushes and quickly escaping danger. You can take two turns during the first round of any combat. You take your first turn at your normal initiative and your second turn at your initiative minus 10. You can't use this feature when you are surprised.","17. seviyeye ulaştığında, pusu kurmakta ve tehlikeden hızla kaçmakta ustalaştın. Herhangi bir savaşın ilk turunda iki tur oynayabilirsin. İlk turunu normal inisiyatifinde, ikinci turunu inisiyatifinin 10 eksiğinde oynarsın. Şaşırmışken bu özelliği kullanamazsın."
+hold person,Kişiyi Tutma
+zone of truth,Gerçek Bölgesi
+locate creature,Yaratığı Bulma
+School of Evocation,Evokasyon Okulu
+Evocation,Evokasyon
+"You focus your study on magic that creates powerful elemental effects such as bitter cold, searing flame, rolling thunder, crackling lightning, and burning acid. Some evokers find employment in military forces, serving as artillery to blast enemy armies from afar. Others use their spectacular power to protect the weak, while some seek their own gain as bandits, adventurers, or aspiring tyrants.","Çalışmalarınızı acı soğuk, kavurucu alev, gürleyen gök gürültüsü, çatırdayan yıldırım ve yakıcı asit gibi güçlü elemental etkiler yaratan büyüye odaklarsınız. Bazı evokatörler askerî güçlerde görev yapar, düşman ordularını uzaktan yok eden topçu olarak hizmet eder. Diğerleri muhteşem güçlerini zayıfları korumak için kullanır, bazıları ise haydut, maceracı veya hevesli tiran olarak kendi çıkarlarını gözetir."
+• Evocation Savant,• Evokasyon Uzmanı
+• Sculpt Spells,• Büyü Şekillendirme
+Evocation Savant,Evokasyon Uzmanı
+"Beginning when you select this school at 2nd level, the gold and time you must spend to copy an evocation spell into your spellbook is halved.","Bu okulu 2. seviyede seçtiğinizde başlayarak, bir evokasyon büyüsünü büyü kitabınıza kopyalamak için harcamanız gereken altın ve zaman yarıya iner."
+Sculpt Spells,Büyü Şekillendirme
+"Beginning at 2nd level, you can create pockets of relative safety within the effects of your evocation spells. When you cast an evocation spell that affects other creatures that you can see, you can choose a number of them equal to 1 + the spell's level. The chosen creatures automatically succeed on their saving throws against the spell, and they take no damage if they would normally take half damage on a successful save.","2. seviyeden itibaren, evokasyon büyülerinizin etkileri içinde göreceli güvenlik cepleri oluşturabilirsiniz. Görebildiğiniz diğer yaratıkları etkileyen bir evokasyon büyüsü yaptığınızda, bunlardan 1 + büyünün seviyesine eşit sayıda yaratık seçebilirsiniz. Seçilen yaratıklar büyüye karşı kurtarma zarlarında otomatik olarak başarılı olur ve normalde başarılı kurtarma zarında yarım hasar alacaklarsa hiç hasar almazlar."
+Potent Cantrip,Güçlü Küçük Büyü
+"Starting at 6th level, your damaging cantrips affect even creatures that avoid the brunt of the effect. When a creature succeeds on a saving throw against your cantrip, the creature takes half the cantrip's damage (if any) but suffers no additional effect from the cantrip.","6. seviyeden itibaren, hasar veren küçük büyüleriniz etkinin ana darbesinden kaçınan yaratıkları bile etkiler. Bir yaratık küçük büyünüze karşı kurtarma zarında başarılı olduğunda, yaratık küçük büyünün hasarının yarısını (varsa) alır ancak küçük büyüden başka bir etki yaşamaz."
+Empowered Evocation,Güçlendirilmiş Evokasyon
+"Beginning at 10th level, you can add your Intelligence modifier to one damage roll of any wizard evocation spell you cast.","10. seviyeden itibaren, yaptığınız herhangi bir sihirbaz evokasyon büyüsünün bir hasar zarına Zeka değiştiricinizi ekleyebilirsiniz."
+Overchannel,Aşırı Yönlendirme
+"Starting at 14th level, you can increase the power of your simpler spells. When you cast a wizard spell of 1st through 5th-level that deals damage, you can deal maximum damage with that spell.","14. seviyeden itibaren, daha basit büyülerinizin gücünü artırabilirsiniz. Hasar veren 1. ile 5. seviye arasında bir sihirbaz büyüsü yaptığınızda, o büyüyle azami hasar verebilirsiniz."
+"The first time you do so, you suffer no adverse effect. If you use this feature again before you finish a long rest, you take 2d12 necrotic damage for each level of the spell, immediately after you cast it. Each time you use this feature again before finishing a long rest, the necrotic damage per spell level increases by 1d12. This damage ignores resistance and immunity.","Bunu ilk yaptığınızda olumsuz bir etki yaşamazsınız. Bir uzun dinlenmeyi bitirmeden bu özelliği tekrar kullanırsanız, büyüyü yaptıktan hemen sonra büyünün her seviyesi için 2d12 nekrotik hasar alırsınız. Bir uzun dinlenmeyi bitirmeden bu özelliği her tekrar kullandığınızda, büyü seviyesi başına nekrotik hasar 1d12 artar. Bu hasar direnci ve bağışıklığı yok sayar."
+scorching ray,Kavurucu Işın
+ice storm,Buz Fırtınası
+wall of fire,Ateş Duvarı
+cone of cold,Soğuk Konisi
+mass cure wounds,Toplu Yara İyileştirme
+Path of the Berserker,Çılgın Yolu
+Berserker,Çılgın
+"For some barbarians, rage is a means to an end—that end being violence. The Path of the Berserker is a path of untrammeled fury, slick with blood. As you enter the berserker's rage, you thrill in the chaos of battle, heedless of your own health or well-being.","Bazı barbarlar için öfke bir amaca ulaşmanın aracıdır; o amaç da şiddettir. Çılgın Yolu, kana bulanmış, dizginsiz bir öfke yoludur. Çılgının öfkesine girdiğinizde, kendi sağlığınızı veya esenliğinizi umursamadan savaşın kaosundan zevk alırsınız."
+• Frenzy,• Çılgınlık
+Frenzy,Çılgınlık
+"Starting when you choose this path at 3rd level, you can go into a frenzy when you rage. If you do so, for the duration of your rage you can make a single melee weapon attack as a bonus action on each of your turns after this one. When your rage ends, you suffer one level of exhaustion.","3. seviyede bu yolu seçtiğinizden itibaren öfkelendiğinizde çılgınlığa kapılabilirsiniz. Bunu yaparsanız, öfkenizin süresi boyunca bundan sonraki her turunuzda bir bonus eylem olarak tek bir yakın dövüş silah saldırısı yapabilirsiniz. Öfkeniz sona erdiğinde bir seviye yorgunluk yaşarsınız."
+Mindless Rage,Akılsız Öfke
+"Beginning at 6th level, you can't be charmed or frightened while raging. If you are charmed or frightened when you enter your rage, the effect is suspended for the duration of the rage.","6. seviyeden itibaren öfkelenirken büyülenemez veya korkutulamazsınız. Öfkelendiğinizde büyülenmiş veya korkmuşsanız, etki öfkenin süresi boyunca askıya alınır."
+Intimidating Presence,Gözdağı Veren Varlık
+"Beginning at 10th level, you can use your action to frighten someone with your menacing presence. When you do so, choose one creature that you can see within 30 feet of you. If the creature can see or hear you, it must succeed on a Wisdom saving throw (DC equal to 8 + your proficiency bonus + your Charisma modifier) or be frightened of you until the end of your next turn. On subsequent turns, you can use your action to extend the duration of this effect on the frightened creature until the end of your next turn. This effect ends if the creature ends its turn out of line of sight or more than 60 feet away from you.","10. seviyeden itibaren eyleminizi, tehditkâr varlığınızla birini korkutmak için kullanabilirsiniz. Bunu yaptığınızda size 30 fit mesafe içinde görebildiğiniz bir yaratık seçin. Yaratık sizi görebiliyor veya duyabiliyorsa, bir Bilgelik kurtarma zarını (ZS 8 + ustalık bonusunuz + Karizma değiştiriciniz) başarmalıdır; aksi halde bir sonraki turunuzun sonuna kadar sizden korkar. Sonraki turlarda, korkmuş yaratık üzerindeki bu etkinin süresini bir sonraki turunuzun sonuna kadar uzatmak için eyleminizi kullanabilirsiniz. Yaratık turunu görüş hattı dışında veya sizden 60 fitten uzakta bitirirse bu etki sona erer."
+"If the creature succeeds on its saving throw, you can't use this feature on that creature again for 24 hours.","Yaratık kurtarma zarını başarırsa, bu özelliği o yaratık üzerinde 24 saat boyunca tekrar kullanamazsınız."
+Retaliation,Misilleme
+"Starting at 14th level, when you take damage from a creature that is within 5 feet of you, you can use your reaction to make a melee weapon attack against that creature.","14. seviyeden itibaren, size 5 fit mesafe içindeki bir yaratıktan hasar aldığınızda, tepkinizi kullanarak o yaratığa bir yakın dövüş silah saldırısı yapabilirsiniz."
+commune with nature,Doğayla Bağlantı
+Desert,Çöl
+"Once you use this feature, you can't use it again until you finish a long rest.","Bu özelliği kullandıktan sonra, uzun dinlenmeyi bitirene kadar tekrar kullanamazsınız."
+College of Lore,Bilgi Okulu
+Lore,Bilgi
+"Bards of the College of Lore know something about most things, collecting bits of knowledge from sources as diverse as scholarly tomes and peasant tales. Whether singing folk ballads in taverns or elaborate compositions in royal courts, these bards use their gifts to hold audiences spellbound. When the applause dies down, the audience members might find themselves questioning everything they held to be true, from their faith in the priesthood of the local temple to their loyalty to the king.","Bilgi Okulu'nun ozanları çoğu şey hakkında bir şeyler bilir; bilgi kırıntılarını bilgin ciltlerinden köylü masallarına kadar çeşitli kaynaklardan toplarlar. İster meyhanelerde halk balatları söylesinler, ister kraliyet saraylarında ayrıntılı besteler, bu ozanlar yeteneklerini dinleyicileri büyülemek için kullanır. Alkışlar dindiğinde dinleyiciler, yerel tapınağın rahiplerine duydukları inançtan krala duydukları sadakate kadar doğru bildikleri her şeyi sorgularken bulabilir kendilerini."
+"The loyalty of these bards lies in the pursuit of beauty and truth, not in fealty to a monarch or following the tenets of a deity. A noble who keeps such a bard as a herald or advisor knows that the bard would rather be honest than politic.","Bu ozanların sadakati bir hükümdara bağlılıkta veya bir tanrının ilkelerini izlemekte değil, güzelliğin ve hakikatin peşinde yatar. Böyle bir ozanı haberci veya danışman olarak tutan bir soylu, ozanın diplomatik olmaktansa dürüst olmayı tercih edeceğini bilir."
+"The college's members gather in libraries and sometimes in actual colleges, complete with classrooms and dormitories, to share their lore with one another. They also meet at festivals or affairs of state, where they can expose corruption, unravel lies, and poke fun at self-important figures of authority.","Okulun üyeleri, birbirleriyle bilgilerini paylaşmak için kütüphanelerde ve bazen sınıfları ve yurtlarıyla gerçek okullarda toplanır. Ayrıca yolsuzluğu ifşa edebilecekleri, yalanları çözebilecekleri ve kendini beğenmiş otorite figürleriyle alay edebilecekleri festivallerde veya devlet işlerinde buluşurlar."
+• Bonus Proficiencies,• Bonus Ustalıklar
+• Cutting Words,• Keskin Sözler
+Bonus Proficiencies,Bonus Ustalıklar
+"When you join the College of Lore at 3rd level, you gain proficiency with three skills of your choice.","3. seviyede Bilgi Okulu'na katıldığınızda, seçeceğiniz üç beceride usta olursunuz."
+Cutting Words,Keskin Sözler
+"Also at 3rd level, you learn how to use your wit to distract, confuse, and otherwise sap the confidence and competence of others. When a creature that you can see within 60 feet of you makes an attack roll, an ability check, or a damage roll, you can use your reaction to expend one of your uses of Bardic Inspiration, rolling a Bardic Inspiration die and subtracting the number rolled from the creature's roll. You can choose to use this feature after the creature makes its roll, but before the DM determines whether the attack roll or ability check succeeds or fails, or before the creature deals its damage. The creature is immune if it can't hear you or if it's immune to being charmed.","Yine 3. seviyede, zekânızı başkalarının dikkatini dağıtmak, kafasını karıştırmak ve güvenini ile yetkinliğini kırmak için nasıl kullanacağınızı öğrenirsiniz. Size 60 fit mesafe içinde görebildiğiniz bir yaratık bir saldırı zarı, yetenek zarı veya hasar zarı attığında, tepkinizi kullanarak Ozan İlhamı kullanımlarınızdan birini harcayabilir, bir Ozan İlhamı zarı atıp sonucu yaratığın zarından çıkarabilirsiniz. Bu özelliği, yaratık zarını attıktan sonra ama DM saldırı zarının veya yetenek zarının başarılı olup olmadığını belirlemeden önce veya yaratık hasarını vermeden önce kullanmayı seçebilirsiniz. Yaratık sizi duyamıyorsa veya büyülenmeye bağışıksa bu etkiye bağışıktır."
+Additional Magical Secrets,Ek Büyülü Sırlar
+"At 6th level, you learn two spells of your choice from any class. A spell you choose must be of a level you can cast, as shown on the Bard table, or a cantrip. The chosen spells count as bard spells for you but don't count against the number of bard spells you know.","6. seviyede, herhangi bir sınıftan seçeceğiniz iki büyü öğrenirsiniz. Seçtiğiniz büyü, Ozan tablosunda gösterildiği gibi yapabileceğiniz bir seviyede veya küçük büyü olmalıdır. Seçilen büyüler sizin için ozan büyüsü sayılır, ancak bildiğiniz ozan büyüsü sayısına dahil edilmezler."
+Peerless Skill,Eşsiz Beceri
+"Starting at 14th level, when you make an ability check, you can expend one use of Bardic Inspiration. Roll a Bardic Inspiration die and add the number rolled to your ability check. You can choose to do so after you roll the die for the ability check, but before the DM tells you whether you succeed or fail.","14. seviyeden itibaren, bir yetenek zarı attığınızda bir Ozan İlhamı kullanımı harcayabilirsiniz. Bir Ozan İlhamı zarı atıp sonucu yetenek zarınıza ekleyin. Bunu, yetenek zarı için zarı attıktan sonra ama DM başarılı mı başarısız mı olduğunuzu söylemeden önce yapmayı seçebilirsiniz."
+"Once you use this feature, you can't use it again until you finish a short or long rest.","Bu özelliği kullandıktan sonra, kısa veya uzun dinlenmeyi bitirene kadar tekrar kullanamazsınız."
+Circle of the Land,Arazi Çemberi
+Land,Arazi
+"The Circle of the Land is made up of mystics and sages who safeguard ancient knowledge and rites through a vast oral tradition. These druids meet within sacred circles of trees or standing stones to whisper primal secrets in Druidic. The circle's wisest members preside as the chief priests of communities that hold to the Old Faith and serve as advisors to the rulers of those folk. As a member of this circle, your magic is influenced by the land where you were initiated into the circle's mysterious rites.","Arazi Çemberi, kadim bilgiyi ve ayinleri geniş bir sözlü gelenek aracılığıyla koruyan mistiklerden ve bilgelerden oluşur. Bu druidler kutsal ağaç çemberlerinde ya da dikili taşlar arasında toplanıp ilkel sırları Druidce fısıldarlar. Çemberin en bilge üyeleri Eski İnanç'a bağlı toplulukların baş rahipleri olarak görev yapar ve bu halkların hükümdarlarına danışmanlık eder. Bu çemberin bir üyesi olarak, büyün çemberin gizemli ayinlerine kabul edildiğin arazinin etkisi altındadır."
+• Natural Recovery,• Doğal Toparlanma
+• Circle Spells,• Çember Büyüleri
+You learn one additional druid cantrip of your choice. This cantrip doesn't count against the number of druid cantrips you know.,"Seçtiğin ek bir druid küçük büyüsü öğrenirsin. Bu küçük büyü, bildiğin druid küçük büyüleri sayısına dahil edilmez."
+Circle Spells,Çember Büyüleri
+"Your mystical connection to the land infuses you with the ability to cast certain spells. At 3rd, 5th, 7th, and 9th level you gain access to circle spells connected to the land where you became a druid. Choose that land—arctic, coast, desert, forest, grassland, mountain, swamp, or Underdark—and consult the associated list of spells.","Araziyle olan mistik bağın, belirli büyüleri yapabilme yeteneği kazandırır. 3., 5., 7. ve 9. seviyelerde, druid olduğun araziyle bağlantılı çember büyülerine erişim kazanırsın. O araziyi seç (kutup, kıyı, çöl, orman, otlak, dağ, bataklık veya Yeraltı Karanlığı) ve ilgili büyü listesine bak."
+"Once you gain access to a circle spell, you always have it prepared, and it doesn't count against the number of spells you can prepare each day. If you gain access to a spell that doesn't appear on the druid spell list, the spell is nonetheless a druid spell for you.","Bir çember büyüsüne erişim kazandığında, onu her zaman hazırlanmış olarak bulundurursun ve her gün hazırlayabileceğin büyü sayısına dahil edilmez. Druid büyü listesinde yer almayan bir büyüye erişim kazanırsan, o büyü yine de senin için bir druid büyüsüdür."
+Arctic,Kutup
+Druid Level | Circle Spells,Druid Seviyesi | Çember Büyüleri
+"3rd | hold person, spike growth","3. | Kişiyi Tutma, Dikenli Büyüme"
+"5th | sleet storm, slow","5. | Sulu Kar Fırtınası, Yavaşlatma"
+"7th | freedom of movement, ice storm","7. | Hareket Özgürlüğü, Buz Fırtınası"
+"9th | commune with nature, cone of cold","9. | Doğayla İletişim, Soğuk Konisi"
+Coast,Kıyı
+"3rd | mirror image, misty step","3. | Ayna Görüntüsü, Puslu Adım"
+"5th | water breathing, water walk","5. | Su Altında Nefes, Su Üstünde Yürüme"
+"7th | control water, freedom of movement","7. | Suyu Kontrol Etme, Hareket Özgürlüğü"
+"9th | conjure elemental, scrying","9. | Elemental Çağırma, Kehanet Aynası"
+"3rd | blur, silence","3. | Bulanıklaşma, Sessizlik"
+"5th | create food and water, protection from energy","5. | Yiyecek ve Su Yaratma, Enerjiden Korunma"
+"7th | blight, hallucinatory terrain","7. | Çürütme, Hayali Arazi"
+"9th | insect plague, wall of stone","9. | Böcek Salgını, Taş Duvarı"
+Forest,Orman
+"3rd | barkskin, spider climb","3. | Ağaç Kabuğu, Örümcek Tırmanışı"
+"5th | call lightning, plant growth","5. | Yıldırım Çağırma, Bitki Büyümesi"
+"7th | divination, freedom of movement","7. | Kehanet, Hareket Özgürlüğü"
+"9th | commune with nature, tree stride","9. | Doğayla İletişim, Ağaç Adımı"
+Grassland,Otlak
+"3rd | invisibility, pass without trace","3. | Görünmezlik, İz Bırakmadan Geçme"
+"5th | daylight, haste","5. | Gün Işığı, Hız"
+"9th | dream, insect plague","9. | Rüya, Böcek Salgını"
+Mountain,Dağ
+"3rd | spider climb, spike growth","3. | Örümcek Tırmanışı, Dikenli Büyüme"
+"5th | lightning bolt, meld into stone","5. | Yıldırım Oku, Taşa Karışma"
+"7th | stone shape, stoneskin","7. | Taş Şekillendirme, Taş Deri"
+"9th | passwall, wall of stone","9. | Duvardan Geçiş, Taş Duvarı"
+Swamp,Bataklık
+"5th | water walk, stinking cloud","5. | Su Üstünde Yürüme, Kokulu Bulut"
+"7th | freedom of movement, locate creature","7. | Hareket Özgürlüğü, Yaratığı Bulma"
+"9th | insect plague, scrying","9. | Böcek Salgını, Kehanet Aynası"
+Underdark,Yeraltı Karanlığı
+"3rd | spider climb, web","3. | Örümcek Tırmanışı, Ağ"
+"5th | gaseous form, stinking cloud","5. | Gaz Biçimi, Kokulu Bulut"
+"7th | greater invisibility, stone shape","7. | Üstün Görünmezlik, Taş Şekillendirme"
+"9th | cloudkill, insect plague","9. | Ölüm Bulutu, Bulaşıcı Hastalık"
+Natural Recovery,Doğal Toparlanma
+"Starting at 2nd level, you can regain some of your magical energy by sitting in meditation and communing with nature. During a short rest, you choose expended spell slots to recover. The spell slots can have a combined level that is equal to or less than half your druid level (rounded up), and none of the slots can be 6th level or higher. You can't use this feature again until you finish a long rest.","2. seviyeden itibaren, meditasyon yaparak ve doğayla iletişim kurarak büyülü enerjinin bir kısmını geri kazanabilirsin. Kısa bir dinlenme sırasında, geri kazanmak üzere harcanmış büyü haklarını seçersin. Büyü haklarının birleşik seviyesi, druid seviyenin yarısına eşit veya altında olabilir (yukarı yuvarlanır) ve hiçbiri 6. seviye veya daha yüksek olamaz. Bu özelliği uzun bir dinlenmeyi bitirene kadar tekrar kullanamazsın."
+"For example, when you are a 4th-level druid, you can recover up to two levels worth of spell slots. You can recover either a 2nd-level slot or two 1st-level slots.","Örneğin 4. seviye bir druidsen, iki seviye değerinde büyü hakkı geri kazanabilirsin. Ya bir 2. seviye hak ya da iki 1. seviye hak geri kazanabilirsin."
+Land's Stride,Arazinin Adımı
+"Starting at 6th level, moving through nonmagical difficult terrain costs you no extra movement. You can also pass through nonmagical plants without being slowed by them and without taking damage from them if they have thorns, spines, or a similar hazard.","6. seviyeden itibaren, büyülü olmayan zor arazide hareket etmek sana fazladan harekete mal olmaz. Ayrıca büyülü olmayan bitkilerin arasından, onlar tarafından yavaşlatılmadan ve dikenleri, iğneleri veya benzeri bir tehlikesi varsa onlardan hasar almadan geçebilirsin."
+"In addition, you have advantage on saving throws against plants that are magically created or manipulated to impede movement, such as those created by the entangle spell.","Ayrıca, hareketi engellemek için büyülü yolla yaratılmış ya da manipüle edilmiş bitkilere karşı (Dolaştırma büyüsünün yarattıkları gibi) kurtarma zarlarında avantajın olur."
+Nature's Ward,Doğanın Koruması
+"When you reach 10th level, you can't be charmed or frightened by elementals or fey, and you are immune to poison and disease.","10. seviyeye ulaştığında, elementaller veya periler tarafından büyülenemez ya da korkutulamazsın ve zehre ve hastalığa karşı bağışıklığın olur."
+Nature's Sanctuary,Doğanın Sığınağı
+"When you reach 14th level, creatures of the natural world sense your connection to nature and become hesitant to attack you. When a beast or plant creature attacks you, that creature must make a Wisdom saving throw against your druid spell save DC. On a failed save, the creature must choose a different target, or the attack automatically misses. On a successful save, the creature is immune to this effect for 24 hours.","14. seviyeye ulaştığında, doğal dünyanın yaratıkları doğayla bağını hisseder ve sana saldırmaktan çekinir. Bir hayvan veya bitki yaratığı sana saldırdığında, o yaratık druid büyü kurtarma ZS'ne karşı bir Bilgelik kurtarma zarı atmalıdır. Başarısız olursa yaratık farklı bir hedef seçmelidir ya da saldırı otomatik olarak ıskalar. Başarılı olursa, yaratık 24 saat boyunca bu etkiye karşı bağışık olur."
+The creature is aware of this effect before it makes its attack against you.,"Yaratık, sana saldırmadan önce bu etkinin farkındadır."
+misty step,Puslu Adım
+water breathing,Su Altında Nefes
+water walk,Su Üstünde Yürüme
+conjure elemental,Elemental Çağırma
+create food and water,Yiyecek ve Su Yaratma
+hallucinatory terrain,Hayali Arazi
+wall of stone,Taş Duvarı
+spider climb,Örümcek Tırmanışı
+meld into stone,Taşa Karışma
+stone shape,Taş Şekillendirme
+stinking cloud,Kokulu Bulut
+Oath of Devotion,Adanmışlık Yemini
+Devotion,Adanmışlık
+"The Oath of Devotion binds a paladin to the loftiest ideals of justice, virtue, and order. Sometimes called cavaliers, white knights, or holy warriors, these paladins meet the ideal of the knight in shining armor, acting with honor in pursuit of justice and the greater good. They hold themselves to the highest standards of conduct, and some, for better or worse, hold the rest of the world to the same standards. Many who swear this oath are devoted to gods of law and good and use their gods' tenets as the measure of their devotion. They hold angels—the perfect servants of good—as their ideals, and incorporate images of angelic wings into their helmets or coats of arms.","Adanmışlık Yemini, bir paladini adaletin, erdemin ve düzenin en yüce ideallerine bağlar. Bazen şövalye, beyaz şövalye ya da kutsal savaşçı olarak anılan bu paladinler, parlak zırhlı şövalye idealini karşılar; adalet ve daha büyük iyilik peşinde onurla hareket ederler. Kendilerini en yüksek davranış standartlarına tabi tutarlar ve bazıları, iyi ya da kötü, dünyanın geri kalanını da aynı standartlara tabi tutar. Bu yemini edenlerin çoğu yasa ve iyilik tanrılarına adanmıştır ve adanmışlıklarının ölçüsü olarak tanrılarının ilkelerini kullanırlar. İyiliğin kusursuz hizmetkârları olan melekleri ideal olarak görürler ve miğferlerine ya da arma kalkanlarına melek kanadı görüntüleri işlerler."
+• Tenets of Devotion,• Adanmışlığın İlkeleri
+• Oath Spells,• Yemin Büyüleri
+• Channel Divinity,• İlahi Yönlendirme
+Channel Divinity,İlahi Yönlendirme
+"When you take this oath at 3rd level, you gain the following two Channel Divinity options.","Bu yemini 3. seviyede ettiğinde, aşağıdaki iki İlahi Yönlendirme seçeneğini kazanırsın."
+• Sacred Weapon,• Kutsal Silah
+• Turn the Unholy,• Kutsal Olmayanı Kov
+Oath Spells,Yemin Büyüleri
+You gain oath spells at the paladin levels listed.,Paladin seviyelerinde listelenen yemin büyülerini kazanırsın.
+Oath of Devotion Spells,Adanmışlık Yemini Büyüleri
+Paladin Level | Spells,Paladin Seviyesi | Büyüler
+"3rd | protection from evil and good, sanctuary","3. | kötülükten ve iyilikten korunma, sığınak"
+"5th | lesser restoration, zone of truth","5. | hafif iyileştirme, hakikat bölgesi"
+"9th | beacon of hope, dispel magic","9. | umut işareti, büyü gider"
+"13th | freedom of movement, guardian of faith","13. | hareket özgürlüğü, inanç muhafızı"
+"17th | commune, flame strike","17. | irtibat, alev darbesi"
+Sacred Weapon,Kutsal Silah
+"As an action, you can imbue one weapon that you are holding with positive energy, using your Channel Divinity. For 1 minute, you add your Charisma modifier to attack rolls made with that weapon (with a minimum bonus of +1). The weapon also emits bright light in a 20-foot radius and dim light 20 feet beyond that. If the weapon is not already magical, it becomes magical for the duration.","Eylem olarak, İlahi Yönlendirme'ni kullanarak elinde tuttuğun bir silahı pozitif enerjiyle doldurabilirsin. 1 dakika boyunca, o silahla yapılan saldırı zarlarına Karizma değiştiricini eklersin (en az +1 bonus). Silah ayrıca 20 fit yarıçapta parlak ışık ve ötesinde 20 fit boyunca loş ışık yayar. Silah zaten büyülü değilse, süre boyunca büyülü olur."
+"You can end this effect on your turn as part of any other action. If you are no longer holding or carrying this weapon, or if you fall unconscious, this effect ends.","Bu etkiyi kendi turunda başka herhangi bir eylemin parçası olarak sonlandırabilirsin. Artık bu silahı elinde tutmuyorsan ya da taşımıyorsan ya da bayılırsan, bu etki sona erer."
+Tenets of Devotion,Adanmışlığın İlkeleri
+"Though the exact words and strictures of the Oath of Devotion vary, paladins of this oath share these tenets.","Adanmışlık Yemini'nin tam sözleri ve kısıtlamaları değişse de, bu yeminin paladinleri şu ilkeleri paylaşır."
+Honesty. Don't lie or cheat. Let your word be your promise.,Dürüstlük. Yalan söyleme ya da hile yapma. Sözün senin vaadin olsun.
+"Courage. Never fear to act, though caution is wise.",Cesaret. İhtiyat akıllıca olsa da asla harekete geçmekten korkma.
+"Compassion. Aid others, protect the weak, and punish those who threaten them. Show mercy to your foes, but temper it with wisdom.","Merhamet. Başkalarına yardım et, zayıfları koru ve onları tehdit edenleri cezalandır. Düşmanlarına merhamet göster, ancak onu bilgelikle ölçülü tut."
+"Honor. Treat others with fairness, and let your honorable deeds be an example to them. Do as much good as possible while causing the least amount of harm.",Onur. Başkalarına adil davran ve onurlu işlerinin onlara örnek olmasına izin ver. Mümkün olan en az zararı vererek mümkün olan en çok iyiliği yap.
+"Duty. Be responsible for your actions and their consequences, protect those entrusted to your care, and obey those who have just authority over you.","Görev. Eylemlerinden ve sonuçlarından sorumlu ol, sana emanet edilenleri koru ve senin üzerinde haklı yetkisi olanlara itaat et."
+Turn the Unholy,Kutsal Olmayanı Kov
+"As an action, you present your holy symbol and speak a prayer censuring fiends and undead, using your Channel Divinity. Each fiend or undead that can see or hear you within 30 feet of you must make a Wisdom saving throw. If the creature fails its saving throw, it is turned for 1 minute or until it takes damage.","Eylem olarak, İlahi Yönlendirme'ni kullanarak kutsal sembolünü sunar ve iblisleri ile ölümsüzleri kınayan bir dua edersin. Seni görebilen ya da duyabilen ve 30 fit içinde olan her iblis veya ölümsüz bir Bilgelik kurtarma zarı atmalıdır. Yaratık kurtarma zarında başarısız olursa, 1 dakika boyunca ya da hasar alana kadar kovulmuş olur."
+"A turned creature must spend its turns trying to move as far away from you as it can, and it can't willingly move to a space within 30 feet of you. It also can't take reactions. For its action, it can use only the Dash action or try to escape from an effect that prevents it from moving. If there's nowhere to move, the creature can use the Dodge action.",Kovulmuş bir yaratık turlarını senden olabildiğince uzağa gitmeye çalışarak geçirmelidir ve isteyerek senden 30 fit içindeki bir alana hareket edemez. Ayrıca tepki veremez. Eylemi için yalnızca Koşma eylemini kullanabilir ya da hareket etmesini engelleyen bir etkiden kaçmaya çalışabilir. Hareket edecek yer yoksa yaratık Kaçınma eylemini kullanabilir.
+Aura of Devotion,Adanmışlık Aurası
+"Starting at 7th level, you and friendly creatures within 10 feet of you can't be charmed while you are conscious.","7. seviyeden itibaren, sen ve 10 fit içindeki dost yaratıklar, sen bilinçliyken büyülenemezsiniz."
+"At 18th level, the range of this aura increases to 30 feet.","18. seviyede, bu aurasının menzili 30 fit'e yükselir."
+Purity of Spirit,Ruhun Saflığı
+"Beginning at 15th level, you are always under the effects of a protection from evil and good spell.","15. seviyeden itibaren, her zaman kötülükten ve iyilikten korunma büyüsünün etkisi altındasın."
+Holy Nimbus,Kutsal Hale
+"At 20th level, as an action, you can emanate an aura of sunlight. For 1 minute, bright light shines from you in a 30-foot radius, and dim light shines 30 feet beyond that.","20. seviyede, eylem olarak güneş ışığından bir aura yayabilirsin. 1 dakika boyunca senden 30 fit yarıçapta parlak ışık ve ötesinde 30 fit boyunca loş ışık yayılır."
+"Whenever an enemy creature starts its turn in the bright light, the creature takes 10 radiant damage.","Bir düşman yaratık turuna parlak ışığın içinde başladığında, yaratık 10 ışıltılı hasar alır."
+"In addition, for the duration, you have advantage on saving throws against spells cast by fiends or undead.","Ayrıca süre boyunca, iblisler veya ölümsüzler tarafından yapılan büyülere karşı kurtarma zarlarında avantajın olur."
+protection from evil and good,kötülükten ve iyilikten korunma
+Draconic Bloodline,Ejder Kan Hattı
+Draconic,Ejder
+"Your innate magic comes from draconic magic that was mingled with your blood or that of your ancestors. Most often, sorcerers with this origin trace their descent back to a mighty sorcerer of ancient times who made a bargain with a dragon or who might even have claimed a dragon parent. Some of these bloodlines are well established in the world, but most are obscure. Any given sorcerer could be the first of a new bloodline, as a result of a pact or some other exceptional circumstance.","Doğuştan gelen büyün, senin veya atalarının kanına karışmış ejder büyüsünden gelir. Çoğu zaman bu kökene sahip büyücüler, bir ejderle anlaşma yapmış ya da hatta bir ejder ebeveyn olduğunu iddia etmiş kadim bir güçlü büyücüye kadar soylarını izler. Bu kan hatlarından bazıları dünyada köklüdür, ancak çoğu belirsizdir. Herhangi bir büyücü, bir pakt ya da başka bir istisnai durumun sonucu olarak yeni bir kan hattının ilki olabilir."
+• Dragon Ancestor,• Ejder Atası
+• Draconic Resilience,• Ejder Dayanıklılığı
+Draconic Resilience,Ejder Dayanıklılığı
+"As magic flows through your body, it causes physical traits of your dragon ancestors to emerge. At 1st level, your hit point maximum increases by 1 and increases by 1 again whenever you gain a level in this class.","Büyü vücudunda aktıkça, ejder atalarının fiziksel özellikleri ortaya çıkar. 1. seviyede, maksimum can puanın 1 artar ve bu sınıfta her seviye kazandığında tekrar 1 artar."
+"Additionally, parts of your skin are covered by a thin sheen of dragon-like scales. When you aren't wearing armor, your AC equals 13 + your Dexterity modifier.","Ek olarak, derinin bazı kısımları ince, ejder benzeri pullarla kaplanır. Zırh giymediğinde ZS'n 13 + Çeviklik değiştiricine eşittir."
+Dragon Ancestor,Ejder Atası
+"At 1st level, you choose one type of dragon as your ancestor. The damage type associated with each dragon is used by features you gain later.","1. seviyede, ata olarak bir ejder türü seçersin. Her ejderle ilişkili hasar türü, daha sonra kazandığın özelliklerde kullanılır."
+Draconic Ancestry,Ejder Soyu
+Dragon | Damage Type,Ejder | Hasar Türü
+Black | Acid,Siyah | Asit
+Blue | Lightning,Mavi | Yıldırım
+Brass | Fire,Pirinç | Ateş
+Bronze | Lightning,Bronz | Yıldırım
+Copper | Acid,Bakır | Asit
+Gold | Fire,Altın | Ateş
+Green | Poison,Yeşil | Zehir
+Red | Fire,Kırmızı | Ateş
+Silver | Cold,Gümüş | Soğuk
+White | Cold,Beyaz | Soğuk
+"You can speak, read, and write Draconic. Additionally, whenever you make a Charisma check when interacting with dragons, your proficiency bonus is doubled if it applies to the check.","Ejderce konuşabilir, okuyabilir ve yazabilirsin. Ayrıca, ejderlerle etkileşirken yaptığın herhangi bir Karizma zarına ustalık bonusun uygulanıyorsa, iki katına çıkar."
+Elemental Affinity,Elemental Yakınlık
+"Starting at 6th level, when you cast a spell that deals damage of the type associated with your draconic ancestry, you can add your Charisma modifier to one damage roll of that spell. At the same time, you can spend 1 sorcery point to gain resistance to that damage type for 1 hour.","6. seviyeden itibaren, ejder soyunla ilişkili türde hasar veren bir büyü yaptığında, Karizma değiştiricini o büyünün bir hasar zarına ekleyebilirsin. Aynı anda, 1 büyücülük puanı harcayarak 1 saat boyunca o hasar türüne karşı direnç kazanabilirsin."
+Dragon Wings,Ejder Kanatları
+"At 14th level, you gain the ability to sprout a pair of dragon wings from your back, gaining a flying speed equal to your current speed. You can create these wings as a bonus action on your turn. They last until you dismiss them as a bonus action on your turn.","14. seviyede, sırtından bir çift ejder kanadı çıkarma yeteneği kazanırsın ve mevcut hızına eşit bir uçma hızı kazanırsın. Bu kanatları turunda bonus eylem olarak oluşturabilirsin. Turunda bonus eylemle bırakana kadar kalırlar."
+"You can't manifest your wings while wearing armor unless the armor is made to accommodate them, and clothing not made to accommodate your wings might be destroyed when you manifest them.","Zırh giyerken, zırh onları barındıracak şekilde yapılmadıkça kanatlarını çıkaramazsın ve kanatlarını barındıracak şekilde yapılmamış giysiler, onları çıkardığında yırtılabilir."
+Draconic Presence,Ejder Varlığı
+"Beginning at 18th level, you can channel the dread presence of your dragon ancestor, causing those around you to become awestruck or frightened. As an action, you can spend 5 sorcery points to draw on this power and exude an aura of awe or fear (your choice) to a distance of 60 feet. For 1 minute or until you lose your concentration (as if you were casting a concentration spell), each hostile creature that starts its turn in this aura must succeed on a Wisdom saving throw or be charmed (if you chose awe) or frightened (if you chose fear) until the aura ends. A creature that succeeds on this saving throw is immune to your aura for 24 hours.","18. seviyeden itibaren, ejder atanın korkutucu varlığını kanalize ederek etrafındakilerin hayrete düşmesini veya korkmasını sağlayabilirsin. Eylem olarak, bu güçten yararlanmak için 5 büyücülük puanı harcayıp 60 fit mesafeye kadar hayranlık veya korku (seçimin) auras yayabilirsin. 1 dakika boyunca veya yoğunlaşmanı kaybedene kadar (sanki yoğunlaşma gerektiren bir büyü yapıyormuşsun gibi), turunu bu aurada başlatan her düşman yaratık bir Bilgelik kurtarma zarında başarılı olmalıdır; aksi halde aura bitene kadar büyülenir (hayranlık seçtiysen) veya korkar (korku seçtiysen). Bu kurtarma zarında başarılı olan bir yaratık 24 saat boyunca aurana bağışıktır."
+Fighting Style,Dövüş Stili
+"At each indicated cleric level, you add the listed spells to your spells prepared.","Belirtilen her rahip seviyesinde, listelenen büyüleri hazırlanmış büyülerinize eklersiniz."
+Cleric Level | Spells,Rahip Seviyesi | Büyüler
+Life Domain,Yaşam Alanı
+Life,Yaşam
+"The Life domain focuses on the vibrant positive energy—one of the fundamental forces of the universe—that sustains all life. The gods of life promote vitality and health through healing the sick and wounded, caring for those in need, and driving away the forces of death and undeath. Almost any non-evil deity can claim influence over this domain, particularly agricultural deities (such as Chauntea, Arawai, and Demeter), sun gods (such as Lathander, Pelor, and Re-Horakhty), gods of healing or endurance (such as Ilmater, Mishakal, Apollo, and Diancecht), and gods of home and community (such as Hestia, Hathor, and Boldrei).","Yaşam alanı, tüm hayatı sürdüren evrenin temel güçlerinden biri olan canlı pozitif enerjiye odaklanır. Yaşam tanrıları hastaları ve yaralıları iyileştirerek, ihtiyaç sahiplerine bakarak ve ölüm ve ölümsüzlük güçlerini kovarak canlılığı ve sağlığı teşvik eder. Neredeyse her kötü olmayan tanrı bu alan üzerinde nüfuz iddia edebilir; özellikle tarım tanrıları (Chauntea, Arawai ve Demeter gibi), güneş tanrıları (Lathander, Pelor ve Re-Horakhty gibi), şifa veya dayanıklılık tanrıları (Ilmater, Mishakal, Apollon ve Diancecht gibi) ve ev ile topluluk tanrıları (Hestia, Hathor ve Boldrei gibi)."
+Life Domain Spells,Yaşam Alanı Büyüleri
+"1st | bless, cure wounds","1. | Kutsama, Yara İyileştirme"
+"3rd | lesser restoration, spiritual weapon","3. | Küçük İyileştirme, Ruhani Silah"
+"5th | beacon of hope, revivify","5. | Umut Işığı, Diriltme"
+"7th | death ward, guardian of faith","7. | Ölüm Koruması, İnanç Muhafızı"
+"9th | mass cure wounds, raise dead","9. | Toplu Yara İyileştirme, Ölüyü Diriltme"
+• Bonus Proficiency,• Bonus Ustalık
+• Disciple of Life,• Yaşamın Müridi
+Bonus Proficiency,Bonus Ustalık
+"When you choose this domain at 1st level, you gain proficiency with heavy armor.",1. seviyede bu alanı seçtiğinizde ağır zırhta usta olursunuz.
+Disciple of Life,Yaşamın Müridi
+"Also starting at 1st level, your healing spells are more effective. Whenever you use a spell of 1st level or higher to restore hit points to a creature, the creature regains additional hit points equal to 2 + the spell's level.","Yine 1. seviyeden itibaren iyileştirme büyüleriniz daha etkilidir. Bir yaratığa can puanı geri kazandırmak için 1. seviye veya daha yüksek bir büyü kullandığınızda, yaratık 2 + büyünün seviyesi kadar ek can puanı geri kazanır."
+Channel Divinity: Preserve Life,İlahi Kanal: Yaşamı Koruma
+"Starting at 2nd level, you can use your Channel Divinity to heal the badly injured.",2. seviyeden itibaren İlahi Kanalınızı ağır yaralıları iyileştirmek için kullanabilirsiniz.
+"As an action, you present your holy symbol and evoke healing energy that can restore a number of hit points equal to five times your cleric level. Choose any creatures within 30 feet of you, and divide those hit points among them. This feature can restore a creature to no more than half of its hit point maximum. You can't use this feature on an undead or a construct.",Bir eylem olarak kutsal sembolünüzü gösterir ve rahip seviyenizin beş katına eşit can puanı geri kazandırabilen iyileştirici enerji çağırırsınız. Size 30 fit mesafe içindeki herhangi yaratıkları seçin ve bu can puanlarını aralarında bölüştürün. Bu özellik bir yaratığı azami can puanının yarısından fazlasına iyileştiremez. Bu özelliği ölümsüz veya yapay varlık üzerinde kullanamazsınız.
+Blessed Healer,Kutsanmış Şifacı
+"Beginning at 6th level, the healing spells you cast on others heal you as well. When you cast a spell of 1st level or higher that restores hit points to a creature other than you, you regain hit points equal to 2 + the spell's level.","6. seviyeden itibaren, başkalarına yaptığınız iyileştirme büyüleri sizi de iyileştirir. Sizden başka bir yaratığa can puanı geri kazandıran 1. seviye veya daha yüksek bir büyü yaptığınızda, 2 + büyünün seviyesi kadar can puanı geri kazanırsınız."
+Divine Strike,İlahi Vuruş
+"At 8th level, you gain the ability to infuse your weapon strikes with divine energy. Once on each of your turns when you hit a creature with a weapon attack, you can cause the attack to deal an extra 1d8 radiant damage to the target. When you reach 14th level, the extra damage increases to 2d8.","8. seviyede silah vuruşlarınıza ilahi enerji aşılama yeteneği kazanırsınız. Her turunuzda bir kez bir yaratığa silah saldırısıyla isabet ettirdiğinizde, saldırının hedefe fazladan 1d8 ışıltılı hasar vermesini sağlayabilirsiniz. 14. seviyeye ulaştığınızda ek hasar 2d8'e çıkar."
+Supreme Healing,Üstün İyileştirme
+"Starting at 17th level, when you would normally roll one or more dice to restore hit points with a spell, you instead use the highest number possible for each die. For example, instead of restoring 2d6 hit points to a creature, you restore 12.","17. seviyeden itibaren, normalde bir büyüyle can puanı geri kazandırmak için bir veya daha fazla zar atacağınız zaman, her zar için mümkün olan en yüksek sayıyı kullanırsınız. Örneğin bir yaratığa 2d6 can puanı geri kazandırmak yerine 12 geri kazandırırsınız."
+cure wounds,Yara İyileştirme
+lesser restoration,Küçük İyileştirme
+spiritual weapon,Ruhani Silah
+beacon of hope,Umut Işığı
+guardian of faith,İnanç Muhafızı
+• Bonus Cantrip,• Bonus Küçük Büyü
+Bonus Cantrip,Bonus Küçük Büyü
+Champion,Şampiyon
+The archetypal Champion focuses on the development of raw physical power honed to deadly perfection. Those who model themselves on this archetype combine rigorous training with physical excellence to deal devastating blows.,"Şampiyon arketipi, ölümcül bir mükemmelliğe işlenmiş ham fiziksel güç geliştirmeye odaklanır. Kendilerini bu arketipe göre biçimlendirenler, yıkıcı darbeler vurmak için titiz bir eğitimi fiziksel mükemmellikle birleştirir."
+• Improved Critical,• Gelişmiş Kritik
+Improved Critical,Gelişmiş Kritik
+"Beginning when you choose this archetype at 3rd level, your weapon attacks score a critical hit on a roll of 19 or 20.","Bu arketipi 3. seviyede seçtiğinden itibaren, silah saldırıların 19 veya 20 atışında kritik vuruş yapar."
+Remarkable Athlete,Olağanüstü Atlet
+"Starting at 7th level, you can add half your proficiency bonus (round up) to any Strength, Dexterity, or Constitution check you make that doesn't already use your proficiency bonus.","7. seviyeden itibaren, zaten ustalık bonusunu kullanmayan herhangi bir Güç, Çeviklik veya Dayanıklılık zarına ustalık bonusunun yarısını (yukarı yuvarlanır) ekleyebilirsin."
+"In addition, when you make a running long jump, the distance you can cover increases by a number of feet equal to your Strength modifier.","Ayrıca, koşarak uzun atlama yaptığında, katedebileceğin mesafe Güç değiştiricine eşit sayıda fit artar."
+Additional Fighting Style,Ek Dövüş Stili
+"At 10th level, you can choose a second option from the Fighting Style class feature.","10. seviyede, Dövüş Stili sınıf özelliğinden ikinci bir seçenek seçebilirsin."
+Superior Critical,Üstün Kritik
+"Starting at 15th level, your weapon attacks score a critical hit on a roll of 18-20.","15. seviyeden itibaren, silah saldırıların 18-20 atışında kritik vuruş yapar."
+Survivor,Hayatta Kalan
+"At 18th level, you attain the pinnacle of resilience in battle. At the start of each of your turns, you regain hit points equal to 5 + your Constitution modifier if you have no more than half of your hit points left. You don't gain this benefit if you have 0 hit points.","18. seviyede, savaşta dayanıklılığın zirvesine ulaşırsın. Her turunun başında, can puanlarının yarısı veya daha azı kalmışsa 5 + Dayanıklılık değiştiricine eşit can puanı geri kazanırsın. 0 can puanın varsa bu faydayı kazanmazsın."
+Hunter,Avcı
+"Emulating the Hunter archetype means accepting your place as a bulwark between civilization and the terrors of the wilderness. As you walk the Hunter's path, you learn specialized techniques for fighting the threats you face, from rampaging ogres and hordes of orcs to towering giants and terrifying dragons.","Avcı arketipini örnek almak, medeniyet ile vahşi doğanın dehşetleri arasındaki bir siper olarak yerini kabul etmek demektir. Avcının yolunda yürürken, saldıran ogrelerden ve ork sürülerinden devasa devlere ve korkunç ejderhalara kadar karşılaştığın tehditlerle savaşmak için özel teknikler öğrenirsin."
+• Hunter's Prey,• Avcının Avı
+Horde Breaker,Sürü Kıran
+"Once on each of your turns when you make a weapon attack, you can make another attack with the same weapon against a different creature that is within 5 feet of the original target and within range of your weapon.","Her turunda bir silah saldırısı yaptığında, aynı silahla, asıl hedeften 5 fit içinde olan ve silahının menzilinde bulunan farklı bir yaratığa karşı bir saldırı daha yapabilirsin."
+Hunter's Prey,Avcının Avı
+"At 3rd level, you gain one of the following features of your choice.","3. seviyede, aşağıdakilerden seçtiğin bir özelliği kazanırsın."
+• Colossus Slayer,• Dev Avcısı
+• Giant Killer,• Dev Katili
+• Horde Breaker,• Sürü Kıran
+Colossus Slayer,Dev Avcısı
+"Your tenacity can wear down the most potent foes. When you hit a creature with a weapon attack, the creature takes an extra 1d8 damage if it's below its hit point maximum. You can deal this extra damage only once per turn.","Azmin en güçlü düşmanları bile yıpratabilir. Bir yaratığa silah saldırısıyla isabet ettirdiğinde, yaratık azami can puanının altındaysa fazladan 1d8 hasar alır. Bu ekstra hasarı tur başına yalnızca bir kez verebilirsin."
+Giant Killer,Dev Katili
+"When a Large or larger creature within 5 feet of you hits or misses you with an attack, you can use your reaction to attack that creature immediately after its attack, provided that you can see the creature.","Senden 5 fit içindeki Büyük veya daha büyük bir yaratık sana saldırıyla isabet ettirdiğinde ya da ıskaladığında, yaratığı görebiliyorsan, tepkini kullanarak saldırısından hemen sonra o yaratığa saldırabilirsin."
+Defensive Tactics,Savunma Taktikleri
+"At 7th level, you gain one of the following features of your choice.","7. seviyede, aşağıdakilerden seçtiğin bir özelliği kazanırsın."
+• Escape the Horde,• Sürüden Kaç
+• Multiattack Defense,• Çoklu Saldırı Savunması
+• Steel Will,• Çelik İrade
+Escape the Horde,Sürüden Kaç
+Opportunity attacks against you are made with disadvantage.,Sana karşı fırsat saldırıları dezavantajla yapılır.
+Multiattack Defense,Çoklu Saldırı Savunması
+"When a creature hits you with an attack, you gain a +4 bonus to AC against all subsequent attacks made by that creature for the rest of the turn.","Bir yaratık sana saldırıyla isabet ettirdiğinde, turun geri kalanında o yaratığın yaptığı sonraki tüm saldırılara karşı ZS'ne +4 bonus kazanırsın."
+Steel Will,Çelik İrade
+You have advantage on saving throws against being frightened.,Korkmuş olmaya karşı kurtarma zarlarında avantajın olur.
+Multiattack,Çoklu Saldırı
+"At 11th level, you gain one of the following features of your choice.","11. seviyede, aşağıdakilerden seçtiğin bir özelliği kazanırsın."
+• Volley,• Ok Yağmuru
+• Whirlwind Attack,• Girdap Saldırısı
+Volley,Ok Yağmuru
+"You can use your action to make a ranged attack against any number of creatures within 10 feet of a point you can see within your weapon's range. You must have ammunition for each target, as normal, and you make a separate attack roll for each target.","Eylemini kullanarak, silahının menzilinde görebildiğin bir noktadan 10 fit içindeki herhangi bir sayıda yaratığa karşı menzilli bir saldırı yapabilirsin. Normalde olduğu gibi her hedef için mühimmatın olmalıdır ve her hedef için ayrı bir saldırı zarı atarsın."
+Whirlwind Attack,Girdap Saldırısı
+"You can use your action to make a melee attack against any number of creatures within 5 feet of you, with a separate attack roll for each target.","Eylemini kullanarak, senden 5 fit içindeki herhangi bir sayıda yaratığa karşı, her hedef için ayrı bir saldırı zarıyla bir yakın dövüş saldırısı yapabilirsin."
+Evasion,Kaçınma
+"You can nimbly dodge out of the way of certain area effects, such as a red dragon's fiery breath or a lightning bolt spell. When you are subjected to an effect that allows you to make a Dexterity saving throw to take only half damage, you instead take no damage if you succeed on the saving throw, and only half damage if you fail.","Kızıl bir ejderhanın ateşli nefesi ya da bir yıldırım büyüsü gibi bazı alan etkilerinden ustaca sıyrılabilirsin. Yarı hasar almak için bir Çeviklik kurtarma zarı atmana izin veren bir etkiye maruz kaldığında, kurtarma zarını geçersen hiç hasar almazsın, başarısız olursan yalnızca yarı hasar alırsın."
+Stand Against the Tide,Dalgaya Karşı Dur
+"When a hostile creature misses you with a melee attack, you can use your reaction to force that creature to repeat the same attack against another creature (other than itself) of your choice.","Düşman bir yaratık sana yakın dövüş saldırısıyla ıskaladığında, tepkini kullanarak o yaratığı aynı saldırıyı seçtiğin başka bir yaratığa (kendisi dışında) karşı tekrarlamaya zorlayabilirsin."
+Superior Hunter's Defense,Üstün Avcı Savunması
+"At 15th level, you gain one of the following features of your choice.","15. seviyede, aşağıdakilerden seçtiğin bir özelliği kazanırsın."
+• Evasion,• Kaçınma
+• Stand Against the Tide,• Dalgaya Karşı Dur
+• Uncanny Dodge,• Tuhaf Sıyrılma
+Uncanny Dodge,Tuhaf Sıyrılma
+"When an attacker that you can see hits you with an attack, you can use your reaction to halve the attack's damage against you.","Görebildiğin bir saldırgan sana saldırıyla isabet ettirdiğinde, tepkini kullanarak saldırının sana verdiği hasarı yarıya indirebilirsin."
+Spell Level | Spells,Büyü Seviyesi | Büyüler
+The Fiend,İblis
+Fiend,İblis
+"You have made a pact with a fiend from the lower planes of existence, a being whose aims are evil, even if you strive against those aims. Such beings desire the corruption or destruction of all things, ultimately including you. Fiends powerful enough to forge a pact include demon lords such as Demogorgon, Orcus, Fraz-Urb'luu, and Baphomet; archdevils such as Asmodeus, Dispater, Mephistopheles, and Belial; pit fiends and balors that are especially mighty; and ultroloths and other lords of the yugoloths.","Varoluşun alt düzlemlerinden bir iblisle pakt yaptın; amaçları kötü olan bir varlık, sen bu amaçlara karşı çaba göstersen bile. Bu varlıklar her şeyin yozlaşmasını veya yok edilmesini, nihayetinde seni de içerecek şekilde arzular. Pakt yapacak kadar güçlü iblisler arasında Demogorgon, Orcus, Fraz-Urb'luu ve Baphomet gibi iblis lordları; Asmodeus, Dispater, Mephistopheles ve Belial gibi baş şeytanlar; özellikle güçlü çukur iblisleri ve balorlar; ve ultroloth'lar ile yugoloth'ların diğer lordları bulunur."
+Expanded Spell List. The Fiend lets you choose from an expanded list of spells when you learn a warlock spell. The following spells are added to the warlock spell list for you.,"Genişletilmiş Büyü Listesi: İblis, bir warlock büyüsü öğrendiğinde genişletilmiş bir büyü listesinden seçmene izin verir. Aşağıdaki büyüler senin için warlock büyü listesine eklenir."
+Fiend Expanded Spells,İblis Genişletilmiş Büyüleri
+"1st | burning hands, command","1. | yanan eller, emir"
+"2nd | blindness/deafness, scorching ray","2. | körlük/sağırlık, yakıcı ışın"
+"3rd | fireball, stinking cloud","3. | ateş topu, kokulu bulut"
+"4th | fire shield, wall of fire","4. | ateş kalkanı, ateş duvarı"
+"5th | flame strike, hallow","5. | alev vuruşu, kutsallaştırma"
+• Dark One's Blessing,• Karanlık Olanın Nimeti
+Dark One's Blessing,Karanlık Olanın Nimeti
+"Starting at 1st level, when you reduce a hostile creature to 0 hit points, you gain temporary hit points equal to your Charisma modifier + your warlock level (minimum of 1).","1. seviyeden itibaren, düşman bir yaratığı 0 can puanına düşürdüğünde, Karizma değiştiricin + warlock seviyene eşit geçici can puanı kazanırsın (en az 1)."
+Dark One's Own Luck,Karanlık Olanın Kendi Şansı
+"Starting at 6th level, you can call on your patron to alter fate in your favor. When you make an ability check or a saving throw, you can use this feature to add a d10 to your roll. You can do so after seeing the initial roll but before any of the roll's effects occur.","6. seviyeden itibaren, kaderi lehine değiştirmesi için haminden yardım isteyebilirsin. Bir yetenek zarı veya kurtarma zarı attığında, bu özelliği kullanarak zarına bir d10 ekleyebilirsin. Bunu ilk atışı gördükten sonra ancak atışın herhangi bir etkisi gerçekleşmeden önce yapabilirsin."
+Fiendish Resilience,İblis Dayanıklılığı
+"Starting at 10th level, you can choose one damage type when you finish a short or long rest. You gain resistance to that damage type until you choose a different one with this feature. Damage from magical weapons or silver weapons ignores this resistance.","10. seviyeden itibaren, kısa veya uzun dinlenme bitirdiğinde bir hasar türü seçebilirsin. Bu özellikle farklı bir tür seçene kadar o hasar türüne karşı direnç kazanırsın. Büyülü silahlardan veya gümüş silahlardan gelen hasar bu direnci yok sayar."
+Hurl Through Hell,Cehennemden Fırlatma
+"Starting at 14th level, when you hit a creature with an attack, you can use this feature to instantly transport the target through the lower planes. The creature disappears and hurtles through a nightmare landscape.","14. seviyeden itibaren, bir yaratığa saldırıyla isabet ettirdiğinde, hedefi alt düzlemlerden anında ışınlamak için bu özelliği kullanabilirsin. Yaratık kaybolur ve kâbus gibi bir manzaranın içinden fırlar."
+"At the end of your next turn, the target returns to the space it previously occupied, or the nearest unoccupied space. If the target is not a fiend, it takes 10d10 psychic damage as it reels from its horrific experience.","Bir sonraki turunun sonunda, hedef daha önce bulunduğu alana veya en yakın boş alana geri döner. Hedef bir iblis değilse, dehşet verici deneyimiyle sarsılırken 10d10 psişik hasar alır."

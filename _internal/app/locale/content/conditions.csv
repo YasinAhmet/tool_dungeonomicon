@@ -1,0 +1,43 @@
+key,tr
+• A blinded creature can't see and automatically fails any ability check that requires sight.,• Kör bir yaratık göremez ve görmeyi gerektiren her yetenek zarında otomatik olarak başarısız olur.
+"• Attack rolls against the creature have advantage, and the creature's attack rolls have disadvantage.","• Yaratığa karşı yapılan saldırı zarları avantajlıdır, yaratığın saldırı zarları ise dezavantajlıdır."
+• A charmed creature can't attack the charmer or target the charmer with harmful abilities or magical effects.,"• Büyülenmiş bir yaratık, büyüleyene saldıramaz veya onu zararlı yeteneklerle ya da büyülü etkilerle hedef alamaz."
+• The charmer has advantage on any ability check to interact socially with the creature.,"• Büyüleyen, yaratıkla sosyal etkileşime girmeyi içeren her yetenek zarında avantaja sahiptir."
+• A deafened creature can't hear and automatically fails any ability check that requires hearing.,• Sağır bir yaratık duyamaz ve işitmeyi gerektiren her yetenek zarında otomatik olarak başarısız olur.
+"Some special abilities and environmental hazards, such as starvation and the long-term effects of freezing or scorching temperatures, can lead to a special condition called exhaustion. Exhaustion is measured in six levels. An effect can give a creature one or more levels of exhaustion, as specified in the effect's description.","Açlık ile dondurucu veya kavurucu sıcaklıkların uzun vadeli etkileri gibi bazı özel yetenekler ve çevresel tehlikeler, yorgunluk adı verilen özel bir duruma yol açabilir. Yorgunluk altı seviye üzerinden ölçülür. Bir etki, açıklamasında belirtildiği şekilde bir yaratığa bir veya daha fazla yorgunluk seviyesi verebilir."
+Level | Effect,Seviye | Etki
+1 | Disadvantage on ability checks,1 | Yetenek zarlarında dezavantaj
+2 | Speed halved,2 | Hız yarıya iner
+3 | Disadvantage on attack rolls and saving throws,3 | Saldırı zarlarında ve kurtarma zarlarında dezavantaj
+4 | Hit point maximum halved,4 | Azami can puanı yarıya iner
+5 | Speed reduced to 0,5 | Hız 0'a düşer
+6 | Death,6 | Ölüm
+"If an already exhausted creature suffers another effect that causes exhaustion, its current level of exhaustion increases by the amount specified in the effect's description.","Zaten yorgun olan bir yaratık yorgunluğa yol açan başka bir etkiye maruz kalırsa, mevcut yorgunluk seviyesi etkinin açıklamasında belirtilen miktar kadar artar."
+"A creature suffers the effect of its current level of exhaustion as well as all lower levels. For example, a creature suffering level 2 exhaustion has its speed halved and has disadvantage on ability checks.","Bir yaratık, mevcut yorgunluk seviyesinin etkisine ve tüm daha düşük seviyelerin etkilerine maruz kalır. Örneğin 2. seviye yorgunluk çeken bir yaratığın hızı yarıya iner ve yetenek zarlarında dezavantajı vardır."
+"An effect that removes exhaustion reduces its level as specified in the effect's description, with all exhaustion effects ending if a creature's exhaustion level is reduced below 1.","Yorgunluğu gideren bir etki, seviyeyi açıklamasında belirtildiği kadar düşürür; bir yaratığın yorgunluk seviyesi 1'in altına düşerse tüm yorgunluk etkileri sona erer."
+"Finishing a long rest reduces a creature's exhaustion level by 1, provided that the creature has also ingested some food and drink. Also, being raised from the dead reduces a creature's exhaustion level by 1.","Bir uzun dinlenmeyi tamamlamak, yaratık ayrıca yiyip içmişse yorgunluk seviyesini 1 azaltır. Ayrıca ölümden döndürülmek de yorgunluk seviyesini 1 azaltır."
+• A frightened creature has disadvantage on ability checks and attack rolls while the source of its fear is within line of sight.,"• Korkmuş bir yaratık, korkusunun kaynağı görüş hattı içindeyken yetenek zarlarında ve saldırı zarlarında dezavantaja sahiptir."
+• The creature can't willingly move closer to the source of its fear.,"• Yaratık, korkusunun kaynağına isteyerek yaklaşamaz."
+"• A grappled creature's speed becomes 0, and it can't benefit from any bonus to its speed.",• Yakalanmış bir yaratığın hızı 0 olur ve hızına gelen hiçbir bonustan yararlanamaz.
+• The condition ends if the grappler is incapacitated.,• Yakalayan etkisiz hale gelirse bu durum sona erer.
+"• The condition also ends if an effect removes the grappled creature from the reach of the grappler or grappling effect, such as when a creature is hurled away by the thunderwave spell.","• Bu durum ayrıca, bir etki yakalanmış yaratığı yakalayanın veya yakalama etkisinin erişiminden uzaklaştırırsa da sona erer; örneğin bir yaratığın gök gürültüsü dalgası büyüsüyle savrulması gibi."
+• An incapacitated creature can't take actions or reactions.,• Etkisiz bir yaratık eylem veya tepki alamaz.
+"• An invisible creature is impossible to see without the aid of magic or a special sense. For the purpose of hiding, the creature is heavily obscured. The creature's location can be detected by any noise it makes or any tracks it leaves.","• Görünmez bir yaratığı büyü veya özel bir duyu yardımı olmadan görmek imkânsızdır. Gizlenme açısından yaratık yoğun biçimde gizlenmiş sayılır. Yaratığın konumu, çıkardığı herhangi bir ses veya bıraktığı izlerle tespit edilebilir."
+"• Attack rolls against the creature have disadvantage, and the creature's attack rolls have advantage.","• Yaratığa karşı yapılan saldırı zarları dezavantajlıdır, yaratığın saldırı zarları ise avantajlıdır."
+• A paralyzed creature is incapacitated and can't move or speak.,• Felçli bir yaratık etkisizdir ve hareket edemez veya konuşamaz.
+• The creature automatically fails Strength and Dexterity saving throws.,• Yaratık Güç ve Çeviklik kurtarma zarlarında otomatik olarak başarısız olur.
+• Attack rolls against the creature have advantage.,• Yaratığa karşı yapılan saldırı zarları avantajlıdır.
+• Any attack that hits the creature is a critical hit if the attacker is within 5 feet of the creature.,"• Saldıran yaratığın 5 fit yakınındaysa, yaratığı vuran her saldırı kritik vuruştur."
+"• A petrified creature is transformed, along with any nonmagical object it is wearing or carrying, into a solid inanimate substance (usually stone). Its weight increases by a factor of ten, and it ceases aging.","• Taşlaşmış bir yaratık, üzerindeki veya taşıdığı büyülü olmayan tüm nesnelerle birlikte katı, cansız bir maddeye (genellikle taşa) dönüşür. Ağırlığı on katına çıkar ve yaşlanmayı bırakır."
+"• The creature is incapacitated, can't move or speak, and is unaware of its surroundings.","• Yaratık etkisizdir, hareket edemez veya konuşamaz ve çevresinden habersizdir."
+• The creature has resistance to all damage.,• Yaratığın tüm hasarlara karşı direnci vardır.
+"• The creature is immune to poison and disease, although a poison or disease already in its system is suspended, not neutralized.","• Yaratık zehire ve hastalığa bağışıktır; ancak vücudunda zaten bulunan bir zehir veya hastalık etkisiz hale getirilmez, yalnızca askıya alınır."
+• A poisoned creature has disadvantage on attack rolls and ability checks.,• Zehirlenmiş bir yaratık saldırı zarlarında ve yetenek zarlarında dezavantaja sahiptir.
+"• A prone creature's only movement option is to crawl, unless it stands up and thereby ends the condition.",• Yere serilmiş bir yaratığın tek hareket seçeneği sürünmektir; ayağa kalkarak bu durumu sona erdirmediği sürece.
+• The creature has disadvantage on attack rolls.,• Yaratık saldırı zarlarında dezavantaja sahiptir.
+"• An attack roll against the creature has advantage if the attacker is within 5 feet of the creature. Otherwise, the attack roll has disadvantage.","• Saldıran yaratığın 5 fit yakınındaysa, yaratığa karşı yapılan saldırı zarı avantajlıdır. Aksi halde saldırı zarı dezavantajlıdır."
+"• A restrained creature's speed becomes 0, and it can't benefit from any bonus to its speed.",• Kısıtlanmış bir yaratığın hızı 0 olur ve hızına gelen hiçbir bonustan yararlanamaz.
+• The creature has disadvantage on Dexterity saving throws.,• Yaratık Çeviklik kurtarma zarlarında dezavantaja sahiptir.
+"• A stunned creature is incapacitated, can't move, and can speak only falteringly.","• Sersemlemiş bir yaratık etkisizdir, hareket edemez ve ancak kekeleyerek konuşabilir."
+"• An unconscious creature is incapacitated, can't move or speak, and is unaware of its surroundings.","• Baygın bir yaratık etkisizdir, hareket edemez veya konuşamaz ve çevresinden habersizdir."
+• The creature drops whatever it's holding and falls prone.,• Yaratık elindeki her şeyi düşürür ve yere serilir.

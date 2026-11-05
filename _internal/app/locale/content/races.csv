@@ -1,0 +1,140 @@
+key,tr
+Dragonborn,Ejderhadoğan
+"Young dragonborn grow quickly. They walk hours after hatching, attain the size and development of a 10-year-old human child by the age of 3, and reach adulthood by 15. They live to be around 80.","Genç ejderhadoğanlar hızla büyür. Yumurtadan çıktıktan saatler sonra yürürler, 3 yaşında 10 yaşındaki bir insan çocuğunun boyuna ve gelişimine ulaşırlar ve 15 yaşında yetişkin olurlar. Yaklaşık 80 yıl yaşarlar."
+Size,Boyut
+"Dragonborn are taller and heavier than humans, standing well over 6 feet tall and averaging almost 250 pounds. Your size is Medium.",Ejderhadoğanlar insanlardan daha uzun ve ağırdır; boyları rahatlıkla 6 fitin üzerindedir ve ortalama neredeyse 250 lb. gelirler. Boyutunuz Orta'dır.
+Draconic Ancestry,Ejderha Soyu
+"You have draconic ancestry. Choose one type of dragon from the Draconic Ancestry table. Your breath weapon and damage resistance are determined by the dragon type, as shown in the table.","Ejderha soyundansınız. Ejderha Soyu tablosundan bir ejderha türü seçin. Nefes silahınız ve hasar direnciniz, tabloda gösterildiği gibi ejderha türüne göre belirlenir."
+Dragon | Damage Type | Breath Weapon,Ejderha | Hasar Türü | Nefes Silahı
+Black | Acid | 5 by 30 ft. line (Dex. save),Siyah | Asit | 5 x 30 fit hat (Çev. kurtarma)
+Blue | Lightning | 5 by 30 ft. line (Dex. save),Mavi | Yıldırım | 5 x 30 fit hat (Çev. kurtarma)
+Brass | Fire | 5 by 30 ft. line (Dex. save),Pirinç | Ateş | 5 x 30 fit hat (Çev. kurtarma)
+Bronze | Lightning | 5 by 30 ft. line (Dex. save),Bronz | Yıldırım | 5 x 30 fit hat (Çev. kurtarma)
+Copper | Acid | 5 by 30 ft. line (Dex. save),Bakır | Asit | 5 x 30 fit hat (Çev. kurtarma)
+Gold | Fire | 15 ft. cone (Dex. save),Altın | Ateş | 15 fit koni (Çev. kurtarma)
+Green | Poison | 15 ft. cone (Con. save),Yeşil | Zehir | 15 fit koni (Day. kurtarma)
+Red | Fire | 15 ft. cone (Dex. save),Kırmızı | Ateş | 15 fit koni (Çev. kurtarma)
+Silver | Cold | 15 ft. cone (Con. save),Gümüş | Soğuk | 15 fit koni (Day. kurtarma)
+White | Cold | 15 ft. cone (Con. save),Beyaz | Soğuk | 15 fit koni (Day. kurtarma)
+Breath Weapon,Nefes Silahı
+"You can use your action to exhale destructive energy. Your draconic ancestry determines the size, shape, and damage type of the exhalation.","Eyleminizi kullanarak yıkıcı bir enerji soluyabilirsiniz. Ejderha soyunuz, soluğun boyutunu, şeklini ve hasar türünü belirler."
+"When you use your breath weapon, each creature in the area of the exhalation must make a saving throw, the type of which is determined by your draconic ancestry. The DC for this saving throw equals 8 + your Constitution modifier + your proficiency bonus. A creature takes 2d6 damage on a failed save, and half as much damage on a successful one. The damage increases to 3d6 at 6th level, 4d6 at 11th level, and 5d6 at 16th level.","Nefes silahınızı kullandığınızda, soluğun alanındaki her yaratık bir kurtarma zarı atmalıdır; kurtarma türü ejderha soyunuz tarafından belirlenir. Bu kurtarma zarının ZS'si 8 + Dayanıklılık değiştiriciniz + ustalık bonusunuza eşittir. Bir yaratık başarısız kurtarmada 2d6 hasar alır, başarılı kurtarmada ise bunun yarısı kadar hasar alır. Hasar 6. seviyede 3d6'ya, 11. seviyede 4d6'ya ve 16. seviyede 5d6'ya yükselir."
+"After you use your breath weapon, you can't use it again until you complete a short or long rest.","Nefes silahınızı kullandıktan sonra, bir kısa veya uzun dinlenmeyi tamamlayana kadar onu tekrar kullanamazsınız."
+Damage Resistance,Hasar Direnci
+You have resistance to the damage type associated with your draconic ancestry.,Ejderha soyunuzla ilişkili hasar türüne karşı dirence sahipsiniz.
+"You can speak, read, and write Common and Draconic. Draconic is thought to be one of the oldest languages and is often used in the study of magic. The language sounds harsh to most other creatures and includes numerous hard consonants and sibilants.","Ortak Dil ve Ejderhaca konuşabilir, okuyabilir ve yazabilirsiniz. Ejderhacanın en eski dillerden biri olduğu düşünülür ve sıklıkla büyü çalışmalarında kullanılır. Bu dil diğer yaratıkların çoğuna sert gelir ve çok sayıda sert ünsüz ile ıslık sesleri içerir."
+Darkvision,Karanlıkta Görme
+Black,Siyah
+"5-foot-wide, 30-foot-long line","5 fit genişliğinde, 30 fit uzunluğunda hat"
+Blue,Mavi
+Brass,Pirinç
+Bronze,Bronz
+Copper,Bakır
+Gold,Altın
+15-foot cone,15 fit koni
+Green,Yeşil
+Red,Kırmızı
+Silver,Gümüş
+White,Beyaz
+Dwarf,Cüce
+"Dwarves mature at the same rate as humans, but they're considered young until they reach the age of 50. On average, they live about 350 years.","Cüceler insanlarla aynı hızda olgunlaşırlar, ancak 50 yaşına ulaşana kadar genç sayılırlar. Ortalama olarak yaklaşık 350 yıl yaşarlar."
+Dwarves stand between 4 and 5 feet tall and average about 150 pounds. Your size is Medium.,Cüceler 4 ile 5 fit arasında boydadır ve ortalama yaklaşık 150 lb. gelirler. Boyutunuz Orta'dır.
+Your speed is not reduced by wearing heavy armor.,Ağır zırh giymek hızınızı düşürmez.
+"Accustomed to life underground, you have superior vision in dark and dim conditions. You can see in dim light within 60 feet of you as if it were bright light, and in darkness as if it were dim light. You can't discern color in darkness, only shades of gray.","Yeraltı yaşamına alışkın olduğunuzdan, karanlık ve loş ortamlarda üstün bir görüşe sahipsiniz. 60 fit çevrenizde loş ışıkta sanki parlak ışıkmış gibi, karanlıkta ise sanki loş ışıkmış gibi görebilirsiniz. Karanlıkta renkleri ayırt edemezsiniz, yalnızca gri tonlarını görürsünüz."
+Dwarven Resilience,Cüce Dayanıklılığı
+"You have advantage on saving throws against poison, and you have resistance against poison damage.",Zehire karşı kurtarma zarlarında avantajınız vardır ve zehir hasarına karşı dirence sahipsiniz.
+Dwarven Combat Training,Cüce Savaş Eğitimi
+"You have proficiency with the battleaxe, handaxe, light hammer, and warhammer.","Savaş baltası, el baltası, hafif çekiç ve savaş çekicinde ustasınız."
+Tool Proficiency,Alet Ustalığı
+"You gain proficiency with the artisan's tools of your choice: Smith's tools, brewer's supplies, or mason's tools.","Seçtiğiniz bir zanaatkâr aletinde ustalık kazanırsınız: demirci aletleri, bira yapım malzemeleri veya taş ustası aletleri."
+Stonecunning,Taş Bilgisi
+"Whenever you make an Intelligence (History) check related to the origin of stonework, you are considered proficient in the History skill and add double your proficiency bonus to the check, instead of your normal proficiency bonus.","Taş işçiliğinin kökeniyle ilgili bir Zeka (Tarih) zarı attığınızda, Tarih becerisinde usta sayılırsınız ve normal ustalık bonusunuz yerine ustalık bonusunuzun iki katını zara eklersiniz."
+"You can speak, read, and write Common and Dwarvish. Dwarvish is full of hard consonants and guttural sounds, and those characteristics spill over into whatever other language a dwarf might speak.","Ortak Dil ve Cücece konuşabilir, okuyabilir ve yazabilirsiniz. Cücece sert ünsüzler ve gırtlaksı seslerle doludur ve bu özellikler bir cücenin konuştuğu diğer her dile de yansır."
+smith's tools,demirci aletleri
+brewer's supplies,bira yapım malzemeleri
+mason's tools,taş ustası aletleri
+light hammer,hafif çekiç
+languageProficiencies,languageProficiencies
+Hill,Tepe
+Dwarven Toughness,Cüce Metaneti
+"Your hit point maximum increases by 1, and it increases by 1 every time you gain a level.",Can puanı maksimumunuz 1 artar ve her seviye kazandığınızda 1 daha artar.
+Elf,Elf
+"Although elves reach physical maturity at about the same age as humans, the elven understanding of adulthood goes beyond physical growth to encompass worldly experience. An elf typically claims adulthood and an adult name around the age of 100 and can live to be 750 years old.","Elfler fiziksel olgunluğa insanlarla yaklaşık aynı yaşta ulaşsalar da, elflerin yetişkinlik anlayışı fiziksel büyümenin ötesine geçip dünyevi deneyimi de kapsar. Bir elf genellikle 100 yaş civarında yetişkinliğini ve yetişkin adını ilan eder ve 750 yıl yaşayabilir."
+Elves range from under 5 to over 6 feet tall and have slender builds. Your size is Medium.,Elfler 5 fitin altından 6 fitin üzerine kadar değişen boylardadır ve ince yapılıdır. Boyutunuz Orta'dır.
+"Accustomed to twilit forests and the night sky, you have superior vision in dark and dim conditions. You can see in dim light within 60 feet of you as if it were bright light, and in darkness as if it were dim light. You can't discern color in darkness, only shades of gray.","Alacakaranlık ormanlarına ve gece göğüne alışkın olduğunuzdan, karanlık ve loş ortamlarda üstün bir görüşe sahipsiniz. 60 fit çevrenizde loş ışıkta sanki parlak ışıkmış gibi, karanlıkta ise sanki loş ışıkmış gibi görebilirsiniz. Karanlıkta renkleri ayırt edemezsiniz, yalnızca gri tonlarını görürsünüz."
+Keen Senses,Keskin Duyular
+You have proficiency in the Perception skill.,Algı becerisinde ustasınız.
+Fey Ancestry,Peri Soyu
+"You have advantage on saving throws against being charmed, and magic can't put you to sleep.",Büyülenmeye karşı kurtarma zarlarında avantajınız vardır ve büyü sizi uyutamaz.
+Trance,Trans
+"Elves don't need to sleep. Instead, they meditate deeply, remaining semiconscious, for 4 hours a day. (The Common word for such meditation is ""trance."") While meditating, you can dream after a fashion; such dreams are actually mental exercises that have become reflexive through years of practice. After resting in this way, you gain the same benefit that a human does from 8 hours of sleep.","Elfler uyumaya ihtiyaç duymaz. Bunun yerine günde 4 saat boyunca yarı bilinçli kalarak derin meditasyon yaparlar. (Bu tür bir meditasyonun Ortak Dildeki adı ""trans""tır.) Meditasyon yaparken bir çeşit rüya görebilirsiniz; bu rüyalar aslında yıllar süren pratikle içgüdüsel hale gelmiş zihinsel egzersizlerdir. Bu şekilde dinlendikten sonra, bir insanın 8 saatlik uykudan elde ettiği faydanın aynısını elde edersiniz."
+"If you meditate during a long rest, you finish the rest after only 4 hours. You otherwise obey all the rules for a long rest; only the duration is changed.","Bir uzun dinlenme sırasında meditasyon yaparsanız, dinlenmeyi yalnızca 4 saat sonra bitirirsiniz. Bunun dışında uzun dinlenmenin tüm kurallarına uyarsınız; yalnızca süre değişir."
+"You can speak, read, and write Common and Elvish. Elvish is fluid, with subtle intonations and intricate grammar. Elven literature is rich and varied, and their songs and poems are famous among other races. Many bards learn their language so they can add Elvish ballads to their repertoires.","Ortak Dil ve Elfçe konuşabilir, okuyabilir ve yazabilirsiniz. Elfçe akıcıdır; ince tonlamaları ve karmaşık bir dilbilgisi vardır. Elf edebiyatı zengin ve çeşitlidir; şarkıları ve şiirleri diğer ırklar arasında ünlüdür. Birçok ozan, repertuvarlarına Elf baladları ekleyebilmek için bu dili öğrenir."
+Elf Weapon Training,Elf Silah Eğitimi
+"You have proficiency with the longsword, shortsword, shortbow, and longbow.","Uzun kılıç, kısa kılıç, kısa yay ve uzun yayda ustasınız."
+High,Yüksek
+Cantrip,Küçük Büyü
+You know one cantrip of your choice from the wizard spell list. Intelligence is your spellcasting ability for it.,Sihirbaz büyü listesinden seçtiğiniz bir küçük büyüyü bilirsiniz. Bunun için büyü yapma yeteneğiniz Zeka'dır.
+Extra Language,Ek Dil
+"You can speak, read, and write one extra language of your choosing.","Seçtiğiniz bir ek dili konuşabilir, okuyabilir ve yazabilirsiniz."
+Gnome,Gnom
+"Gnomes mature at the same rate humans do, and most are expected to settle down into an adult life by around age 40. They can live 350 to almost 500 years.",Gnomlar insanlarla aynı hızda olgunlaşır ve çoğunun 40 yaş civarında yetişkin hayatına yerleşmesi beklenir. 350 ile yaklaşık 500 yıl arasında yaşayabilirler.
+Gnomes are between 3 and 4 feet tall and average about 40 pounds. Your size is Small.,Gnomlar 3 ile 4 fit arasında boydadır ve ortalama yaklaşık 40 lb. gelirler. Boyutunuz Küçük'tür.
+Gnome Cunning,Gnom Kurnazlığı
+"You have advantage on all Intelligence, Wisdom, and Charisma saving throws against magic.","Büyüye karşı tüm Zeka, Bilgelik ve Karizma kurtarma zarlarında avantajınız vardır."
+"You can speak, read, and write Common and Gnomish. The Gnomish language, which uses the Dwarvish script, is renowned for its technical treatises and its catalogs of knowledge about the natural world.","Ortak Dil ve Gnomca konuşabilir, okuyabilir ve yazabilirsiniz. Cüce yazısını kullanan Gnomca, teknik incelemeleri ve doğal dünya hakkındaki bilgi katalogları ile ünlüdür."
+Rock,Kaya
+Artificer's Lore,Mucit Bilgisi
+"Whenever you make an Intelligence (History) check related to magic items, alchemical objects, or technological devices, you can add twice your proficiency bonus, instead of any proficiency bonus you normally apply.","Büyülü eşyalar, simya nesneleri veya teknolojik cihazlarla ilgili bir Zeka (Tarih) zarı attığınızda, normalde uyguladığınız herhangi bir ustalık bonusu yerine ustalık bonusunuzun iki katını ekleyebilirsiniz."
+Tinker,Tamirci
+"You have proficiency with artisan's tools (tinker's tools). Using those tools, you can spend 1 hour and 10 gp worth of materials to construct a Tiny clockwork device (AC 5, 1 hp). The device ceases to function after 24 hours (unless you spend 1 hour repairing it to keep the device functioning), or when you use your action to dismantle it; at that time, you can reclaim the materials used to create it. You can have up to three such devices active at a time.","Zanaatkâr aletlerinde (tamirci aletleri) ustasınız. Bu aletleri kullanarak 1 saat harcayıp 10 altın değerinde malzemeyle Minik bir saat mekanizmalı cihaz (ZS 5, 1 can puanı) yapabilirsiniz. Cihaz 24 saat sonra (cihazı çalışır tutmak için 1 saat onarım yapmadıkça) veya eyleminizi kullanarak onu söktüğünüzde çalışmayı bırakır; o zaman onu yapmak için kullanılan malzemeleri geri alabilirsiniz. Aynı anda en fazla üç böyle cihaz aktif olabilir."
+"When you create a device, choose one of the following options:",Bir cihaz yarattığınızda aşağıdaki seçeneklerden birini seçin:
+"Clockwork Toy. This toy is a clockwork animal, monster, or person, such as a frog, mouse, bird, dragon, or soldier. When placed on the ground, the toy moves 5 feet across the ground on each of your turns in a random direction. It makes noises as appropriate to the creature it represents.","Mekanik Oyuncak. Bu oyuncak kurbağa, fare, kuş, ejderha veya asker gibi saat mekanizmalı bir hayvan, canavar veya kişidir. Yere konulduğunda, oyuncak her sıranızda rastgele bir yönde zeminde 5 fit hareket eder. Temsil ettiği yaratığa uygun sesler çıkarır."
+"Fire Starter. The device produces a miniature flame, which you can use to light a candle, torch, or campfire. Using the device requires your action.","Ateş Yakıcı. Cihaz minyatür bir alev üretir; bunu bir mum, meşale veya kamp ateşi yakmak için kullanabilirsiniz. Cihazı kullanmak eyleminizi gerektirir."
+"Music Box. When opened, this music box plays a single song at a moderate volume. The box stops playing when it reaches the song's end or when it is closed.",Müzik Kutusu. Açıldığında bu müzik kutusu orta seviyede bir ses düzeyinde tek bir şarkı çalar. Kutu şarkının sonuna geldiğinde veya kapatıldığında çalmayı bırakır.
+tinker's tools,tamirci aletleri
+Half-Elf,Yarı-Elf
+"Half-elves mature at the same rate humans do and reach adulthood around the age of 20. They live much longer than humans, however, often exceeding 180 years.",Yarı-elfler insanlarla aynı hızda olgunlaşır ve yaklaşık 20 yaşında yetişkinliğe ulaşır. Ancak insanlardan çok daha uzun yaşarlar ve çoğunlukla 180 yılı aşarlar.
+"Half-elves are about the same size as humans, ranging from 5 to 6 feet tall. Your size is Medium.",Yarı-elfler insanlarla yaklaşık aynı boydadır ve 5 ile 6 fit arasında değişir. Boyutunuz Orta'dır.
+"Thanks to your elf blood, you have superior vision in dark and dim conditions. You can see in dim light within 60 feet of you as if it were bright light, and in darkness as if it were dim light. You can't discern color in darkness, only shades of gray.","Elf kanınız sayesinde, karanlık ve loş ortamlarda üstün bir görüşe sahipsiniz. 60 fit çevrenizde loş ışıkta sanki parlak ışıkmış gibi, karanlıkta ise sanki loş ışıkmış gibi görebilirsiniz. Karanlıkta renkleri ayırt edemezsiniz, yalnızca gri tonlarını görürsünüz."
+Skill Versatility,Beceri Çok Yönlülüğü
+You gain proficiency in two skills of your choice.,Seçtiğiniz iki beceride usta olursunuz.
+"You can speak, read, and write Common, Elvish, and one extra language of your choice.","Ortak Dil, Elfçe ve seçtiğiniz bir ek dili konuşabilir, okuyabilir ve yazabilirsiniz."
+Half-Orc,Yarı-Ork
+"Half-orcs mature a little faster than humans, reaching adulthood around age 14. They age noticeably faster and rarely live longer than 75 years.",Yarı-orklar insanlardan biraz daha hızlı olgunlaşır ve yaklaşık 14 yaşında yetişkinliğe ulaşır. Belirgin biçimde daha hızlı yaşlanırlar ve nadiren 75 yıldan fazla yaşarlar.
+"Half-orcs are somewhat larger and bulkier than humans, and they range from 5 to well over 6 feet tall. Your size is Medium.",Yarı-orklar insanlardan biraz daha iri ve hantaldır ve boyları 5 fitten 6 fitin hayli üzerine kadar değişir. Boyutunuz Orta'dır.
+"Thanks to your orc blood, you have superior vision in dark and dim conditions. You can see in dim light within 60 feet of you as if it were bright light, and in darkness as if it were dim light. You can't discern color in darkness, only shades of gray.","Ork kanınız sayesinde, karanlık ve loş ortamlarda üstün bir görüşe sahipsiniz. 60 fit çevrenizde loş ışıkta sanki parlak ışıkmış gibi, karanlıkta ise sanki loş ışıkmış gibi görebilirsiniz. Karanlıkta renkleri ayırt edemezsiniz, yalnızca gri tonlarını görürsünüz."
+Menacing,Tehditkâr
+You gain proficiency in the Intimidation skill.,Gözdağı becerisinde ustasınız.
+Relentless Endurance,Amansız Dayanıklılık
+"When you are reduced to 0 hit points but not killed outright, you can drop to 1 hit point instead. You can't use this feature again until you finish a long rest.","0 can puanına düşürüldüğünüzde ama doğrudan öldürülmediğinizde, bunun yerine 1 can puanına düşebilirsiniz. Bir uzun dinlenmeyi bitirene kadar bu özelliği tekrar kullanamazsınız."
+Savage Attacks,Vahşi Saldırılar
+"When you score a critical hit with a melee weapon attack, you can roll one of the weapon's damage dice one additional time and add it to the extra damage of the critical hit.","Bir yakın dövüş silah saldırısıyla kritik vuruş yaptığınızda, silahın hasar zarlarından birini bir kez daha atıp kritik vuruşun ekstra hasarına ekleyebilirsiniz."
+"You can speak, read, and write Common and Orc. Orc is a harsh, grating language with hard consonants. It has no script of its own but is written in the Dwarvish script.","Ortak Dil ve Orkça konuşabilir, okuyabilir ve yazabilirsiniz. Orkça sert ünsüzlü, tırmalayıcı bir dildir. Kendi yazısı yoktur ancak Cüce yazısıyla yazılır."
+Halfling,Hobbit
+A halfling reaches adulthood at the age of 20 and generally lives into the middle of his or her second century.,Bir hobbit 20 yaşında yetişkinliğe ulaşır ve genellikle ikinci yüzyılının ortalarına kadar yaşar.
+Halflings average about 3 feet tall and weigh about 40 pounds. Your size is Small.,Hobbitler ortalama yaklaşık 3 fit boyundadır ve yaklaşık 40 lb. gelirler. Boyutunuz Küçük'tür.
+Lucky,Şanslı
+"When you roll a 1 on an attack roll, ability check, or saving throw, you can reroll the die and must use the new roll.","Bir saldırı zarı, yetenek zarı veya kurtarma zarında 1 attığınızda, zarı yeniden atabilirsiniz ve yeni atışı kullanmak zorundasınız."
+Brave,Cesur
+You have advantage on saving throws against being frightened.,Korkmaya karşı kurtarma zarlarında avantajınız vardır.
+Halfling Nimbleness,Hobbit Çevikliği
+You can move through the space of any creature that is of a size larger than yours.,Sizden daha büyük boyuttaki herhangi bir yaratığın alanından geçebilirsiniz.
+"You can speak, read, and write Common and Halfling. The Halfling language isn't secret, but halflings are loath to share it with others. They write very little, so they don't have a rich body of literature. Their oral tradition, however, is very strong. Almost all halflings speak Common to converse with the people in whose lands they dwell or through which they are traveling.","Ortak Dil ve Hobbitçe konuşabilir, okuyabilir ve yazabilirsiniz. Hobbit dili gizli değildir, ancak hobbitler onu başkalarıyla paylaşmaktan çekinirler. Çok az yazarlar, bu yüzden zengin bir edebiyatları yoktur. Ancak sözlü gelenekleri çok güçlüdür. Hemen hemen tüm hobbitler, topraklarında yaşadıkları veya içinden geçtikleri insanlarla konuşmak için Ortak Dili konuşur."
+Lightfoot,Hafif Ayak
+Naturally Stealthy,Doğal Gizlilik
+You can attempt to hide even when you are obscured only by a creature that is at least one size larger than you.,Yalnızca sizden en az bir boyut daha büyük bir yaratık tarafından örtülseniz bile saklanmayı deneyebilirsiniz.
+Human,İnsan
+Humans reach adulthood in their late teens and live less than a century.,İnsanlar yaşamlarının geç gençlik yıllarında yetişkinliğe ulaşır ve bir yüzyıldan az yaşar.
+"Humans vary widely in height and build, from barely 5 feet to well over 6 feet tall. Regardless of your position in that range, your size is Medium.","İnsanlar boy ve yapı bakımından büyük farklılık gösterir; zar zor 5 fitten 6 fitin hayli üzerine kadar değişirler. Bu aralıkta nerede olursanız olun, boyutunuz Orta'dır."
+"You can speak, read, and write Common and one extra language of your choice. Humans typically learn the languages of other peoples they deal with, including obscure dialects. They are fond of sprinkling their speech with words borrowed from other tongues: Orc curses, Elvish musical expressions, Dwarvish military phrases, and so on.","Ortak Dil ve seçtiğiniz bir ek dili konuşabilir, okuyabilir ve yazabilirsiniz. İnsanlar genellikle ilişki kurdukları diğer halkların dillerini, belirsiz lehçeler dahil, öğrenirler. Konuşmalarını başka dillerden ödünç alınmış sözcüklerle süslemeyi severler: Ork küfürleri, Elf müzikal ifadeleri, Cüce askeri deyimleri ve benzerleri."
+Tiefling,Tiefling
+hellish rebuke#2,hellish rebuke#2
+Tieflings mature at the same rate as humans but live a few years longer.,Tiefling'ler insanlarla aynı hızda olgunlaşır ancak birkaç yıl daha uzun yaşar.
+Tieflings are about the same size and build as humans. Your size is Medium.,Tiefling'ler insanlarla yaklaşık aynı boyda ve yapıdadır. Boyutunuz Orta'dır.
+"Thanks to your infernal heritage, you have superior vision in dark and dim conditions. You can see in dim light within 60 feet of you as if it were bright light, and in darkness as if it were dim light. You can't discern color in darkness, only shades of gray.","İblis mirasınız sayesinde, karanlık ve loş ortamlarda üstün bir görüşe sahipsiniz. 60 fit çevrenizde loş ışıkta sanki parlak ışıkmış gibi, karanlıkta ise sanki loş ışıkmış gibi görebilirsiniz. Karanlıkta renkleri ayırt edemezsiniz, yalnızca gri tonlarını görürsünüz."
+Hellish Resistance,Cehennem Direnci
+You have resistance to fire damage.,Ateş hasarına karşı dirence sahipsiniz.
+Infernal Legacy,İblis Mirası
+"You know the thaumaturgy cantrip. Once you reach 3rd level, you can cast the hellish rebuke spell as a 2nd-level spell with this trait; you regain the ability to cast it when you finish a long rest. Once you reach 5th level, you can also cast the darkness spell once per day with this trait; you regain the ability to cast it when you finish a long rest. Charisma is your spellcasting ability for these spells.","Mucize Büyüsü küçük büyüsünü bilirsiniz. 3. seviyeye ulaştığınızda, bu nitelikle Cehennemi Azar büyüsünü 2. seviye bir büyü olarak yapabilirsiniz; bir uzun dinlenmeyi bitirdiğinizde onu yapma yeteneğinizi geri kazanırsınız. 5. seviyeye ulaştığınızda, bu nitelikle günde bir kez Karanlık büyüsünü de yapabilirsiniz; bir uzun dinlenmeyi bitirdiğinizde onu yapma yeteneğinizi geri kazanırsınız. Bu büyüler için büyü yapma yeteneğiniz Karizma'dır."
+"You can speak, read, and write Common and Infernal.","Ortak Dil ve Cehennemce konuşabilir, okuyabilir ve yazabilirsiniz."

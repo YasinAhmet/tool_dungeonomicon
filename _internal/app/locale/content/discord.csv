@@ -1,0 +1,191 @@
+key,tr
+No battle in progress,Devam eden bir savaş yok
+The GM hasn't started a battle yet.,GM henüz bir savaş başlatmadı.
+"YOUR TURN, {0}","SIRA SENDE, {0}"
+"You're up next, {0}!** Get ready","Sıradaki sensin, {0}!** Hazırlan"
+Rolling for initiative** — the battle starts soon,İnisiyatif atılıyor** — savaş birazdan başlıyor
+Round {0}** · it's **{1}**'s turn,Tur {0}** · sıra **{1}**'de
+Battle over** after {0} round(s),Savaş bitti** — {0} tur sürdü
+and {0} more,ve {0} tane daha
+Last action,Son eylem
+Updates live · enemy health is shown in words unless the GM reveals it,Canlı güncellenir · GM açmadıkça düşman canı kelimelerle gösterilir
+Refresh,Yenile
+Roll my initiative,İnisiyatifimi at
+This view belongs to someone else. Use `/initiative` yourself.,Bu görünüm başkasına ait. `/initiative` komutunu kendin kullan.
+{0} rolled **{1}**,"{0}, **{1}** attı"
+Nothing to roll.,Atılacak bir şey yok.
+Bot not fully initialized.,Bot tam olarak hazır değil.
+{t0} · AC {1},{t0} · ZS {1}
+{t0} **(you)** — {t1},{t0} **(sen)** — {t1}
+{0} 💀 **down**,{0} 💀 **yere düştü**
+{0} — 💀 defeated,{0} — 💀 yenildi
+{t0} · ⚠️ {1},{t0} · ⚠️ {1}
+{0} · Round {1},{0} · Tur {1}
+{0} · battle over,{0} · savaş bitti
+{0} · setting up,{0} · hazırlanıyor
+{t0}  <- TURN,{t0}  <- SIRA
+{0}  defeated,{0}  yenildi
+{0}  DOWN,{0}  YERDE
+{0}  {1} HP,{0}  {1} CP
+(off the shown area: {0}),(gösterilen alanın dışında: {0})
+Short rest,Kısa dinlenme
+Long rest,Uzun dinlenme
+Hit die ({0}),Can zarı ({0})
+Initiative {0},İnisiyatif {0}
+Death save,Ölüm kurtarması
+Roll an ability or skill check,Bir yetenek ya da beceri zarı at
+Roll a saving throw,Bir kurtarma zarı at
+Switch character,Karakter değiştir
+Ability check,Yetenek zarı
+{0} save {1},{0} kurtarma {1}
+(expertise),(uzmanlık)
+(proficient),(usta)
+Weapon,Silah
+Attack,Saldır
+Advantage,Avantaj
+Disadvantage,Dezavantaj
+Damage,Hasar
+Critical,Kritik
+Two-handed {0},İki elli {0}
+Yes - roll damage,Evet - hasar at
+Yes - roll critical damage,Evet - kritik hasar at
+Yes - critical,Evet - kritik
+No - it missed,Hayır - ıskaladı
+Consumable,Tüketilir eşya
+Use {0},{0} kullan
+Cast a spell (lowest slot that works),Bir büyü yap (uygun en düşük hak)
+Recover a spent slot,Harcanmış bir hakkı geri al
+{0} slot,{0} hak
+Cantrip,Küçük büyü
+{0} level {1},{0} seviye {1}
+Short rest taken. Pact slots and short-rest features recharged.,Kısa dinlenme yapıldı. Pakt hakları ve kısa dinlenme özellikleri yenilendi.
+"Long rest taken. HP, spell slots, hit dice and features restored.","Uzun dinlenme yapıldı. CP, büyü hakları, can zarları ve özellikler yenilendi."
+"Spent a hit die: rolled {0}, healed **{1}** HP.","Bir can zarı harcandı: {0} atıldı, **{1}** CP iyileşti."
+"Spent a hit die: rolled {0}, healed {1}.","Bir can zarı harcandı: {0} atıldı, {1} iyileşti."
+Natural 1 - automatic miss.,Doğal 1 - otomatik ıska.
+Natural 20!** ,Doğal 20!** 
+Did it hit?**,İsabet etti mi?**
+Missed - no damage.,Iskaladı - hasar yok.
+Spent a {0} spell slot.,Bir {0} büyü hakkı harcandı.
+Recovered a {0} spell slot.,Bir {0} büyü hakkı geri kazanıldı.
+This sheet belongs to someone else.,Bu karakter sayfası başkasına ait.
+"You don't have a character yet. Ask the GM for one, then use `/assigncharacter`.","Henüz bir karakterin yok. GM'den bir karakter iste, sonra `/assigncharacter` kullan."
+Character not found,Karakter bulunamadı
+{0} no longer exists.,{0} artık yok.
+Hit Points,Can Puanı
+Armor Class,Zırh Sınıfı
+Combat,Savaş
+"Initiative {0}
+Speed {1} ft","İnisiyatif {0}
+Hız {1} fit"
+Abilities,Yetenekler
+Details,Ayrıntılar
+Conditions,Durumlar
+None,Yok
+Player,Oyuncu
+Unassigned,Atanmamış
+Class Resources,Sınıf Kaynakları
+Notes,Notlar
+Passive Perception **{0}**,Pasif Algı **{0}**
+Hit dice {0},Can zarları {0}
+Darkvision {0} ft,Karanlıkta görme {0} fit
+Inspiration,İlham
+Inventory,Envanter
+Items,Eşyalar
+Items (cont.),Eşyalar (devam)
+Money,Para
+Weight,Ağırlık
+E = equipped · A = attuned,E = kuşanılmış · A = uyumlanmış
+Skills,Beceriler
+◆ expertise · ● proficient · ○ not proficient,◆ uzmanlık · ● usta · ○ usta değil
+Languages,Diller
+Tools,Aletler
+Armor,Zırh
+Weapons,Silahlar
+Features & Traits,Özellikler ve Nitelikler
+Proficiency {0},Ustalık {0}
+Spellbook,Büyü kitabı
+Features,Özellikler
+Overview,Genel bakış
+No character selected or owned. Use `/listchars` to see available characters.,Seçili ya da sahip olunan karakter yok. Mevcut karakterleri görmek için `/listchars` kullan.
+No character selected. Please select one in the Character tab.,Karakter seçilmedi. Lütfen Karakter sekmesinden birini seç.
+Unknown command: {0}. Type /help for list.,Bilinmeyen komut: {0}. Liste için /help yaz.
+Usage: {0},Kullanım: {0}
+Available Commands**,Kullanılabilir Komutlar**
+Rolls**,Zarlar**
+Your character**,Karakterin**
+Spells**,Büyüler**
+Roster**,Liste**
+Admin**,Yönetici**
+"`/roll <expr>` – Roll dice (e.g., `/roll 2d6+3`)",`/roll <ifade>` – Zar at (örn. `/roll 2d6+3`)
+`/check <skill|ability>` – Ability or skill check (add `adv` or `dis`),`/check <beceri|yetenek>` – Yetenek ya da beceri zarı (`adv` veya `dis` ekle)
+`/save <ability>` – Saving throw,`/save <yetenek>` – Kurtarma zarı
+`/initiative` – Roll initiative,`/initiative` – İnisiyatif at
+`/attack <weapon>` – Attack with an equipped weapon,`/attack <silah>` – Kuşanılmış silahla saldır
+`/sheet` – Open your private interactive character sheet (the GUI prints a text sheet),`/sheet` – Sana özel etkileşimli karakter sayfanı aç (GUI düz metin sayfa yazdırır)
+`/hp` – Show hit points · `/damagechar <n>` · `/healchar <n>`,`/hp` – Can puanını göster · `/damagechar <n>` · `/healchar <n>`
+`/rest short|long` – Take a rest · `/hitdie` – Spend a hit die on a short rest,`/rest short|long` – Dinlen · `/hitdie` – Kısa dinlenmede can zarı harca
+"`/features` – List class, race and feat features","`/features` – Sınıf, ırk ve meziyet özelliklerini listele"
+`/inventory` · `/additem <item> [amount]` · `/removeitem <item> [amount]`,`/inventory` · `/additem <eşya> [adet]` · `/removeitem <eşya> [adet]`
+`/equip <item>` · `/unequip <item>` · `/attune <item>`,`/equip <eşya>` · `/unequip <eşya>` · `/attune <eşya>`
+`/senditem <item> <amount> <target>` · `/buyitem <item> <amount> <goldcost> [char]`,`/senditem <eşya> <adet> <hedef>` · `/buyitem <eşya> <adet> <altın> [karakter]`
+`/addnote <text>` · `/removenote <id>` · `/notes`,`/addnote <metin>` · `/removenote <no>` · `/notes`
+`/spells` – Known/prepared spells · `/slots` – Spell slots,`/spells` – Bilinen/hazırlanmış büyüler · `/slots` – Büyü hakları
+`/cast <spell> [slot level]` – Cast a spell (use `ritual` to cast as a ritual),`/cast <büyü> [hak seviyesi]` – Büyü yap (ritüel olarak yapmak için `ritual` ekle)
+`/listchars` – List unassigned characters,`/listchars` – Atanmamış karakterleri listele
+`/assigncharacter <name>` – Add a free character to your characters,`/assigncharacter <ad>` – Boştaki bir karakteri karakterlerine ekle
+`/unassigncharacter [name]` – Release one of your characters,`/unassigncharacter [ad]` – Karakterlerinden birini serbest bırak
+`/mychars` – List your characters · `/usecharacter <name>` – Choose the active one,`/mychars` – Karakterlerini listele · `/usecharacter <ad>` – Etkin olanı seç
+`/sync` – Clear and resync Discord slash commands,`/sync` – Discord slash komutlarını temizle ve yeniden eşitle
+"Tip: put item names with spaces in quotes: `/additem ""Potion of Healing"" 2`","İpucu: boşluklu eşya adlarını tırnak içine al: `/additem ""Potion of Healing"" 2`"
+No free characters available.,Boşta karakter yok.
+Free characters:,Boştaki karakterler:
+Took {0} damage (HP: {1}),{0} hasar alındı (CP: {1})
+Healed {0} (HP: {1}),{0} iyileşti (CP: {1})
+Short rest taken: short-rest features and pact slots recharged. Use `/hitdie` to heal.,Kısa dinlenme yapıldı: kısa dinlenme özellikleri ve pakt hakları yenilendi. İyileşmek için `/hitdie` kullan.
+"Long rest taken: HP, spell slots, hit dice and features restored.","Uzun dinlenme yapıldı: CP, büyü hakları, can zarları ve özellikler yenilendi."
+Added {0}× '{1}',{0}× '{1}' eklendi
+Removed {0}× '{1}',{0}× '{1}' çıkarıldı
+Equipped {0},{0} kuşanıldı
+Unequipped {0},{0} çıkarıldı
+Attuned to {0},{0} ile uyumlanıldı
+Sent {0}× '{1}' to {2},"{0}× '{1}', {2} karakterine gönderildi"
+"Purchased {0}× '{1}' for {2} gp.
+   Remaining: {3}","{0}× '{1}' {2} altına satın alındı.
+   Kalan: {3}"
+Added note #{0} to {1},{1} karakterine #{0} numaralı not eklendi
+Removed note #{0},#{0} numaralı not silindi
+Invalid note ID.,Geçersiz not numarası.
+No notes.,Not yok.
+Notes:,Notlar:
+Inventory is empty. 💰 {0},Envanter boş. 💰 {0}
+Inventory** ({0}),Envanter** ({0})
+{0} has no spells.,{0} karakterinin büyüsü yok.
+Spell slots: {0},Büyü hakları: {0}
+Slots: {0},Haklar: {0}
+Cantrips,Küçük büyüler
+Character '{0}' added to your characters.,'{0}' karakteri karakterlerine eklendi.
+Character '{0}' unassigned (now free).,'{0}' karakteri serbest bırakıldı (artık boşta).
+"You have no characters. Ask the GM to create one, then use /assigncharacter.","Hiç karakterin yok. GM'den bir tane oluşturmasını iste, sonra /assigncharacter kullan."
+Your characters:,Karakterlerin:
+active,etkin
+{0} is now your active character.,{0} artık etkin karakterin.
+"This command can only be run from the GUI, not from Discord.","Bu komut yalnızca GUI'den çalıştırılabilir, Discord'dan değil."
+This command must be used from Discord (not GUI).,Bu komut Discord'dan kullanılmalı (GUI'den değil).
+Error: {0},Hata: {0}
+{0} — Healthy,{0} — Sağlıklı
+{0} — Wounded,{0} — Yaralı
+{0} — Bloodied,{0} — Kanlar içinde
+{0} — Critical,{0} — Kritik
+{0}  Healthy,{0}  Sağlıklı
+{0}  Wounded,{0}  Yaralı
+{0}  Bloodied,{0}  Kanlar içinde
+{0}  Critical,{0}  Kritik
+Castable here (attack or damage rolls),Burada yapılabilir (saldırı ya da hasar zarlı)
+Also known - not used from Discord,Ayrıca biliniyor - Discord'dan kullanılmaz
+darkvision {0} ft.,karanlıkta görme {0} fit
+blindsight {0} ft.,kör görüş {0} fit
+tremorsense {0} ft.,titreşim duyusu {0} fit
+truesight {0} ft.,gerçek görüş {0} fit
+blindsight {0} ft. (blind beyond this radius),kör görüş {0} fit (bu yarıçapın ötesinde kör)
+Language set to **{0}**.,Dil **{0}** olarak ayarlandı.

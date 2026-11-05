@@ -1,0 +1,9 @@
+# Big .dmmod content modules are shipped separately, not in git (GitHub caps files at 100 MB).
+# The modules/ folder itself and its read-me stay.
+modules/*.dmmod
+modules/*.dpmod
+
+# Left behind if the app is run from here
+__pycache__/
+*.pyc
+startup_error.log

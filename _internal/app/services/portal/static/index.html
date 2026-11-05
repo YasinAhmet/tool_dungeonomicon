@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f1115">
+<title>Dungeonomicon</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%234b52a8'/><text x='50' y='68' font-family='Segoe UI,Arial,sans-serif' font-size='50' font-weight='700' fill='white' text-anchor='middle'>DM</text></svg>">
+<link rel="stylesheet" href="/portal.css">
+</head>
+<body>
+<header>
+  <b class="brand" title="Dungeonomicon"><span class="mark">DM</span><span class="name">Dungeonomicon</span></b>
+  <select id="who" aria-label="character"></select>
+  <span id="turn" class="badge" role="status" aria-live="assertive"></span>
+  <span id="now" class="now hide">
+    <a id="nowlink" target="_blank" rel="noopener noreferrer"><img id="nowart" alt=""><span class="nt"><b id="nowsong"></b><span id="nowartist"></span></span></a>
+    <button id="nowheart" class="flat">♡</button>
+  </span>
+  <span class="grow"></span>
+  <span id="conn" class="conn live" role="status"></span>
+  <nav id="views"><button data-view="map" class="on"></button><button data-view="sheet"></button><button data-view="feed"><span class="lbl"></span><span id="unread" class="cnt hide"></span></button></nav>
+  <button id="music" class="flat hide" aria-haspopup="true" aria-expanded="false" aria-controls="musicpop">🎧</button>
+  <button id="menu" class="flat" aria-haspopup="true" aria-expanded="false" aria-controls="menupop">⚙</button>
+  <div id="musicpop" class="hide"></div>
+  <div id="menupop" class="hide"></div>
+</header>
+<div id="closed" class="hide" role="alert"></div>
+<div id="body">
+  <section id="map" class="pane on">
+    <div class="bar">
+      <b id="bname"></b><span id="round" class="dim"></span><span class="grow"></span>
+      <span id="target" class="dim"></span>
+      <button class="sm" id="zout">−</button><button class="sm" id="zin">+</button><button class="sm" id="zfit"></button>
+    </div>
+    <div class="mapbody">
+      <aside id="initiative"><div class="title" id="inittitle"></div><div id="order"></div><button id="endturn" class="primary" disabled></button></aside>
+      <div id="mapwrap"><canvas id="board"></canvas><div id="aimbar" class="hide"></div></div>
+    </div>
+    <div id="actionbar" class="hide"></div>
+    <div id="hint" class="dim small"></div>
+  </section>
+  <section id="sheet" class="pane"></section>
+</div>
+<footer id="dock">
+  <div class="bar">
+    <span id="feedtitle" class="title"></span>
+    <span class="seg" id="feedfilter"></span>
+    <span class="grow"></span>
+    <span id="quick" class="quick"></span>
+    <button class="sm" id="dockfold">▾</button>
+  </div>
+  <div id="feed" role="log"></div>
+  <div class="bar"><input id="say" autocomplete="off" enterkeyhint="send"><button id="send" class="primary"></button></div>
+</footer>
+<div id="results" role="status" aria-live="polite"></div>
+<div id="react" class="hide"></div>
+<div id="detail" class="hide"></div>
+<div id="gate" class="hide"><div><p id="gatetext"></p><p id="gatemore" class="dim"></p></div></div>
+<script src="/portal.js"></script>
+<script src="/world.js"></script>
+<script src="/duel.js"></script>
+</body>
+</html>

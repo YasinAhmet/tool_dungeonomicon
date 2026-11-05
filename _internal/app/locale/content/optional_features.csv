@@ -1,0 +1,111 @@
+key,tr
+Agonizing Blast,Acı Veren Patlama
+eldritch blast#c,eldritch blast#c
+"When you cast eldritch blast, add your Charisma modifier to the damage it deals on a hit.","Gizemli patlama büyüsünü yaptığında, isabet ettiğinde verdiği hasara Karizma değiştiricini ekle."
+Archery,Okçuluk
+You gain a +2 bonus to attack rolls you make with ranged weapons.,Menzilli silahlarla yaptığın saldırı zarlarına +2 bonus kazanırsın.
+Armor of Shadows,Gölge Zırhı
+"You can cast mage armor on yourself at will, without expending a spell slot or material components.",Büyü hakkı veya maddi bileşen harcamadan istediğin kadar kendine mage armor büyüsünü yapabilirsin.
+Ascendant Step,Yükselen Adım
+"You can cast levitate on yourself at will, without expending a spell slot or material components.",Büyü hakkı veya maddi bileşen harcamadan istediğin kadar kendine levitate büyüsünü yapabilirsin.
+Beast Speech,Hayvan Dili
+"You can cast speak with animals at will, without expending a spell slot.",Büyü hakkı harcamadan istediğin kadar speak with animals büyüsünü yapabilirsin.
+Beguiling Influence,Büyüleyici Etki
+You gain proficiency in the Deception and Persuasion skills.,Aldatma ve İkna becerilerinde usta olursun.
+Bewitching Whispers,Büyüleyici Fısıltılar
+You can cast compulsion once using a warlock spell slot. You can't do so again until you finish a long rest.,Bir warlock büyü hakkı kullanarak compulsion büyüsünü bir kez yapabilirsin. Uzun bir dinlenmeyi bitirene kadar bunu tekrar yapamazsın.
+Book of Ancient Secrets,Kadim Sırlar Kitabı
+Tome,Cilt
+"You can now inscribe magical rituals in your Book of Shadows. Choose two 1st-level spells that have the ritual tag from any class's spell list. The spells needn't be from the same spell list. The spells appear in the book and don't count against the number of spells you know. With your Book of Shadows in hand, you can cast the chosen spells as rituals. You can't cast the spells except as rituals, unless you've learned them by some other means. You can also cast a warlock spell you know as a ritual if it has the ritual tag.",Artık Gölgeler Kitabına büyülü ritüeller yazabilirsin. Herhangi bir sınıfın büyü listesinden ritüel etiketine sahip iki 1. seviye büyü seç. Büyülerin aynı büyü listesinden olması gerekmez. Büyüler kitapta görünür ve bildiğin büyü sayısına dahil edilmez. Gölgeler Kitabı elindeyken seçilen büyüleri ritüel olarak yapabilirsin. Büyüleri başka bir yolla öğrenmediysen ritüel dışında yapamazsın. Ayrıca bildiğin bir warlock büyüsü ritüel etiketine sahipse onu ritüel olarak da yapabilirsin.
+"On your adventures, you can add other ritual spells to your Book of Shadows. When you find such a spell, you can add it to the book if the spell's level is equal to or less than half your warlock level (rounded up) and if you can spare the time to transcribe the spell. For each level of the spell, the transcription process takes 2 hours and costs 50 gp for the rare inks needed to inscribe it.","Maceralarında Gölgeler Kitabına başka ritüel büyüleri ekleyebilirsin. Böyle bir büyü bulduğunda, büyünün seviyesi warlock seviyenin yarısına (yukarı yuvarlanır) eşit veya daha azsa ve büyüyü kopyalamak için vakit ayırabiliyorsan kitaba ekleyebilirsin. Büyünün her seviyesi için kopyalama işlemi 2 saat sürer ve yazmak için gereken nadir mürekkepler için 50 altın tutar."
+Careful Spell,Dikkatli Büyü
+"When you cast a spell that forces other creatures to make a saving throw, you can protect some of those creatures from the spell's full force. To do so, you spend 1 sorcery point and choose a number of those creatures up to your Charisma modifier (minimum of one creature). A chosen creature automatically succeeds on its saving throw against the spell.","Diğer yaratıkları kurtarma zarı atmaya zorlayan bir büyü yaptığında, bu yaratıklardan bazılarını büyünün tam gücünden koruyabilirsin. Bunun için 1 büyücülük puanı harcar ve Karizma değiştiricine kadar (en az bir yaratık) yaratık seçersin. Seçilen yaratık, büyüye karşı kurtarma zarında otomatik olarak başarılı olur."
+Chains of Carceri,Carceri Zincirleri
+Chain,Zincir
+"You can cast hold monster at will—targeting a celestial, fiend, or elemental—without expending a spell slot or material components. You must finish a long rest before you can use this invocation on the same creature again.","Büyü hakkı veya maddi bileşen harcamadan, bir göksel varlık, iblis veya elemental hedef alarak istediğin kadar hold monster büyüsünü yapabilirsin. Bu çağrıyı aynı yaratık üzerinde tekrar kullanabilmek için uzun bir dinlenmeyi bitirmelisin."
+Defense,Savunma
+"While you are wearing armor, you gain a +1 bonus to AC.",Zırh giyerken ZS'ne +1 bonus kazanırsın.
+Devil's Sight,Şeytanın Görüşü
+"You can see normally in darkness, both magical and nonmagical, to a distance of 120 feet.",Hem büyülü hem de büyüsüz karanlıkta 120 fit mesafeye kadar normal görebilirsin.
+Distant Spell,Uzak Büyü
+"When you cast a spell that has a range of 5 feet or greater, you can spend 1 sorcery point to double the range of the spell.","Menzili 5 fit veya daha fazla olan bir büyü yaptığında, büyünün menzilini ikiye katlamak için 1 büyücülük puanı harcayabilirsin."
+"When you cast a spell that has a range of touch, you can spend 1 sorcery point to make the range of the spell 30 feet.","Menzili dokunma olan bir büyü yaptığında, büyünün menzilini 30 fit yapmak için 1 büyücülük puanı harcayabilirsin."
+Dreadful Word,Dehşet Verici Söz
+You can cast confusion once using a warlock spell slot. You can't do so again until you finish a long rest.,Bir warlock büyü hakkı kullanarak confusion büyüsünü bir kez yapabilirsin. Uzun bir dinlenmeyi bitirene kadar bunu tekrar yapamazsın.
+Dueling,Düello
+"When you are wielding a melee weapon in one hand and no other weapons, you gain a +2 bonus to damage rolls with that weapon.","Bir elinde yakın dövüş silahı tutarken ve başka silah kullanmıyorken, o silahla yaptığın hasar zarlarına +2 bonus kazanırsın."
+Eldritch Sight,Gizemli Görüş
+"You can cast detect magic at will, without expending a spell slot.",Büyü hakkı harcamadan istediğin kadar detect magic büyüsünü yapabilirsin.
+Eldritch Spear,Gizemli Mızrak
+"When you cast eldritch blast, its range is 300 feet.",Gizemli patlama büyüsünü yaptığında menzili 300 fit olur.
+Empowered Spell,Güçlendirilmiş Büyü
+"When you roll damage for a spell, you can spend 1 sorcery point to reroll a number of the damage dice up to your Charisma modifier (minimum of one). You must use the new rolls.","Bir büyü için hasar attığında, Karizma değiştiricine kadar (en az bir) hasar zarını yeniden atmak için 1 büyücülük puanı harcayabilirsin. Yeni atışları kullanmalısın."
+You can use Empowered Spell even if you have already used a different Metamagic option during the casting of the spell.,Büyü yapılırken zaten farklı bir Metamagic seçeneği kullanmış olsan bile Güçlendirilmiş Büyüyü kullanabilirsin.
+Extended Spell,Uzatılmış Büyü
+"When you cast a spell that has a duration of 1 minute or longer, you can spend 1 sorcery point to double its duration, to a maximum duration of 24 hours.","Süresi 1 dakika veya daha uzun olan bir büyü yaptığında, süresini ikiye katlamak için 1 büyücülük puanı harcayabilirsin; azami süre 24 saattir."
+Eyes of the Rune Keeper,Rün Bekçisinin Gözleri
+You can read all writing.,Tüm yazıları okuyabilirsin.
+Fiendish Vigor,İblis Gücü
+"You can cast false life on yourself at will as a 1st-level spell, without expending a spell slot or material components.",Büyü hakkı veya maddi bileşen harcamadan istediğin kadar kendine 1. seviye büyü olarak false life büyüsünü yapabilirsin.
+Gaze of Two Minds,İki Zihnin Bakışı
+"You can use your action to touch a willing humanoid and perceive through its senses until the end of your next turn. As long as the creature is on the same plane of existence as you, you can use your action on subsequent turns to maintain this connection, extending the duration until the end of your next turn. While perceiving through the other creature's senses, you benefit from any special senses possessed by that creature, and you are blinded and deafened to your own surroundings.","Eylemini kullanarak istekli bir insansıya dokunabilir ve bir sonraki turunun sonuna kadar onun duyularıyla algılayabilirsin. Yaratık seninle aynı varoluş düzleminde olduğu sürece, sonraki turlarda eylemini kullanarak bu bağlantıyı sürdürebilir, süreyi bir sonraki turunun sonuna kadar uzatabilirsin. Diğer yaratığın duyularıyla algılarken, o yaratığın sahip olduğu özel duyulardan yararlanırsın ve kendi çevrene karşı kör ve sağır olursun."
+Great Weapon Fighting,Büyük Silahla Dövüş
+"When you roll a 1 or 2 on a damage die for an attack you make with a melee weapon that you are wielding with two hands, you can reroll the die and must use the new roll, even if the new roll is a 1 or a 2. The weapon must have the two-handed or versatile property for you to gain this benefit.","İki elle tuttuğun bir yakın dövüş silahıyla yaptığın saldırının hasar zarında 1 veya 2 attığında, zarı yeniden atabilir ve yeni sonuç 1 veya 2 olsa bile yeni atışı kullanmak zorundasın. Bu faydayı kazanmak için silahın iki elli veya çok yönlü özelliğine sahip olması gerekir."
+Heightened Spell,Yükseltilmiş Büyü
+"When you cast a spell that forces a creature to make a saving throw to resist its effects, you can spend 3 sorcery points to give one target of the spell disadvantage on its first saving throw made against the spell.","Bir yaratığı etkilerine direnmek için kurtarma zarı atmaya zorlayan bir büyü yaptığında, büyünün bir hedefine, büyüye karşı atacağı ilk kurtarma zarında dezavantaj vermek için 3 büyücülük puanı harcayabilirsin."
+Lifedrinker,Yaşam İçici
+Blade,Kılıç
+"When you hit a creature with your pact weapon, the creature takes extra necrotic damage equal to your Charisma modifier (minimum of 1).","Pakt silahınla bir yaratığa isabet ettirdiğinde, yaratık Karizma değiştiricine eşit (en az 1) ek nekrotik hasar alır."
+Mask of Many Faces,Çok Yüzlü Maske
+"You can cast disguise self at will, without expending a spell slot.",Büyü hakkı harcamadan istediğin kadar disguise self büyüsünü yapabilirsin.
+Master of Myriad Forms,Sayısız Biçimin Ustası
+"You can cast alter self at will, without expending a spell slot.",Büyü hakkı harcamadan istediğin kadar alter self büyüsünü yapabilirsin.
+Minions of Chaos,Kaos Ufaklıkları
+You can cast conjure elemental once using a warlock spell slot. You can't do so again until you finish a long rest.,Bir warlock büyü hakkı kullanarak conjure elemental büyüsünü bir kez yapabilirsin. Uzun bir dinlenmeyi bitirene kadar bunu tekrar yapamazsın.
+Mire the Mind,Zihni Batağa Sürükle
+You can cast slow once using a warlock spell slot. You can't do so again until you finish a long rest.,Bir warlock büyü hakkı kullanarak slow büyüsünü bir kez yapabilirsin. Uzun bir dinlenmeyi bitirene kadar bunu tekrar yapamazsın.
+Misty Visions,Puslu Görüler
+"You can cast silent image at will, without expending a spell slot or material components.",Büyü hakkı veya maddi bileşen harcamadan istediğin kadar silent image büyüsünü yapabilirsin.
+One with Shadows,Gölgelerle Bir
+"When you are in an area of dim light or darkness, you can use your action to become invisible until you move or take an action or a reaction.","Loş ışıkta veya karanlık bir alandayken, eylemini kullanarak hareket edene, bir eylem ya da tepki yapana kadar görünmez olabilirsin."
+Otherworldly Leap,Başka Âlemden Sıçrayış
+"You can cast jump on yourself at will, without expending a spell slot or material components.",Büyü hakkı veya maddi bileşen harcamadan istediğin kadar kendine jump büyüsünü yapabilirsin.
+Pact of the Blade,Kılıç Paktı
+You can use your action to create a pact weapon in your empty hand. You can choose the form that this melee weapon takes each time you create it (see chapter 5 for weapon options). You are proficient with it while you wield it. This weapon counts as magical for the purpose of overcoming resistance and immunity to nonmagical attacks and damage.,"Eylemini kullanarak boş elinde bir pakt silahı yaratabilirsin. Her yarattığında bu yakın dövüş silahının şeklini seçebilirsin (silah seçenekleri için bkz. 5. bölüm). Silahı tuttuğun sürece onunla ustasın. Bu silah, büyüsüz saldırılara ve hasara karşı direnç ve bağışıklığı aşmak açısından büyülü sayılır."
+"Your pact weapon disappears if it is more than 5 feet away from you for 1 minute or more. It also disappears if you use this feature again, if you dismiss the weapon (no action required), or if you die.","Pakt silahın, senden 1 dakika veya daha uzun süre 5 fitten uzaktaysa kaybolur. Ayrıca bu özelliği tekrar kullanırsan, silahı (eylem gerektirmeden) gönderirsen veya ölürsen de kaybolur."
+"You can transform one magic weapon into your pact weapon by performing a special ritual while you hold the weapon. You perform the ritual over the course of 1 hour, which can be done during a short rest. You can then dismiss the weapon, shunting it into an extradimensional space, and it appears whenever you create your pact weapon thereafter. You can't affect an artifact or a sentient weapon in this way. The weapon ceases being your pact weapon if you die, if you perform the 1-hour ritual on a different weapon, or if you use a 1-hour ritual to break your bond to it. The weapon appears at your feet if it is in the extradimensional space when the bond breaks.","Silahı tutarken özel bir ritüel yaparak büyülü bir silahı pakt silahına dönüştürebilirsin. Ritüeli 1 saat içinde yaparsın; bu kısa dinlenme sırasında yapılabilir. Sonra silahı gönderip boyut ötesi bir uzaya aktarabilirsin ve bundan sonra pakt silahını her yarattığında o silah belirir. Bu yolla bir artefaktı veya bilinçli bir silahı etkileyemezsin. Silah; ölürsen, farklı bir silah üzerinde 1 saatlik ritüeli yaparsan veya bağını koparmak için 1 saatlik ritüel kullanırsan pakt silahın olmaktan çıkar. Bağ koptuğunda silah boyut ötesi uzaydaysa ayaklarının dibinde belirir."
+Pact of the Chain,Zincir Paktı
+You learn the find familiar spell and can cast it as a ritual. The spell doesn't count against your number of spells known.,"Find familiar büyüsünü öğrenirsin ve onu ritüel olarak yapabilirsin. Büyü, bildiğin büyü sayısına dahil edilmez."
+"When you cast the spell, you can choose one of the normal forms for your familiar or one of the following special forms: imp, pseudodragon, quasit, or sprite.","Büyüyü yaptığında, ahbabın için normal biçimlerden birini veya şu özel biçimlerden birini seçebilirsin: imp, pseudodragon, quasit veya sprite."
+"Additionally, when you take the Attack action, you can forgo one of your own attacks to allow your familiar to use its reaction to make one attack of its own.","Ek olarak, Saldırı eylemini yaptığında kendi saldırılarından birinden vazgeçip ahbabının tepkisini kullanarak kendi bir saldırısını yapmasına izin verebilirsin."
+Pact of the Tome,Cilt Paktı
+"Your patron gives you a grimoire called a Book of Shadows. When you gain this feature, choose three cantrips from any class's spell list. The cantrips do not need to be from the same spell list. While the book is on your person, you can cast those cantrips at will. They don't count against your number of cantrips known. Any cantrip you cast with this feature is considered a warlock cantrip for you. If you lose your Book of Shadows, you can perform a 1-hour ceremony to receive a replacement from your patron. This ceremony can be performed during a short or long rest, and it destroys the previous book. The book turns to ash when you die.","Hamin sana Gölgeler Kitabı adlı bir büyü kitabı verir. Bu özelliği kazandığında herhangi bir sınıfın büyü listesinden üç küçük büyü seç. Küçük büyülerin aynı listeden olması gerekmez. Kitap üzerindeyken bu küçük büyüleri istediğin kadar yapabilirsin. Bunlar bildiğin küçük büyü sayısına dahil edilmez. Bu özellikle yaptığın her küçük büyü senin için bir warlock küçük büyüsü sayılır. Gölgeler Kitabını kaybedersen, hamiden yedek almak için 1 saatlik bir tören yapabilirsin. Bu tören kısa veya uzun dinlenme sırasında yapılabilir ve önceki kitabı yok eder. Öldüğünde kitap küle dönüşür."
+Protection,Koruma
+"When a creature you can see attacks a target other than you that is within 5 feet of you, you can use your reaction to impose disadvantage on the attack roll. You must be wielding a shield.","Görebildiğin bir yaratık, 5 fit içindeki senden başka bir hedefe saldırdığında, tepkini kullanarak saldırı zarına dezavantaj uygulayabilirsin. Kalkan tutuyor olmalısın."
+Quickened Spell,Hızlandırılmış Büyü
+"When you cast a spell that has a casting time of 1 action, you can spend 2 sorcery points to change the casting time to 1 bonus action for this casting.","Yapım süresi 1 eylem olan bir büyü yaptığında, bu yapım için yapım süresini 1 bonus eyleme çevirmek üzere 2 büyücülük puanı harcayabilirsin."
+Repelling Blast,Geri İten Patlama
+"When you hit a creature with eldritch blast, you can push the creature up to 10 feet away from you in a straight line.","Bir yaratığa gizemli patlamayla isabet ettirdiğinde, yaratığı senden düz bir çizgide 10 fit uzağa kadar itebilirsin."
+Sculptor of Flesh,Et Yontucusu
+You can cast polymorph once using a warlock spell slot. You can't do so again until you finish a long rest.,Bir warlock büyü hakkı kullanarak polymorph büyüsünü bir kez yapabilirsin. Uzun bir dinlenmeyi bitirene kadar bunu tekrar yapamazsın.
+Sign of Ill Omen,Uğursuz Alamet İşareti
+You can cast bestow curse once using a warlock spell slot. You can't do so again until you finish a long rest.,Bir warlock büyü hakkı kullanarak bestow curse büyüsünü bir kez yapabilirsin. Uzun bir dinlenmeyi bitirene kadar bunu tekrar yapamazsın.
+Subtle Spell,İnce Büyü
+"When you cast a spell, you can spend 1 sorcery point to cast it without any somatic or verbal components.","Bir büyü yaptığında, onu somatik veya sözlü bileşen olmadan yapmak için 1 büyücülük puanı harcayabilirsin."
+Thief of Five Fates,Beş Kaderin Hırsızı
+You can cast bane once using a warlock spell slot. You can't do so again until you finish a long rest.,Bir warlock büyü hakkı kullanarak bane büyüsünü bir kez yapabilirsin. Uzun bir dinlenmeyi bitirene kadar bunu tekrar yapamazsın.
+Thirsting Blade,Susamış Kılıç
+"You can attack with your pact weapon twice, instead of once, whenever you take the Attack action on your turn.",Sırasında Saldırı eylemini yaptığında pakt silahınla bir yerine iki kez saldırabilirsin.
+Twinned Spell,İkiz Büyü
+"When you cast a spell that targets only one creature and doesn't have a range of self, you can spend a number of sorcery points equal to the spell's level to target a second creature in range with the same spell (1 sorcery point if the spell is a cantrip).","Yalnızca tek bir yaratığı hedef alan ve menzili kendi olmayan bir büyü yaptığında, aynı büyüyle menzildeki ikinci bir yaratığı hedef almak için büyünün seviyesine eşit sayıda büyücülük puanı harcayabilirsin (büyü küçük büyüyse 1 büyücülük puanı)."
+"To be eligible, a spell must be incapable of targeting more than one creature at the spell's current level. For example, magic missile and scorching ray aren't eligible, but ray of frost and chromatic orb are.","Uygun olması için, büyünün mevcut seviyesinde birden fazla yaratığı hedef alamıyor olması gerekir. Örneğin magic missile ve scorching ray uygun değildir, ancak ray of frost ve chromatic orb uygundur."
+Two-Weapon Fighting,Çift Silahla Dövüş
+"When you engage in two-weapon fighting, you can add your ability modifier to the damage of the second attack.","Çift silahla dövüştüğünde, ikinci saldırının hasarına yetenek değiştiricini ekleyebilirsin."
+Visions of Distant Realms,Uzak Âlemlerin Görüleri
+"You can cast arcane eye at will, without expending a spell slot.",Büyü hakkı harcamadan istediğin kadar arcane eye büyüsünü yapabilirsin.
+Voice of the Chain Master,Zincir Efendisinin Sesi
+"You can communicate telepathically with your familiar and perceive through your familiar's senses as long as you are on the same plane of existence. Additionally, while perceiving through your familiar's senses, you can also speak through your familiar in your own voice, even if your familiar is normally incapable of speech.","Aynı varoluş düzleminde olduğun sürece ahbabınla telepatik olarak iletişim kurabilir ve ahbabının duyularıyla algılayabilirsin. Ayrıca ahbabının duyularıyla algılarken, ahbabın normalde konuşamıyor olsa bile onun aracılığıyla kendi sesinle konuşabilirsin."
+Whispers of the Grave,Mezarın Fısıltıları
+"You can cast speak with dead at will, without expending a spell slot.",Büyü hakkı harcamadan istediğin kadar speak with dead büyüsünü yapabilirsin.
+Witch Sight,Cadı Görüşü
+You can see the true form of any shapechanger or creature concealed by illusion or transmutation magic while the creature is within 30 feet of you and within line of sight.,"Şekil değiştiren veya illüzyon ya da dönüştürme büyüsüyle gizlenmiş herhangi bir yaratığın gerçek biçimini, yaratık senden 30 fit içindeyse ve görüş hattındaysa görebilirsin."
