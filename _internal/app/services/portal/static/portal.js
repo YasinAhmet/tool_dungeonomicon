@@ -159,12 +159,13 @@ function tip(e, text) {
 // The connection: live, reconnecting (the table doesn't answer), or closed (gone for a while: the DM stopped sharing,
 // and the next session's address is a new one). Proxies (Cloudflare) answer 502-504 / 52x / 530 when the app is away.
 const NET = { state: 'live', down: 0, busy: 0 }, CLOSED_AFTER = 45000;
+const PAGE = Math.random().toString(36).slice(2, 12);   // this page, to the table: its stream knows what the page loaded
 const AWAY = s => s === 502 || s === 503 || s === 504 || (s >= 520 && s <= 530);
 async function api(path, body, more) {
   if (body && path === '/api/act' && typeof duelPlay === 'function') body = duelPlay(body);   // on the Duel tab: acts on the duel (duel.js)
   let r;
   try {
-    r = await fetch(path, { method: body ? 'POST' : 'GET', headers: { 'X-Key': KEY, 'Content-Type': 'application/json', ...more },
+    r = await fetch(path, { method: body ? 'POST' : 'GET', headers: { 'X-Key': KEY, 'X-Page': PAGE, 'Content-Type': 'application/json', ...more },
       body: body ? JSON.stringify(body) : undefined, cache: 'no-store' });
   } catch {
     offline(); throw new Error(navigator.onLine === false ? S('You are offline - check your connection.') : S("Can't reach the table right now - reconnecting…"));
@@ -223,7 +224,7 @@ async function act(action, args = {}, quiet = false, opts = {}) {
     const r = await api('/api/act', { action, character: ST && ST.me.active, adv: UI.adv, target: UI.target, ...args });
     if (!quiet) say(r.text);
     if (UI.adv && (ADV_ONCE.has(action) || opts.adv)) UI.adv = '';
-    await load();
+    if (!(await pushedBy(r.v))) await load();       // the live stream brings the new state (no request of its own)
     return r;
   } catch (e) { if (e.message !== 'login') say(e.message, true); return null; }
   finally { inflight.delete(key); NET.busy--; conn(); }
@@ -254,26 +255,71 @@ async function load1() {
   catch (e) { for (const p of full ? ['all'] : parts) DIRTY.add(p); throw e; }       // not lost: the next load asks again
   if (st.strings) { WORDS = st.strings; wordsLang = st.me.lang; UICONS = st.ui_icons || UICONS; CONDS = st.conditions || CONDS; }
   else if (!ask && st.me.lang !== wordsLang) { wordsLang = null; DIRTY.add('all'); return load1(); }      // the language changed
+  if (!merge(st, full)) { DIRTY.add('all'); return load1(); }
+}
+/** Each part's newest version on the page: an answer older than what a part already shows leaves that part alone
+ *  (a pushed state and a requested one may cross on the way). */
+let PARTV = {};
+/** Merge a state (asked for or pushed) into the page's; false: it said "unchanged" of something the page lacks (a
+ *  pushed state names each unchanged unit with its fingerprint: one the page holds differently counts as lacking). */
+function merge(st, full) {
   const shown = ST && ST.battle;                       // the battle the page showed (on the Duel tab the duel's: duel.js)
   if (typeof duelUnswap === 'function') duelUnswap();  // (the campaign's battle back in its place while the parts merge)
-  const was = ST, prints = st.prints || {}, same = new Set(st.same || []);
+  const was = ST, prints = st.prints || {}, sameIn = st.same || [], v = st.v || 0;
+  const same = Array.isArray(sameIn) ? new Set(sameIn) : new Set(Object.keys(sameIn));
   delete st.prints; delete st.same;
+  for (const p of (full ? [] : st.parts || [])) {      // a part older than the page's: kept as the page has it
+    if (was && p in was && (PARTV[p] || 0) > v) {
+      delete st[p];
+      for (const k of [...same]) if (k === p || k.startsWith(p + '.')) same.delete(k);
+      for (const k of Object.keys(prints)) if (k === p || k.startsWith(p + '.')) delete prints[k];
+    }
+  }
   const next = { ...(full ? {} : ST), ...st };
   let lost = false;
   for (const k of same) {                              // unchanged: kept from what the page has
+    if (!Array.isArray(sameIn) && PRINTS[k] !== sameIn[k]) { lost = true; break; }
     const [part, key] = k.split('.');
     if (!key) { if (was && part in was) next[part] = was[part]; else lost = true; }
     else if (next[part] && was && was[part] && key in was[part]) next[part][key] = was[part][key];
     else lost = true;
   }
-  if (lost) { if (typeof duelSwap === 'function') duelSwap(); PRINTS = {}; DIRTY.add('all'); return load1(); }      // it said "unchanged" of something the page lacks
+  if (lost) { if (typeof duelSwap === 'function') duelSwap(); PRINTS = {}; PARTV = {}; return false; }
   if (!was) PRINTS = {};
   Object.assign(PRINTS, prints);                       // (only what came: the rest the page kept, prints and all)
+  for (const p of (full ? Object.keys(next) : st.parts || [])) if (p in st) PARTV[p] = Math.max(PARTV[p] || 0, v);
   ST = next;
-  ST.fullV = full ? st.v : (was && was.fullV) || 0;     // everything is at least this new
+  ST.fullV = full ? v : (was && was.fullV) || 0;        // everything is at least this new
+  ST.pv = Math.max((was && was.pv) || 0, v);            // the newest change merged
   if (typeof duelSwap === 'function') duelSwap();
   render();
   alerts(was && { ...was, battle: shown });
+  for (const w of [...PUSHWAIT]) if (ST.pv >= w.v) { PUSHWAIT.delete(w); w.done(true); }
+  return true;
+}
+/** The stream pushes each change's state (server: _stream push); LIVE.at: when it was last heard from (its
+ *  keep-alives too), so the page asks for nothing itself while it is. */
+const LIVE = { push: false, at: 0, state: 0 };    // state: when a pushed state last came
+const pushLive = () => LIVE.push && Date.now() - LIVE.at < 25000;
+const PUSHWAIT = new Set();
+/** After an action (its reply's v: the change it made): true once the pushed state has it, false when the stream
+ *  isn't pushing or is late (the page then asks itself). */
+function pushedBy(v) {
+  if (!v || (ST && (ST.pv || 0) >= v)) return Promise.resolve(!!v && pushLive());
+  if (!pushLive()) return Promise.resolve(false);
+  return new Promise(done => {
+    const w = { v, done };
+    PUSHWAIT.add(w);
+    setTimeout(() => { if (PUSHWAIT.delete(w)) done(false); }, 2500);
+  });
+}
+function pushed(st) {
+  LIVE.at = Date.now();
+  if (st.reload || !ST || loading || wordsLang === null || st.me.lang !== wordsLang) {   // not now: the page asks itself
+    if (!(ST && st.v && ST.fullV >= st.v)) load(st.reload ? null : st.parts).catch(() => {});
+    return;
+  }
+  if (!merge(st, false)) load().catch(() => {});
 }
 /** What a change of each topic touches on the page (an unknown one: everything). */
 const TOUCHES = { battle: ['battle', 'character', 'team'], characters: ['battle', 'character', 'team', 'world'], dice: ['feed'],
@@ -296,25 +342,34 @@ const refresh = (v, topics) => {
 };
 function listen() {
   const stream = () => {
-    const es = new EventSource('/api/events?k=' + encodeURIComponent(KEY));
+    const es = new EventSource('/api/events?push=1&p=' + PAGE + '&k=' + encodeURIComponent(KEY));
+    es.addEventListener('state', e => { LIVE.push = true; LIVE.state = Date.now(); try { pushed(JSON.parse(e.data)); } catch { load().catch(() => {}); } });
+    es.addEventListener('ka', () => { LIVE.push = true; LIVE.at = Date.now(); });
     es.onmessage = e => {
+      LIVE.at = Date.now();
       const m = String(e.data);
       if (m.startsWith('ping ')) ping(m);
       else if (m.startsWith('wping ')) wping(m);
       else { const [topics, v] = m.split(' '); seenV = Math.max(seenV, +v || 0); refresh(+v || 0, topics.split(',')); }   // "battle,characters 12"
     };
-    es.onerror = () => { setTimeout(poll, 300); if (es.readyState === 2) setTimeout(stream, 5000); };   // closed for good: open a new one
-    es.onopen = () => { online(); refresh(); };
+    es.onerror = () => { LIVE.at = 0; setTimeout(poll, 300); if (es.readyState === 2) setTimeout(stream, 5000); };   // closed for good: open a new one
+    es.onopen = () => {                    // a pushing stream sends what the page missed at once; else the page asks
+      const t0 = LIVE.at = Date.now(); online();
+      setTimeout(() => { if (!(LIVE.state >= t0)) refresh(); }, 800);
+    };
   };
   stream();
   // A proxy may hold the live stream back: also ask every couple of seconds whether anything changed. Behind the
   // stream twice in a row (once may be a line still on its way): it missed something, so everything reloads.
-  let wait = 2000, timer = 0, lagging = false;        // backs off while the table is offline (up to 30 s)
+  // While the stream pushes and is heard from, once in 10 s is enough (a safety net, not the way changes come).
+  let wait = 2000, timer = 0, lagging = false, asked = 0;   // backs off while the table is offline (up to 30 s)
   async function poll() {
     clearTimeout(timer);
+    if (pushLive() && Date.now() - asked < 10000) { timer = setTimeout(poll, wait); return; }
+    asked = Date.now();
     try {
       const { v } = await api('/api/version');
-      const behind = ST && v > Math.max(seenV, ST.fullV || 0);
+      const behind = ST && v > Math.max(seenV, ST.fullV || 0, ST.pv || 0);
       if (behind && lagging) { seenV = v; refresh(v); }
       lagging = behind && !lagging;
       wait = 2000;
@@ -2952,13 +3007,30 @@ function drawWay(g, T, c, m, lift = 0) {
 }
 /** The table's word on walking `c` to a tile - the way, its cost, the opportunity attacks on it - for the mouse's hover
  *  and a dragged token: asked once the pointer rests there a moment (one at a time); null until it answers. */
+const PEEKS = new Map();                 // the table's answers by key (several kept: the pointer goes back and forth)
+function peekKey(c, x, y) {
+  const b = ST.battle;
+  return `${c.id}|${x},${y}|${moveLeft(b)}|${b.combatants.map(o => o.pos).join(';')}`;   // (someone moved: asked again)
+}
+function keepPeek(key, data) {
+  PEEKS.delete(key); PEEKS.set(key, data);
+  while (PEEKS.size > 300) PEEKS.delete(PEEKS.keys().next().value);
+}
 function movePeek(c, x, y) {
-  const b = ST.battle, key = `${c.id}|${x},${y}|${moveLeft(b)}|${b.combatants.map(o => o.pos).join(';')}`;   // (someone moved: asked again)
-  if (UI.peek && UI.peek.key === key) return UI.peek.data;
+  const key = peekKey(c, x, y);
+  if (PEEKS.has(key)) return PEEKS.get(key);
   if (UI.peekWant !== key) {
     UI.peekWant = key; clearTimeout(UI.peekTimer);
-    UI.peekTimer = setTimeout(() => api('/api/act', { action: 'preview', character: ST.me.active, item: 'move', point: [x, y] })
-      .then(r => { UI.peek = { key, data: r.data || {} }; }, () => { UI.peek = { key, data: null }; })
+    UI.peekTimer = setTimeout(() => api('/api/act', { action: 'preview', character: ST.me.active, item: 'move', point: [x, y], near: 1 })
+      .then(r => {
+        const d = r.data || {};
+        for (const [at, q] of Object.entries(d.near || {})) {      // the tiles around it came too: no trip for them
+          const [nx, ny] = at.split(',').map(Number);
+          keepPeek(peekKey(c, nx, ny), q);
+        }
+        delete d.near;
+        keepPeek(key, d);
+      }, () => { keepPeek(key, null); })
       .finally(() => { if (UI.peekWant === key) requestAnimationFrame(renderMap); }), 150);
   }
   return null;

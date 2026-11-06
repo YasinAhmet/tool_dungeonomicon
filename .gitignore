@@ -3,7 +3,7 @@
 modules/*.dmmod
 modules/*.dpmod
 
-# Left behind if the app is run from here
+# Left behind if the app is run from here (the app's own code ships as .pyc files beside where its .py would be:
+# those are part of the program)
 __pycache__/
-*.pyc
 startup_error.log
