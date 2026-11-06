@@ -8,6 +8,8 @@ I hope it's useful for you too!
 
 Below this, you will find a guide prepared by AI, however feel free to come and ask stuff on Discord directly to me. Take care!
 
+https://github.com/YasinAhmet/tool_dungeonomicon/raw/main/.github/demo.mp4
+
 ---
 
 # Dungeonomicon guide
