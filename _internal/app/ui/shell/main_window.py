@@ -22,6 +22,7 @@ from . import layouts
 from .docking import DockHost
 from .ghostlog import GhostLog, typing_in
 from .module_folder import ModuleFolderWatch
+from .support import support_links
 
 APP_TITLE = "Dungeonomicon"
 
@@ -143,6 +144,12 @@ class MainWindow(QMainWindow):
             w = guard(t.factory, self)
             if w is not None:
                 tb.addWidget(w)
+        if not right:
+            spacer = QWidget()
+            spacer.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+            tb.addWidget(spacer)
+        tb.addSeparator()
+        tb.addWidget(support_links())                        # Donate and Community, always at the right end
 
     def _action(self, a: registry.ActionSpec) -> QAction:
         act = QAction(f"{a.icon} {tr(a.title)}".strip(), self)
