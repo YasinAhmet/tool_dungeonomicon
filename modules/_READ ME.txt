@@ -4,5 +4,5 @@ Dungeonomicon reads them when it starts - and at once while it runs - and their 
 window. A file taken out of this folder takes its module with it.
 
 This folder travels with the program: copy or zip the whole Dungeonomicon folder and give it to someone, and App.exe
-starts on their computer with the same modules. (Characters, settings and the bot token stay in your own
+starts on their computer with the same modules. (Settings, players and the bot token stay in your own
 Documents\Dungeonomicon folder and are never part of it.)

@@ -50,17 +50,19 @@ function wSmoothPts(pts) {                             // the points of wLinePat
 // ---------------------------------------------------------------- which map the pane shows
 /** Battle or World: what the player picked, or (not picked) the battle while one is running, else the world. */
 function mapMode() {
-  const b = ST && (ST._camp || ST.battle), st = b ? b.status : 'none';    // (the campaign's: on the Duel tab ST.battle is the duel's)
+  const bg = typeof bgMode === 'function' ? bgMode() : 'gone';   // Battlegrounds (battlegrounds.js): a member's map stays there;
+  if (bg === 'member') return 'bg';                                 // the lobby I watch starts fighting: show it; the mode closes: away
+  if (WM.mode === 'duel') WM.mode = 'bg';                           // (the old name, kept by a browser)
+  const b = ST && (ST._camp || ST.battle), st = b ? b.status : 'none';    // (the campaign's: on the Battlegrounds face ST.battle is the lobby's)
   if (WM.lastStatus !== null && st !== WM.lastStatus && st === 'active') WM.mode = '';    // a fight starts: show it
   WM.lastStatus = st;
-  const duel = typeof duelMode === 'function' ? duelMode() : 'gone';     // a duel starts: show it; it closes: away (duel.js)
-  if (duel === 'start') WM.mode = 'duel';
-  else if (duel === 'gone' && WM.mode === 'duel') WM.mode = '';
+  if (bg === 'start') WM.mode = 'bg';
+  else if (bg === 'gone' && WM.mode === 'bg') WM.mode = '';
   return WM.mode || (st === 'active' ? 'battle' : 'world');
 }
 function setMapMode(m) {
   WM.mode = m; store('mapmode', m);
-  if (typeof duelSwap === 'function' && duelSwap()) { render(); return; }    // to or from the duel's map: everything anew
+  if (typeof bgSwap === 'function' && bgSwap()) { render(); return; }        // to or from a lobby's map: everything anew
   renderWorld(); if (m === 'battle') renderMap();
 }
 
@@ -95,19 +97,20 @@ function renderWorld() {
   buildWorld();
   const mode = mapMode(), world = mode === 'world';
   const seg = $('mapmode');
-  const live = typeof duelLive === 'function' && duelLive();             // (a fight on in the lobby I look at: duel.js)
-  const key = mode + (wordsLang || '') + (ST.duel ? (live ? ':duel!' : ':duel') : '');
+  const live = typeof bgLive === 'function' && bgLive(bgLobby());        // (a fight on in the lobby I look at: battlegrounds.js)
+  const bgOn = typeof bgState === 'function' && !!bgState();              // (the Battlegrounds app, or the mode open: never in the campaign app)
+  const key = mode + (wordsLang || '') + (bgOn ? (live ? ':bg!' : ':bg') : '');
   if (seg.dataset.k !== key) {
     seg.dataset.k = key;
     seg.replaceChildren(
-      h('button', { class: mode === 'battle' ? 'on' : '', onclick: () => setMapMode('battle'), tip: S('The battle map') }, '⚔ ' + S('Battle')),
-      h('button', { class: world ? 'on' : '', onclick: () => setMapMode('world'), tip: S('The world map: where the party is, its route and food') }, '🗺 ' + S('World')),
-      ...(ST.duel ? [h('button', { class: (mode === 'duel' ? 'on' : '') + (live ? ' live' : ''), onclick: () => setMapMode('duel'),
-        tip: S('The duel: pick a hero or a monster and fight the others - or watch. Nothing of it stays.') }, '🤺 ' + S('Duel'))] : []));
+      h('button', { class: 'camp' + (mode === 'battle' ? ' on' : ''), onclick: () => setMapMode('battle'), tip: S('The battle map') }, '⚔ ' + S('Battle')),
+      h('button', { class: 'camp' + (world ? ' on' : ''), onclick: () => setMapMode('world'), tip: S('The world map: where the party is, its route and food') }, '🗺 ' + S('World')),
+      ...(bgOn ? [h('button', { class: (mode === 'bg' ? 'on' : '') + (live ? ' live' : ''), onclick: () => setMapMode('bg'),
+        tip: S('Battlegrounds: fights for fun, apart from the game - a duel, a skirmish or an arena run. Join a lobby, or watch. Nothing of it stays.') }, '⚔ ' + S('Battlegrounds'))] : []));
   }
   document.body.classList.toggle('worldmode', world);
   $('worldbody').classList.toggle('hide', !world);
-  if (typeof renderDuel === 'function') renderDuel(mode);     // the duel's lobby, or its fight on the map (duel.js)
+  if (typeof renderBG === 'function') renderBG(mode);         // a Battlegrounds lobby, or its fight on the map (battlegrounds.js)
   if (!world) return;
   const W = ST.world, m = W.map;
   $('bname').textContent = m ? m.name : S('World map');

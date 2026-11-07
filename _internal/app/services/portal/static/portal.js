@@ -162,7 +162,7 @@ const NET = { state: 'live', down: 0, busy: 0 }, CLOSED_AFTER = 45000;
 const PAGE = Math.random().toString(36).slice(2, 12);   // this page, to the table: its stream knows what the page loaded
 const AWAY = s => s === 502 || s === 503 || s === 504 || (s >= 520 && s <= 530);
 async function api(path, body, more) {
-  if (body && path === '/api/act' && typeof duelPlay === 'function') body = duelPlay(body);   // on the Duel tab: acts on the duel (duel.js)
+  if (body && path === '/api/act' && typeof bgPlay === 'function') body = bgPlay(body);   // on a lobby's map: acts on that lobby (battlegrounds.js)
   let r;
   try {
     r = await fetch(path, { method: body ? 'POST' : 'GET', headers: { 'X-Key': KEY, 'X-Page': PAGE, 'Content-Type': 'application/json', ...more },
@@ -263,8 +263,8 @@ let PARTV = {};
 /** Merge a state (asked for or pushed) into the page's; false: it said "unchanged" of something the page lacks (a
  *  pushed state names each unchanged unit with its fingerprint: one the page holds differently counts as lacking). */
 function merge(st, full) {
-  const shown = ST && ST.battle;                       // the battle the page showed (on the Duel tab the duel's: duel.js)
-  if (typeof duelUnswap === 'function') duelUnswap();  // (the campaign's battle back in its place while the parts merge)
+  const shown = ST && ST.battle;                       // the battle the page showed (on the Battlegrounds face a lobby's: battlegrounds.js)
+  if (typeof bgUnswap === 'function') bgUnswap();      // (the campaign's battle back in its place while the parts merge)
   const was = ST, prints = st.prints || {}, sameIn = st.same || [], v = st.v || 0;
   const same = Array.isArray(sameIn) ? new Set(sameIn) : new Set(Object.keys(sameIn));
   delete st.prints; delete st.same;
@@ -284,14 +284,14 @@ function merge(st, full) {
     else if (next[part] && was && was[part] && key in was[part]) next[part][key] = was[part][key];
     else lost = true;
   }
-  if (lost) { if (typeof duelSwap === 'function') duelSwap(); PRINTS = {}; PARTV = {}; return false; }
+  if (lost) { if (typeof bgSwap === 'function') bgSwap(); PRINTS = {}; PARTV = {}; return false; }
   if (!was) PRINTS = {};
   Object.assign(PRINTS, prints);                       // (only what came: the rest the page kept, prints and all)
   for (const p of (full ? Object.keys(next) : st.parts || [])) if (p in st) PARTV[p] = Math.max(PARTV[p] || 0, v);
   ST = next;
   ST.fullV = full ? v : (was && was.fullV) || 0;        // everything is at least this new
   ST.pv = Math.max((was && was.pv) || 0, v);            // the newest change merged
-  if (typeof duelSwap === 'function') duelSwap();
+  if (typeof bgSwap === 'function') bgSwap();
   render();
   alerts(was && { ...was, battle: shown });
   for (const w of [...PUSHWAIT]) if (ST.pv >= w.v) { PUSHWAIT.delete(w); w.done(true); }
@@ -324,14 +324,15 @@ function pushed(st) {
 /** What a change of each topic touches on the page (an unknown one: everything). */
 const TOUCHES = { battle: ['battle', 'character', 'team'], characters: ['battle', 'character', 'team', 'world'], dice: ['feed'],
   feed: ['feed'], nowplaying: ['now'], team: ['team', 'world'], world: ['world', 'team'], notes: ['notes'],     // (the team's view shows the food's days)
-  duel: ['duel', 'dbattle'] };
+  duel: ['bg', 'bgbattle'] };                        // (Battlegrounds; a member's battle, character and team parts are their lobby's too)
+const touchesOf = t => TOUCHES[t] === undefined ? ['all'] : t === 'duel' && typeof bgMember === 'function' && bgMember() ? ['bg', 'bgbattle', 'battle', 'character', 'team'] : TOUCHES[t];
 let soon = null, seenV = 0;              // seenV: the newest change the live stream told of
 const WANT = new Set();
 /** A change at the table (topics, v: its number): reload what it touched, unless the page already has it all (it
  *  reloaded everything after an action). No topics: everything. */
 const refresh = (v, topics) => {
   if (v && ST && ST.fullV >= v) return;
-  for (const t of topics && topics.length ? topics : ['?']) for (const p of TOUCHES[t] || ['all']) WANT.add(p);
+  for (const t of topics && topics.length ? topics : ['?']) for (const p of touchesOf(t)) WANT.add(p);
   clearTimeout(soon);
   soon = setTimeout(() => {
     if (v && ST && ST.fullV >= v) { WANT.clear(); return; }
@@ -509,6 +510,14 @@ function hpChip() {
   el.onmouseleave = () => tip();
 }
 function header() {
+  const title = ST.title || 'Dungeonomicon';                 // which app this is (api.state: edition): Dungeonomicon, or Battlegrounds
+  if (document.querySelector('.brand .name').textContent !== title) {
+    document.querySelector('.brand .name').textContent = title;
+    document.querySelector('.brand').title = title;
+    document.querySelector('.brand .mark').textContent = ST.edition === 'battlegrounds' ? 'BG' : 'DM';
+    if (!ALERT.timer) document.title = title;
+    ALERT.base = title;
+  }
   const whoKey = JSON.stringify([ST.me.characters, ST.me.active]);
   if (UI.whoKey !== whoKey && document.activeElement !== $('who')) {
     UI.whoKey = whoKey;
@@ -1913,7 +1922,7 @@ function fitBox(b) {
   return [x0, y0, x1 - x0, y1 - y0];
 }
 function renderMap() {
-  if (document.body.classList.contains('worldmode') || document.body.classList.contains('duellobby')) return;   // the world map (world.js), the duel's lobby (duel.js)
+  if (document.body.classList.contains('worldmode') || document.body.classList.contains('bglobby')) return;   // the world map (world.js), a Battlegrounds lobby (battlegrounds.js)
   const b = ST.battle, cv = $('board'), wrap = $('mapwrap');
   let veil = $('bhidden');                             // the DM keeps the map to themselves: the turn order only
   if (!veil) { veil = h('div', { id: 'bhidden', class: 'hide' }); wrap.append(veil); }
@@ -2491,7 +2500,7 @@ function propImage(key) {            // a map prop's (or symbol's) picture, fetc
   return propImgs[key];
 }
 function image(id, v) {             // kept by its version: a new portrait (or a new creature under this id) loads again
-  const d = typeof duelTokenRoom === 'function' ? duelTokenRoom() : 0;   // (a token on a duel lobby's map: duel.js)
+  const d = typeof bgTokenRoom === 'function' ? bgTokenRoom() : 0;   // (a token on a Battlegrounds lobby's map: battlegrounds.js)
   const key = `${d}:${id}:${v}`;
   if (!imgs[key]) { imgs[key] = new Image(); imgs[key].onload = () => renderMap(); imgs[key].src = `/token/${id}?v=${v}${d ? '&duel=' + d : ''}&k=${encodeURIComponent(KEY)}`; }
   return imgs[key];
@@ -3077,7 +3086,7 @@ function renderActions() {
     h('i'), h('span', { class: 'lbl' }, label));             // (on phones the dot alone: its word on hold)
   const econ = [res('action', t.action, S('Action')), res('bonus', t.bonus, S('Bonus action')), res('reaction', t.reaction, S('Reaction')),
     h('span', { class: 'res' }, `🦶 ${Math.min(t.move, a.speed)}/${a.speed} ${S('ft')}`)];   // (speed 0 mid-turn: nothing left)
-  const me = (typeof duelMe === 'function' && duelMe()) || ST.character, ds = me && me.death_saves;   // (on the Duel tab: my fighter)
+  const me = (typeof bgMe === 'function' && bgMe()) || ST.character, ds = me && me.death_saves;   // (on a lobby's map: my fighter)
   if (me && me.current_hp <= 0 && ds && ds.success < 3 && ds.failure < 3)    // dying: the save right here (the map view on a phone too)
     econ.push(needs('roll', btn(`🎲 ${S('Death save')}  ✔ ${pips(ds.success, 3)} ✘ ${pips(ds.failure, 3)}`, () => act('death_save'), 'sm danger', S('Roll a death saving throw'))));
   for (const g of a.spells) if (g.level > 0 && g.slots && g.slots.total) econ.push(h('span', { class: 'res slot' + (g.slots.left ? '' : ' used'),
@@ -3205,7 +3214,9 @@ const TABS = () => [['overview', S('Overview')], ['spells', S('Spells')], ['inve
 function renderSheet() {
   const c = ST.character, el = $('sheet');
   if (!c) { el.replaceChildren(h('div', { class: 'card' }, h('div', { class: 'title' }, S('Your characters')),
-    ST.me.characters.length ? S('Choose a character') : S('Ask your DM to give you a character.'))); return; }
+    typeof bgApp === 'function' && bgApp() && !bgMember() ? S('Join a lobby to get a hero: it shows here.')      // (the Battlegrounds app)
+    : typeof bgMember === 'function' && bgMember() ? S('Battlegrounds: your hero shows here once you have one.')     // (a member's sheet is their lobby hero's)
+    : ST.me.characters.length ? S('Choose a character') : S('Ask your DM to give you a character.'))); return; }
   const pct = c.max_hp ? Math.max(0, Math.min(100, 100 * c.current_hp / c.max_hp)) : 0;
   const amount = h('input', { type: 'number', min: 0, placeholder: S('amt'), value: UI.amount, oninput: e => { UI.amount = e.target.value; } });
   const hp = kind => {
@@ -3237,7 +3248,7 @@ function renderSheet() {
     head.push(h('div', { class: 'card warn' }, h('div', { class: 'title' }, S('Death saves')),
       `✔ ${pips(s.success, 3)}   ✘ ${pips(s.failure, 3)}  `, needs('roll', btn('🎲 ' + S('Roll'), () => act('death_save'), 'sm primary'))));
   }
-  const tabs = h('div', { class: 'tabs' }, ...TABS().filter(([k]) => k !== 'teamnotes' || may('team_notes')).map(([k, l]) => h('button', { class: UI.tab === k ? 'on' : '', onclick: () => { UI.tab = k; store('tab', k); renderSheet(); } }, l)));
+  const tabs = h('div', { class: 'tabs' }, ...TABS().filter(([k]) => k !== 'teamnotes' || (may('team_notes') && !(typeof bgApp === 'function' && bgApp()))).map(([k, l]) => h('button', { class: UI.tab === k ? 'on' : '', onclick: () => { UI.tab = k; store('tab', k); renderSheet(); } }, l)));
   const body = { overview: overviewTab, spells: spellsTab, inventory: inventoryTab, features: featuresTab, notes: notesTab, teamnotes: teamNotesTab }[UI.tab](c);
   el.replaceChildren(...head, tabs, ...body);
   el.querySelectorAll('textarea').forEach(fitText);
@@ -3298,7 +3309,7 @@ function overviewTab(c) {
 /** Situational feats as switches: Great Weapon Master's −5 / +10, Sentinel, Lucky... (hover: what they do). */
 const TOGGLE_HELP = () => ({ power: S('Click to turn it on for your attacks.'), auto: S('On: the battle applies it by itself.'),
   reaction: S('On: it is offered when it applies.'), option: S('Pick the damage type.') });
-function toggleChips(list, bar) {            // bar: the action bar's (on the Duel tab: the fighter's, duel.js)
+function toggleChips(list, bar) {            // bar: the action bar's (on a lobby's map: the fighter's, battlegrounds.js)
   const more = bar ? { bar: 1 } : {};
   return list.map(t => {
     const tipText = `${t.feat_label || t.feat}\n${t.does}\n\n${TOGGLE_HELP()[t.kind]}` + (t.text ? `\n\n${t.text}` : '');
@@ -3488,7 +3499,7 @@ function dropZone(el, takes, to) {
 }
 const myToken = () => ST && ST.battle.combatants.find(c => c.mine && c.character === ST.me.active);
 /** Team items go on the map any time out of a fight; in one, on my turn. */
-const canTeamDrop = () => !(typeof duelShown === 'function' && duelShown()) && (ST.battle.status !== 'active' || !!ST.battle.my_turn);
+const canTeamDrop = () => !(typeof bgShown === 'function' && bgShown() && !bgMember()) && (ST.battle.status !== 'active' || !!ST.battle.my_turn);   // (a member: onto the arena's map)
 /** How many of a stack: 1 when there is one; otherwise a small sheet (null: cancelled). */
 function askQty(question, max, verb) {
   if (!(max > 1)) return Promise.resolve(1);
@@ -3714,7 +3725,7 @@ function tnClose() { UI.tnEdit = null; tnStore(); tnHeartbeat(); }
 addEventListener('pagehide', () => { if (UI.tnEdit && navigator.sendBeacon) navigator.sendBeacon('/api/act?k=' + encodeURIComponent(KEY), JSON.stringify({ action: 'tnote_cancel', id: UI.tnEdit.id })); });
 function teamNotesTab() {
   const N = ST.notes;
-  if (!N) return [h('div', { class: 'card dim' }, S('Ask your DM to give you a character.'))];
+  if (!N) return [h('div', { class: 'card dim' }, typeof bgApp === 'function' && bgApp() ? S('No team notes in Battlegrounds.') : S('Ask your DM to give you a character.'))];
   const notes = N.notes;
   if (UI.tnEdit && !notes.some(n => n.id === UI.tnEdit.id)) tnClose();
   if (UI.tnEdit && !tnTimer) {                       // back after a refresh: take the note again (kept text stays)
