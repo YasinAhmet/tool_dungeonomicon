@@ -131,6 +131,23 @@ Players without Discord can be added as **manual** players, with just a name. Co
 **This PC only** runs the page without a public address. Stopping sharing, or closing the app, takes the address
 down.
 
+## Battlegrounds: duels, skirmishes and the arena (`Battlegrounds.exe`)
+
+Next to `App.exe` is a second program, **`Battlegrounds.exe`**: fights for fun, apart from your campaign. It uses the
+same `modules` folder but keeps everything else apart: its own settings, players, layouts and logs in
+`Documents\Dungeonomicon Battlegrounds`, and its own player portal with its own links (port 8810, so both programs can
+run at once). Your players' campaign characters never appear in it.
+
+* Add your players in the **Players** window and share the portal: each player gets a Battlegrounds link.
+* Make lobbies in the Battlegrounds window: a **Duel** (players against each other, teams 1-9 or free-for-all), a
+  **Skirmish** (one battle against what you generate or set up by hand) or an **Arena** (players build a level 1 hero
+  with point buy, then fight an encounter per level; each win is a level, a level-up panel on their page, and maybe a
+  trophy in the arena's own team inventory). Players join as fighters or watch.
+* **Prepare battle** puts everyone on the map with the opposition (easy to deadly; monsters, NPC heroes or both). Add,
+  remove or change anything, then **Confirm and start**. Enemies play their own turns unless you untick Autoplay.
+* Every battle - in both programs - is recorded as a replay while **Record battles** is ticked. The Replays page lists
+  them with who fought; **Watch** plays one for everyone at 0.25x-8x, **Fight again** sets it up to be fought anew.
+
 ## Discord bot (optional)
 
 The bot gives your players interactive character sheets and slash commands in Discord, and plays the app's music and
