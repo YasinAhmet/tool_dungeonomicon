@@ -3101,10 +3101,10 @@ function renderActions() {
   kids.push(h('div', { class: 'econ' }, ...econ));
   const COST_WORD = { action: S('Action'), attack: S('Action'), multi: S('Action'), bonus: S('Bonus action'), reaction: S('Reaction'),
     free: S('Free'), legendary: S('Legendary action'), long: S('Takes longer than a turn'), on_hit: S('On hit') };
-  const button = it => h('button', { class: `act ico ${!it.ok ? 'off' : it.kind === 'spell' ? 'spell' : COST_CLASS[(it.cost || '').split(':')[0]] || 'action'}${UI.aim && UI.aim.item.id === it.id ? ' aiming' : ''}${it.readied ? ' readied' : ''}`,
+  const button = it => h('button', { class: `act ico ${!it.ok ? 'off' : it.kind === 'spell' ? 'spell' : COST_CLASS[(it.cost || '').split(':')[0]] || 'action'}${UI.aim && UI.aim.item.id === it.id ? ' aiming' : ''}${it.readied ? ' readied' : ''}${!it.icon || NOICON.has(it.icon) ? ' txt' : ''}`,
     onclick: () => startAim(it), 'aria-label': it.label, 'aria-disabled': it.ok ? null : 'true', tip: () => actionCard(it),
     more: () => [it.ok ? [it.kind === 'spell' ? S('Cast') : S('Use'), () => startAim(it)] : null] },
-    it.icon ? h('img', { src: `/icon/${it.icon}.webp`, alt: '', width: 30, height: 30, decoding: 'sync' }) : it.label,   // (no lazy: the bar is redrawn often - no blink)
+    iconOr(it.icon, 30, it.label, 'sync'),   // (no lazy: the bar is redrawn often - no blink)
     it.uses != null && it.uses !== '' ? h('span', { class: 'uses' }, it.uses) : null);
   const strip = [];                       // every group in one wrapping strip, a thin bar in its cost colour first (its name on hover)
   UI.hotkeys = a.groups.filter(g => g.key !== 'reaction').flatMap(g => g.items).slice(0, 9);   // keys 1-9, in the strip's order
@@ -3143,7 +3143,7 @@ const COST_LOOK = () => ({ action: [S('Action'), 'var(--good)'], attack: [S('Act
 function actionCard(it) {
   const info = it.info || {}, kind = (it.cost || '').split(':')[0], [cost, color] = COST_LOOK()[kind] || [it.cost, 'var(--dim)'];
   return h('div', null,
-    h('div', { class: 'tc-head' }, it.icon ? h('img', { src: `/icon/${it.icon}.webp`, alt: '', width: 22, height: 22 }) : null,
+    h('div', { class: 'tc-head' }, iconOr(it.icon, 22, null),
       h('b', null, it.label), h('span', { class: 'grow' }),
       h('span', { style: `color:${it.kind === 'spell' ? '#c084fc' : color}` }, cost), it.uses != null && it.uses !== '' ? h('span', { class: 'dim' }, ' · ' + it.uses) : null),
     (info.tags || []).length ? h('div', { class: 'tc-tags' }, info.tags.join(' · ')) : null,
@@ -3309,6 +3309,15 @@ function overviewTab(c) {
 /** Situational feats as switches: Great Weapon Master's −5 / +10, Sentinel, Lucky... (hover: what they do). */
 const TOGGLE_HELP = () => ({ power: S('Click to turn it on for your attacks.'), auto: S('On: the battle applies it by itself.'),
   reaction: S('On: it is offered when it applies.'), option: S('Pick the damage type.') });
+/** An action's picture - or, when there is none (no picture module installed: an icon the server can't find), its
+ * words instead of a broken image. A picture that failed once isn't asked for again. */
+const NOICON = new Set();
+function iconOr(icon, px, label, decoding) {
+  if (!icon || NOICON.has(icon)) return label;
+  return h('img', { src: `/icon/${icon}.webp`, alt: '', width: px, height: px, decoding: decoding || 'async',
+    onerror: e => { NOICON.add(icon); const b = e.target.closest('button.act'); if (b) b.classList.add('txt');
+      e.target.replaceWith(label == null ? '' : label); } });
+}
 function toggleChips(list, bar) {            // bar: the action bar's (on a lobby's map: the fighter's, battlegrounds.js)
   const more = bar ? { bar: 1 } : {};
   return list.map(t => {

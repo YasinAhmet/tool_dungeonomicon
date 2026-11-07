@@ -243,7 +243,8 @@ function pointBuy(scores, budget, costs, onChange, abilities) {
     const plus = mini('+', () => { if (scores[a] < 15) { scores[a]++; onChange(); refresh(); } return null; }, '', S('Raise {0}', names[a]));
     rows.push(n => { val.textContent = String(scores[a]); mod.textContent = sign(Math.floor((scores[a] - 10) / 2));
       plus.disabled = scores[a] >= 15 || n - (cost(scores[a] + 1) - cost(scores[a])) < 0; minus.disabled = scores[a] <= 8; });
-    return h('div', { class: 'pb' }, h('span', { class: 'title' }, names[a]), minus, val, plus, mod);
+    return h('div', { class: 'pb' }, h('div', { class: 'pbh' }, h('span', { class: 'title', title: names[a] }, names[a]), mod),
+      h('div', { class: 'pbc' }, minus, val, plus));
   }));
   refresh();
   return h('div', { class: 'card pointbuy' }, h('div', { class: 'drow' }, h('b', null, S('Point buy')), h('span', { class: 'grow' }), left), grid);
