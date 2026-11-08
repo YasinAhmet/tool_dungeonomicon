@@ -351,6 +351,8 @@ body.bgmode [data-need~="edit_hp"],body.bgmode [data-need~="rest"],body.bgmode [
 .chip.team:disabled{opacity:.5;cursor:default}
 .bgform{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:6px 10px}
 .bgf{display:flex;flex-direction:column;gap:2px;min-width:0}.bgf select,.bgf input{width:100%;min-width:0}
+.bgtick{display:flex;align-items:center;gap:6px;cursor:pointer}.duelform .drow{gap:12px;flex-wrap:wrap}
+.card.host{border-color:var(--accent)}#bghost:empty{display:none}#bghost{display:inline-flex;gap:4px}
 .bgform.mons{grid-template-columns:repeat(auto-fill,minmax(130px,1fr))}.bgform.mons .bgf:first-child{grid-column:1/-1}
 .pointbuy .pbgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:4px}
 .pb{display:flex;flex-direction:column;gap:2px;min-width:0;padding:3px 6px;background:var(--panel);border:1px solid var(--border);border-radius:4px}

@@ -2510,10 +2510,15 @@ function image(id, v) {             // kept by its version: a new portrait (or a
 const camNow = () => ({ ...(UI.cam || UI.camFit) });
 function screenAt(e) { const r = $('board').getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; }
 function tileAt(e) { const [x, y] = screenAt(e), c = camNow(); return [Math.floor((x - c.x) / c.z), Math.floor((y - c.y) / c.z)]; }
+/** The creature at a point of the map (tile units: where the pointer is, or a tile's corner): a Tiny token drawn under
+ *  the point first, then a Tiny one anywhere on that tile (half a tile across: hard to hit on a phone), then whoever
+ *  stands there - a Tiny token over the big one it shares a tile with. */
 function tokenAt([x, y]) {
-  const hit = c => { const b = c.box || (c.pos && [c.pos[0], c.pos[1], c.span]); return b && x >= b[0] && x < b[0] + b[2] && y >= b[1] && y < b[1] + b[2]; };
+  const tx = Math.floor(x), ty = Math.floor(y);
+  const drawn = c => { const b = c.box || (c.pos && [c.pos[0], c.pos[1], c.span]); return b && x >= b[0] && x < b[0] + b[2] && y >= b[1] && y < b[1] + b[2]; };
+  const on = c => c.pos && tx >= c.pos[0] && tx < c.pos[0] + c.span && ty >= c.pos[1] && ty < c.pos[1] + c.span;
   const all = [...ST.battle.combatants].reverse();
-  return all.find(c => c.tiny && hit(c)) || all.find(hit);    // a Tiny token over the big one it shares a tile with
+  return all.find(c => c.tiny && drawn(c)) || all.find(c => c.tiny && on(c)) || all.find(on);
 }
 function zoomAt(f, sx, sy) {
   const c = camNow(), z = Math.max(6, Math.min(140, c.z * f)), k = z / c.z;
@@ -2534,7 +2539,7 @@ board.addEventListener('pointerdown', e => {
   try { board.setPointerCapture(e.pointerId); } catch { /* a pointer already gone */ }
   pointers.set(e.pointerId, screenAt(e));
   if (pointers.size === 2) { press = { mode: 'pinch', d: pinchDistance(), mid: pinchMid(), cam: camNow() }; UI.drag = null; return; }
-  const at = tileAt(e), c = tokenAt(at), b = ST.battle, [sx, sy] = screenAt(e);
+  const at = tileAt(e), c = tokenAt(pointAt(e)), b = ST.battle, [sx, sy] = screenAt(e);
   const own = c && c.mine && canMove(b) && !UI.aim;
   const fingers = e.pointerType !== 'mouse';                 // a finger wobbles: more slack before a tap becomes a drag
   const me = meInBattle(), it = !c && !UI.aim ? groundAt(pointAt(e)) : null;
@@ -2552,7 +2557,7 @@ board.addEventListener('pointermove', e => {
     renderMap(); return;
   }
   if (!press) {
-    const c = ST && tokenAt(tileAt(e)), it = ST && !c && !UI.aim ? groundAt(pointAt(e)) : null;
+    const c = ST && tokenAt(pointAt(e)), it = ST && !c && !UI.aim ? groundAt(pointAt(e)) : null;
     board.style.cursor = UI.aim ? 'crosshair' : c || it ? 'pointer' : 'grab';
     if ((it ? it.id : null) !== (UI.groundHover ?? null)) { UI.groundHover = it ? it.id : null; requestAnimationFrame(renderMap); }
     if (c && !UI.aim) { if (UI.tipFor !== c.id + '|' + ST.v) { UI.tipFor = c.id + '|' + ST.v; tip({ clientX: e.clientX, clientY: e.clientY, currentTarget: { getBoundingClientRect: () => ({ left: e.clientX + 12, top: e.clientY - 8, bottom: e.clientY + 18 }) } }, () => tokenCard(c)); } }
@@ -2581,7 +2586,7 @@ function release(e) {
   press = null;
   board.style.cursor = 'grab';
   if (p.mode === 'item') {                                   // an item dragged onto my token: picked up; a tap shows its name
-    const d = UI.item, c = tokenAt(tileAt(e)); UI.item = null;
+    const d = UI.item, c = tokenAt(pointAt(e)); UI.item = null;
     if (d.moved && c && c.mine) act('do', { item: 'pickup', option: String(d.id) });
     else if (!d.moved) UI.groundHover = UI.groundHover === d.id ? null : d.id;
     renderMap();
@@ -2614,10 +2619,12 @@ function tokenCard(c) {
     (c.badges || []).length ? h('div', { class: 'conds' }, ...c.badges.map(k => h('span', { style: `color:${(look[k] || [])[1] || 'var(--warn)'}` }, gi(k))),
       h('span', { class: 'small warn' }, c.conditions.join(', '))) : c.conditions.length ? h('div', { class: 'small warn' }, c.conditions.join(', ')) : null,
     me && me.pos && c.pos && me.id !== c.id ? h('div', { class: 'dim small' }, S('{0} ft away', Geo.dist(me, c))) : null,
-    h('div', { class: 'dim small' }, c.mine ? S('Click: show your details') : c.id === UI.target ? S('Click: clear the target') : S('Click: make it your target')));
+    c.untargetable && !c.mine ? h('div', { class: 'small warn' }, S("Can't be targeted now (banished, ethereal or sealed away)")) : null,
+    h('div', { class: 'dim small' }, c.mine ? S('Click: show your details') : c.id === UI.target ? S('Click: clear the target')
+      : c.untargetable ? S('Click: show it') : S('Click: make it your target')));
 }
 function tapToken(c) {
-  if (c.mine) UI.inspect = UI.inspect === c.id ? null : c.id;
+  if (c.mine || (c.untargetable && c.id !== UI.target)) UI.inspect = UI.inspect === c.id ? null : c.id;   // (out of reach: shown, not a target)
   else { UI.target = c.id === UI.target ? null : c.id; UI.inspect = null; }
   if (UI.move) { UI.move = null; renderAimbar(); }
   renderMap();
@@ -2857,7 +2864,7 @@ function slotLevels(min) {
 function aimTap(p, token) {
   const a = UI.aim, t = a.item.target || {}, tile = [Math.floor(p[0]), Math.floor(p[1])], key = tile.join(',');
   if (!aimNeedsClick(a)) return;
-  const tok = token || tokenAt(tile);
+  const tok = token || tokenAt(p);
   if ((t.type === 'creature' || t.type === 'split') && !tok) return;
   if (a.pending && a.pending.key === key) return aimPick();
   a.pending = { key, p, token: tok };
@@ -2876,9 +2883,10 @@ function aimNeedsClick(a) {
 }
 function aimClick(p, token) {
   const a = UI.aim, t = a.item.target || {}, me = meInBattle(), tile = [Math.floor(p[0]), Math.floor(p[1])];
-  const tok = token || tokenAt(tile);
+  const tok = token || tokenAt(p);
   if (t.type === 'creature' || t.type === 'split') {
     if (!tok) return;
+    if (tok.untargetable && !tok.mine) return say(S("{0} can't be targeted now", tok.name), true);   // banished, ethereal, sealed
     if (me && me.pos && tok.pos && a.item.range != null && Geo.dist(me, tok) > Math.max(5, a.item.range)) return say(S('Out of range'), true);
     if (t.type === 'creature' && a.targets.includes(tok.id)) a.targets = a.targets.filter(x => x !== tok.id);
     else a.targets.push(tok.id);
@@ -3060,12 +3068,12 @@ function drawAimArea(g, b, T, a, me) {
     g.fillStyle = 'rgba(255,140,40,.28)'; g.strokeStyle = 'rgba(255,140,40,.9)'; g.lineWidth = 1;
     for (const [x, y] of tiles) { g.fillRect(x * T + .5, y * T + .5, T - 1, T - 1); }
     for (const c of b.combatants) {
-      if (!c.pos || c.id === me.id && area.origin === 'caster') continue;
+      if (!c.pos || c.id === me.id && area.origin === 'caster' || c.untargetable) continue;   // (banished, ethereal: out of the area's reach)
       for (let i = 0; i < c.span; i++) for (let j = 0; j < c.span; j++) if (set.has(`${c.pos[0] + i},${c.pos[1] + j}`) && !a.hit.includes(c.id)) a.hit.push(c.id);
     }
   } else if (UI.hover && (t.type === 'creature' || t.type === 'split')) {
-    const tok = tokenAt([Math.floor(UI.hover[0]), Math.floor(UI.hover[1])]);
-    if (tok) a.hit = [tok.id];
+    const tok = tokenAt(UI.hover);
+    if (tok && !tok.untargetable) a.hit = [tok.id];
   } else if (UI.hover && t.type === 'point') {
     const x = Math.floor(UI.hover[0]), y = Math.floor(UI.hover[1]);
     g.strokeStyle = '#ff8c28'; g.lineWidth = 2; g.strokeRect(x * T + 2, y * T + 2, T - 4, T - 4);

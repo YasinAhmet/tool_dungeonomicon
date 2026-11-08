@@ -8,6 +8,8 @@
 // meanwhile (the campaign's waits in ST._camp). Only your fighter (and what it summons) is yours to play.
 // A member's page is in Battlegrounds mode (body.bgmode): no character picker, no campaign modes - their sheet tab shows
 // their lobby hero, the Inventory tab's team section the arena's stash.
+// A player may open a duel of their own (skirmishes and arenas are the DM's) and run it: its settings, starting the
+// fight once everyone is ready, ending it, taking everyone back to the lobby, closing it (hostCard, duelForm).
 'use strict';
 const BG = { last: null, shown: null, draft: store('bgpick') || null, build: store('bgbuild') || null, opts: null, optsKey: null,
   asking: new Set(), mons: null, monsKey: '', mq: store('bgmq') || {}, mtimer: 0, tab: store('bgtab') || 'hero',
@@ -101,7 +103,7 @@ function buildBG() {
   $('map').querySelector('.mapbody').after(h('div', { id: 'bgbody', class: 'hide' }, h('div', { id: 'bgmain' }), h('aside', { id: 'bgside' })));
   $('round').after(h('span', { id: 'bgbar', class: 'hide' },
     h('select', { id: 'bgroom', onchange: e => act('bg_watch', { room: +e.target.value }, true) }), h('span', { id: 'bgnote' }),
-    btn('📜', () => { BG.flog = !BG.flog; bgRedo(); return null; }, 'sm', S('The battle log'))));
+    h('span', { id: 'bghost' }), btn('📜', () => { BG.flog = !BG.flog; bgRedo(); return null; }, 'sm', S('The battle log'))));
   $('mapwrap').append(h('div', { id: 'bgflog', class: 'hide' }));
 }
 function renderBG(mode) {
@@ -142,6 +144,9 @@ function bgBar(g, l, fight) {
     sel.title = S('Pick a lobby to watch or join');
     sel.replaceChildren(...g.lobbies.map(x => h('option', { value: x.id, selected: !!l && x.id === l.id }, lobbyWords(x))));
   }
+  const hostEl = $('bghost'), hosting = fight && l && l.hosting && l.mode !== 'replay';
+  hostEl.replaceChildren(...(!hosting ? [] : l.phase === 'battle' ? [btn('⏹', () => endDuel(l), 'sm', S('End the fight'))]
+    : l.phase === 'over' ? [btn('✔ ' + S('Back to the lobby'), () => bgAct('bg_finish', {}, true), 'sm primary', S('Everyone rested, back in the lobby for another round'))] : []));
   const note = $('bgnote');
   note.classList.toggle('hide', !fight);
   if (fight) {
@@ -163,6 +168,9 @@ function bgBanner(g, l) {
   const me = g.me, r = l.result;
   let cls = 'dim', text;
   if (l.mode === 'replay') text = '🎞 ' + replayWords(l);
+  else if (l.phase === 'lobby' && l.hosting) text = me && me.ready ? '✔ ' + S('Ready - start the duel once everyone is') : '🕓 ' + S('Lobby - get ready, then start the duel');
+  else if (l.phase === 'lobby' && l.host) text = me ? (me.ready ? '✔ ' + S('Ready - waiting for {0} to start the duel', l.host) : '🕓 ' + S('Lobby - waiting for {0} to start the duel', l.host))
+    : '🕓 ' + S('Lobby - the players get ready');
   else if (l.phase === 'lobby') text = me ? (me.ready ? '✔ ' + S('Ready - waiting for the DM to start the battle') : '🕓 ' + S('Lobby - waiting for the DM to start the battle'))
     : '🕓 ' + S('Lobby - the players get ready');
   else if (l.phase === 'setup') { cls = 'warn'; text = '⏳ ' + S('The DM is preparing the battle'); }
@@ -170,7 +178,7 @@ function bgBanner(g, l) {
   else if (r) { cls = r.players_won && me ? 'good' : r.draw ? 'dim' : me ? 'bad' : 'acc'; text = '🏁 ' + (me ? (r.players_won ? S('Victory!') : r.draw ? S('A draw.') : S('Defeat.')) + ' ' : '') + r.text; }
   else text = '🏁 ' + S('The battle is over');
   return h('div', { class: 'bgphase ' + cls }, h('span', { class: 'mbadge ' + l.mode }, modeIcon(l.mode) + ' ' + modeWord(l.mode)),
-    h('b', null, l.name), h('span', { class: 'grow' }), h('span', null, text),
+    h('b', null, l.name), l.host ? h('span', { class: 'dim small' }, S('run by {0}', l.host)) : null, h('span', { class: 'grow' }), h('span', null, text),
     l.mode === 'arena' ? h('span', { class: 'dim small' }, S('{0} battles won', l.stage)) : null);
 }
 
@@ -180,17 +188,20 @@ function bgMainPane(g, l) {
   const intro = h('div', { class: 'dim small' }, S('Fights for fun, apart from the game: nothing of them stays, and your real character is never touched.'));
   if (!l) {
     el.replaceChildren(h('div', { class: 'title' }, '⚔ ' + S('Battlegrounds')), intro,
-      h('div', { class: 'empty dim' }, g.open ? S('No lobbies yet: the DM opens them.') : S("The DM hasn't opened Battlegrounds yet. This page follows along once a lobby is up.")));
+      h('div', { class: 'empty dim' }, g.open ? (g.can_create ? S('No lobbies yet: open a duel of your own, or wait for the DM.') : S('No lobbies yet: the DM opens them.'))
+        : S("The DM hasn't opened Battlegrounds yet. This page follows along once a lobby is up.")),
+      g.can_create ? h('div', { class: 'drow' }, btn('🤺 ' + S('Open a duel'), () => duelForm(null), 'primary', S('Your own duel: players against each other. You set it up and start it.'))) : null);
     return;
   }
-  const me = g.me, parts = [bgBanner(g, l)];
+  const me = g.me, parts = [bgBanner(g, l), hostCard(g, l)];
   const mine = g.lobbies.find(x => x.mine);
   if (!me && mine) parts.push(h('div', { class: 'drow' }, h('span', { class: 'warn small' }, S('You fight in {0}.', mine.name)),
     btn('↩ ' + S('Back to my lobby'), () => act('bg_watch', { room: mine.id }, true), 'sm')));
   if (l.mode === 'replay') parts.push(h('div', { class: 'card' }, h('div', null, S('A recorded battle plays here, for everyone: the DM plays, pauses and steps it.')),
     l.replay ? h('div', { class: 'dim small' }, replayWords(l)) : null));
   else if (l.phase !== 'lobby') parts.push(h('div', { class: 'card' }, l.phase === 'setup' ? S('The DM is placing everyone and the opposition. The map shows once the DM confirms.')
-    : l.phase === 'battle' ? S('The battle is on.') : S('The battle is over - the lobby opens again when the DM finishes it.'),
+    : l.phase === 'battle' ? S('The battle is on.') : l.host ? S('The duel is over - {0} takes everyone back to the lobby.', l.host)
+      : S('The battle is over - the lobby opens again when the DM finishes it.'),
     bgBoard() ? ' ' : null, bgBoard() ? btn('🗺 ' + S('Show the map'), () => { BG.shown = null; bgSwap(); render(); return null; }, 'sm') : null));
   else if (l.mode === 'arena') parts.push(...arenaPane(g, l));
   else parts.push(...fighterPane(g, l));
@@ -202,10 +213,12 @@ function readyRow(g, l) {
   const me = g.me, has = me.char || me.kind === 'monster';
   const need = l.mode === 'arena' ? (me.pending ? S('Take your level-up first.') : !me.char ? S('Build your hero first.') : '') : !has ? S('Pick a fighter first.') : '';
   return h('div', { class: 'drow ready'},
-    Object.assign(btn(me.ready ? '✔ ' + S('Ready') : S("I'm ready"), () => bgAct('bg_ready', { on: !me.ready }), me.ready ? 'primary' : 'sm', need || S('Tell the DM you are ready; the DM starts the battle')), { disabled: !!need }),
+    Object.assign(btn(me.ready ? '✔ ' + S('Ready') : S("I'm ready"), () => bgAct('bg_ready', { on: !me.ready }), me.ready ? 'primary' : 'sm',
+      need || (l.host ? S('Tell the others you are ready: the duel starts once everyone is') : S('Tell the DM you are ready; the DM starts the battle'))), { disabled: !!need }),
     me.char ? btn('📜 ' + S('See my hero'), () => { showView('sheet'); return null; }, 'sm', S('Your lobby hero, on the character tab')) : null,
     h('span', { class: 'grow' }),
-    btn(S('Leave the lobby'), () => ask(S('Leave this lobby? Your fighter here is dropped.'), S('Leave'), () => act('bg_leave', {}, true), 'danger'), 'flat'));
+    btn(S('Leave the lobby'), () => ask(l.hosting ? S('Leave your duel? Your fighter is dropped; the next fighter runs it (nobody left: it closes).')
+      : S('Leave this lobby? Your fighter here is dropped.'), S('Leave'), () => act('bg_leave', {}, true), 'danger'), 'flat'));
 }
 
 // ---------------------------------------------------------------- the forms' options (asked once per lobby)
@@ -605,20 +618,74 @@ async function bgLevelUp(l, cls, sub) {
 }
 
 // ---------------------------------------------------------------- the side pane: fighters, lobbies, spectators, the log
+// ---------------------------------------------------------------- a duel of your own: open it, set it up, run it
+/** The duel form: a name and the room's rules - the hero level (or each picks theirs), teams or free-for-all, what
+ *  the fighters may be, the map, whether others may watch. `l`: my duel, to change; null: a new one. */
+function duelForm(l) {
+  const g = bgState(), st = l ? l.settings : { level: 3, free_level: true, max_level: 20, ffa: true, kinds: ['hero', 'monster'], map: 'arena', spectators: true };
+  const v = { name: l ? l.name : '', level: st.level || 3, free_level: !!st.free_level, max_level: st.max_level || 20, ffa: !!st.ffa,
+    kinds: new Set((st.kinds || []).filter(k => k === 'hero' || k === 'monster')), map: st.map || 'arena', spectators: st.spectators !== false };
+  const num = (val, lo, hi, set) => h('input', { type: 'number', min: lo, max: hi, value: val, oninput: e => set(Math.max(lo, Math.min(hi, Math.round(+e.target.value) || lo))) });
+  const tick = (label, on, set) => h('label', { class: 'bgtick' }, h('input', { type: 'checkbox', checked: on || null, onchange: e => set(e.target.checked) }), ' ' + label);
+  const kind = (k, label) => tick(label, v.kinds.has(k), on => { if (on) v.kinds.add(k); else v.kinds.delete(k); });
+  const maps = ((g && g.maps) || []).map(m => [m.key, m.name]);
+  if (!maps.some(([k]) => k === v.map)) maps.push([v.map, v.map]);
+  detail(() => h('div', { class: 'iform duelform' },
+    h('b', null, l ? '⚙ ' + S('Duel settings') : '🤺 ' + S('Open a duel')),
+    h('div', { class: 'dim small' }, S('Players against each other. You run it: you start the fight once everyone is ready.')),
+    field(S('Name'), h('input', { type: 'text', maxlength: 40, value: v.name, placeholder: S('a name the others see'), oninput: e => { v.name = e.target.value; } })),
+    h('div', { class: 'bgform' }, field(S('Hero level'), num(v.level, 1, 20, x => { v.level = x; })),
+      field(S('Highest level'), num(v.max_level, 1, 20, x => { v.max_level = x; })),
+      field(S('Map'), selectOf(v.map, maps, x => { v.map = x; }))),
+    tick(S('Everyone picks their own level (up to the highest)'), v.free_level, x => { v.free_level = x; }),
+    tick(S('Free-for-all: everyone on a team of their own'), v.ffa, x => { v.ffa = x; }),
+    h('div', { class: 'drow' }, h('span', { class: 'title' }, S('Fight as')), kind('hero', S('A hero')), kind('monster', S('A monster'))),
+    tick(S('Others may watch'), v.spectators, x => { v.spectators = x; })),
+  () => [[l ? S('Save') : S('Open the duel'), () => {
+    const settings = { level: v.level, free_level: v.free_level, max_level: Math.max(v.level, v.max_level), ffa: v.ffa, kinds: [...v.kinds], map: v.map,
+      spectators: v.spectators };
+    const name = v.name.trim();
+    if (!l) return act('bg_create', { mode: 'duel', name, settings });
+    return act('bg_settings', { room: l.id, settings }, true).then(() => name && name !== l.name ? act('bg_rename', { room: l.id, name }, true) : null);
+  }], [S('Cancel'), () => null, 'flat']]);
+  return null;
+}
+const endDuel = l => ask(S('End the fight now? Whoever is left standing wins (several teams: nobody).'), S('End it'), () => bgAct('bg_end', {}, true), 'danger');
+/** My own duel: what running it takes - start the fight (two fighters at least, on two teams, everyone ready), change
+ *  its settings, end the fight, take everyone back to the lobby, close it. */
+function hostCard(g, l) {
+  if (!l.hosting || l.mode === 'replay') return null;
+  const ms = l.members, teams = l.settings.ffa || new Set(ms.map(m => m.team)).size > 1;
+  const why = ms.length < 2 ? S('Waiting for a second fighter.') : !ms.every(m => m.ready) ? S('Waiting for everyone to be ready.')
+    : !teams ? S('Everyone is on the same team: someone has to pick another.') : '';
+  const acts = [];
+  if (l.phase === 'lobby') acts.push(Object.assign(btn('▶ ' + S('Start the duel'), () => bgAct('bg_start', {}, false), 'primary',
+    why || S('Everyone is placed and initiative is rolled: the fight begins')), { disabled: !!why }),
+    btn('⚙ ' + S('Settings'), () => duelForm(l), 'sm', S('The name, level, teams, fighters and map of your duel')),
+    btn('✖ ' + S('Close'), () => ask(S('Close {0}? Everyone in it is sent back.', l.name), S('Close'), () => bgAct('bg_close', {}, true), 'danger'), 'flat', S('Close your duel')));
+  else if (l.phase === 'battle') acts.push(btn('⏹ ' + S('End the fight'), () => endDuel(l), 'sm'));
+  else if (l.phase === 'over') acts.push(btn('✔ ' + S('Back to the lobby'), () => bgAct('bg_finish', {}, true), 'primary', S('Everyone rested, back in the lobby for another round')));
+  return h('div', { class: 'card host' }, h('div', { class: 'drow' }, h('b', null, '👑 ' + S('You run this duel')), h('span', { class: 'grow' }), ...acts),
+    l.phase === 'lobby' && why ? h('div', { class: 'dim small' }, why) : null);
+}
 function bgSidePane(g, l) {
   const rows = (l ? l.members : []).map(x => h('div', { class: 'drowp fighter' + (x.me ? ' me' : '') + (x.out ? ' out' : '') + (x.ready ? ' rdy' : '') },
     teamDot(x.team), h('b', null, x.player), h('span', { class: 'dim small n' }, x.name || x.pick || ''),
     x.hp != null ? h('span', { class: 'small' }, `${x.hp}/${x.max_hp}`) : null,
-    h('span', { class: 'small st' }, (x.ready && l.phase === 'lobby' ? '✔ ' : '') + x.status + (x.pending ? ' ⬆' : ''))));
+    h('span', { class: 'small st' }, (x.ready && l.phase === 'lobby' ? '✔ ' : '') + x.status + (x.pending ? ' ⬆' : '')),
+    l.hosting && !x.me && l.phase === 'lobby' ? mini('✕', () => ask(S('Send {0} out of your duel?', x.player), S('Send out'),
+      () => bgAct('bg_kick', { uid: x.uid }, true), 'danger'), '', S('Send {0} out of your duel', x.player)) : null));
   const lobbies = g.lobbies.map(x => h('div', { class: 'drowp lobby click' + (l && x.id === l.id ? ' me' : ''), tabindex: 0, role: 'button',
     onclick: () => { if (!l || x.id !== l.id) act('bg_watch', { room: x.id }, true); } },
     h('span', { class: 'mbadge ' + x.mode }, modeIcon(x.mode)), h('b', { class: 'n' }, (x.mine ? '★ ' : '') + x.name),
-    h('span', { class: 'dim small' }, `${phaseWord(x)} · ${x.n} 🤺 ${x.watching} 👁`),
+    h('span', { class: 'dim small' }, `${phaseWord(x)} · ${x.n} 🤺 ${x.watching} 👁` + (x.host ? ' · ' + S('run by {0}', x.host) : '')),
     !x.mine && x.mode !== 'replay' && x.phase === 'lobby' ? btn('⚔ ' + S('Join'), e => { e.stopPropagation(); return act('bg_join', { room: x.id }, true); }, 'sm', S('Join this lobby as a fighter')) : null));
   $('bgside').replaceChildren(...[
     l ? h('div', { class: 'title' }, S('Fighters ({0})', l.members.length), l.spectators.length ? h('span', { class: 'sup' }, ` · ${S('{0} watching', l.spectators.length)}`) : null) : null,
     ...(l ? (rows.length ? rows : [h('div', { class: 'dim small' }, S('Nobody has joined yet.'))]) : []),
     g.lobbies.length ? h('div', { class: 'title wgap' }, S('Lobbies ({0})', g.lobbies.length)) : null, ...lobbies,
+    g.can_create && g.lobbies.length ? h('div', { class: 'drow' }, btn('🤺 ' + S('Open a duel'), () => duelForm(null), 'sm',
+      S('Your own duel: players against each other. You set it up and start it.'))) : null,
     l ? bgLog(g, false) : null].filter(Boolean));
 }
 /** The lobby's battle log: actions and dice (no movement), coloured by kind, a marker when the round changes. */

@@ -5115,3 +5115,53 @@ Add a player: they get a Battlegrounds link of their own,Add a player: they get 
 "Run the lobbies: the Battle map in the middle shows the lobby picked in the Battlegrounds window on its right (lobbies, players, the opposition to check before confirming); the Inspector on its left steps aside when nothing is picked. Players (and their links), Audio and Library slide out from the side bars.","Run the lobbies: the Battle map in the middle shows the lobby picked in the Battlegrounds window on its right (lobbies, players, the opposition to check before confirming); the Inspector on its left steps aside when nothing is picked. Players (and their links), Audio and Library slide out from the side bars.",
 "Watch the fight: the Battle map fills the window with the Inspector beside it (it steps aside when nothing is picked); Battlegrounds, Players, Audio and Library slide out from the side bars.","Watch the fight: the Battle map fills the window with the Inspector beside it (it steps aside when nothing is picked); Battlegrounds, Players, Audio and Library slide out from the side bars.",
 Recorded in the campaign app: rename or delete it there,Recorded in the campaign app: rename or delete it there,
+"Can't be targeted now (banished, ethereal or sealed away)","Can't be targeted now (banished, ethereal or sealed away)","Şu an hedef alınamaz (sürgün, eterik ya da mühürlü)"
+Click: show it,Click: show it,Tıkla: göster
+{0} can't be targeted now,{0} can't be targeted now,{0} şu an hedef alınamaz
+End the fight,End the fight,Dövüşü bitir
+Back to the lobby,Back to the lobby,Lobiye dön
+"Everyone rested, back in the lobby for another round","Everyone rested, back in the lobby for another round","Herkes dinlenir, bir tur daha için lobiye dönülür"
+Ready - start the duel once everyone is,Ready - start the duel once everyone is,Hazır - herkes hazır olunca düelloyu başlat
+"Lobby - get ready, then start the duel","Lobby - get ready, then start the duel","Lobi - hazırlan, sonra düelloyu başlat"
+Ready - waiting for {0} to start the duel,Ready - waiting for {0} to start the duel,Hazır - {0} düelloyu başlatacak
+Lobby - waiting for {0} to start the duel,Lobby - waiting for {0} to start the duel,Lobi - {0} düelloyu başlatacak
+run by {0},run by {0},yöneten: {0}
+"No lobbies yet: open a duel of your own, or wait for the DM.","No lobbies yet: open a duel of your own, or wait for the DM.",Henüz lobi yok: kendi düellonu aç ya da DM'i bekle.
+Open a duel,Open a duel,Düello aç
+Your own duel: players against each other. You set it up and start it.,Your own duel: players against each other. You set it up and start it.,Kendi düellon: oyuncular birbirine karşı. Kurarsın ve başlatırsın.
+The duel is over - {0} takes everyone back to the lobby.,The duel is over - {0} takes everyone back to the lobby.,Düello bitti - {0} herkesi lobiye geri götürür.
+Tell the others you are ready: the duel starts once everyone is,Tell the others you are ready: the duel starts once everyone is,Diğerlerine hazır olduğunu söyle: herkes hazır olunca düello başlar
+Leave your duel? Your fighter is dropped; the next fighter runs it (nobody left: it closes).,Leave your duel? Your fighter is dropped; the next fighter runs it (nobody left: it closes).,Düellondan ayrılsın mı? Dövüşçün bırakılır; sıradaki dövüşçü yönetir (kimse kalmazsa kapanır).
+Duel settings,Duel settings,Düello ayarları
+Players against each other. You run it: you start the fight once everyone is ready.,Players against each other. You run it: you start the fight once everyone is ready.,Oyuncular birbirine karşı. Sen yönetirsin: herkes hazır olunca dövüşü başlatırsın.
+a name the others see,a name the others see,diğerlerinin göreceği bir ad
+Everyone picks their own level (up to the highest),Everyone picks their own level (up to the highest),Herkes kendi seviyesini seçer (en yükseğe kadar)
+A hero,A hero,Bir kahraman
+A monster,A monster,Bir canavar
+Others may watch,Others may watch,Başkaları izleyebilir
+Open the duel,Open the duel,Düelloyu aç
+End the fight now? Whoever is left standing wins (several teams: nobody).,End the fight now? Whoever is left standing wins (several teams: nobody).,Dövüş şimdi bitsin mi? Ayakta kalan kazanır (birden çok takım: kimse).
+End it,End it,Bitir
+Waiting for a second fighter.,Waiting for a second fighter.,İkinci bir dövüşçü bekleniyor.
+Waiting for everyone to be ready.,Waiting for everyone to be ready.,Herkesin hazır olması bekleniyor.
+Everyone is on the same team: someone has to pick another.,Everyone is on the same team: someone has to pick another.,Herkes aynı takımda: biri başka bir takım seçmeli.
+Everyone is placed and initiative is rolled: the fight begins,Everyone is placed and initiative is rolled: the fight begins,Herkes yerleşir ve inisiyatif atılır: dövüş başlar
+"The name, level, teams, fighters and map of your duel","The name, level, teams, fighters and map of your duel","Düellonun adı, seviyesi, takımları, dövüşçüleri ve haritası"
+Close {0}? Everyone in it is sent back.,Close {0}? Everyone in it is sent back.,{0} kapatılsın mı? İçindeki herkes geri gönderilir.
+Close your duel,Close your duel,Düellonu kapat
+You run this duel,You run this duel,Bu düelloyu sen yönetiyorsun
+Send {0} out of your duel?,Send {0} out of your duel?,{0} düellondan çıkarılsın mı?
+Send out,Send out,Çıkar
+Send {0} out of your duel,Send {0} out of your duel,{0} düellondan çıkar
+The DM opens the lobbies in this game.,The DM opens the lobbies in this game.,Bu oyunda lobileri DM açar.
+A different map each fight,A different map each fight,Her dövüşte farklı bir harita
+You play it (and what it summons); untick to give it back to the AI,You play it (and what it summons); untick to give it back to the AI,Onu (ve çağırdıklarını) sen oynarsın; yapay zekâya geri vermek için işareti kaldır
+Manual control (the AI doesn't play it),Manual control (the AI doesn't play it),Elle kontrol (yapay zekâ oynamaz)
+Played by,Played by,Oynayan
+Manual control,Manual control,Elle kontrol
+You play the selected creature (and what it summons): the AI leaves it alone. Before the battle or during it; untick to give it back to the AI.,You play the selected creature (and what it summons): the AI leaves it alone. Before the battle or during it; untick to give it back to the AI.,Seçili yaratığı (ve çağırdıklarını) sen oynarsın: yapay zekâ ona dokunmaz. Savaştan önce ya da savaş sırasında; yapay zekâya geri vermek için işareti kaldır.
+You,You,Sen
+AI,AI,YZ
+Players may open duels,Players may open duels,Oyuncular düello açabilir
+"Players can open a duel of their own from their page and run it (settings, start, end). Skirmishes and arenas stay yours. You can do everything in their duels too.","Players can open a duel of their own from their page and run it (settings, start, end). Skirmishes and arenas stay yours. You can do everything in their duels too.","Oyuncular kendi sayfalarından kendi düellolarını açıp yönetebilir (ayarlar, başlatma, bitirme). Çatışmalar ve arenalar sende kalır. Onların düellolarında da her şeyi yapabilirsin."
+{0} opened this duel and runs it (you can too).,{0} opened this duel and runs it (you can too).,Bu düelloyu {0} açtı ve yönetiyor (sen de yönetebilirsin).
