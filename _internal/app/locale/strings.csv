@@ -2699,7 +2699,7 @@ Cone of cold wind,Cone of cold wind,
 Put out the flames,Put out the flames,
 Dexterity check (DC 10): stop burning (Alchemist's Fire).,Dexterity check (DC 10): stop burning (Alchemist's Fire).,
 Player page,Player page,
-Pick a server on the toolbar to stream apps into its voice channel and to the player page.,Pick a server on the toolbar to stream apps into its voice channel and to the player page.,
+No Discord server chosen: the apps play on the player page only. Pick a server on the toolbar to stream them into its voice channel too.,No Discord server chosen: the apps play on the player page only. Pick a server on the toolbar to stream them into its voice channel too.,Discord sunucusu seçilmedi: uygulamalar yalnızca oyuncu sayfasında çalar. Ses kanalına da yayınlamak için araç çubuğundan bir sunucu seç.
 "Mix the loops and effects into the music players hear on the player page
 (they press Listen there and set their own volume).","Mix the loops and effects into the music players hear on the player page
 (they press Listen there and set their own volume).",
@@ -5165,3 +5165,7 @@ AI,AI,YZ
 Players may open duels,Players may open duels,Oyuncular düello açabilir
 "Players can open a duel of their own from their page and run it (settings, start, end). Skirmishes and arenas stay yours. You can do everything in their duels too.","Players can open a duel of their own from their page and run it (settings, start, end). Skirmishes and arenas stay yours. You can do everything in their duels too.","Oyuncular kendi sayfalarından kendi düellolarını açıp yönetebilir (ayarlar, başlatma, bitirme). Çatışmalar ve arenalar sende kalır. Onların düellolarında da her şeyi yapabilirsin."
 {0} opened this duel and runs it (you can too).,{0} opened this duel and runs it (you can too).,Bu düelloyu {0} açtı ve yönetiyor (sen de yönetebilirsin).
+"{0} on the map, initiative rolled.","{0} on the map, initiative rolled.","{0} haritada, inisiyatif atıldı."
+"{0} joined the battle, initiative rolled.","{0} joined the battle, initiative rolled.","{0} savaşa katıldı, inisiyatif atıldı."
+No free tile near there.,No free tile near there.,Oraya yakın boş kare yok.
+Nobody to bring.,Nobody to bring.,Getirilecek kimse yok.
