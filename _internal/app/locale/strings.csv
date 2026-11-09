@@ -5517,3 +5517,278 @@ Say the spell save DC (a list of utility spells may leave it out),Say the spell 
 """…'s innate spellcasting ability is…""","""…'s innate spellcasting ability is…""",
 """…casts one of the following spells…""","""…casts one of the following spells…""",
 Shows,Shows,
+Invulnerable,Invulnerable,
+Hard to wound,Hard to wound,
+Insubstantial,Insubstantial,
+Revealing light,Revealing light,
+Healing aura,Healing aura,
+Shielded from missiles,Shielded from missiles,
+Warded,Warded,
+Inspired,Inspired,
+Steeled,Steeled,
+Advantage on checks,Advantage on checks,
+Faster,Faster,
+Mighty blows,Mighty blows,
+Warding barrier,Warding barrier,
+Steady hand,Steady hand,
+Temporary hit points,Temporary hit points,
+"When you fail a Dexterity saving throw while wearing it, you can use your reaction to expend 1 of its charges to succeed on that saving throw instead","When you fail a Dexterity saving throw while wearing it, you can use your reaction to expend 1 of its charges to succeed on that saving throw instead",
+"When you take damage, you can use your reaction to become insubstantial for a moment, halving the damage you take","When you take damage, you can use your reaction to become insubstantial for a moment, halving the damage you take",
+"standard sentences: its DCs, damage and name follow the creature","standard sentences: its DCs, damage and name follow the creature",
+"a list of effects: each item's DCs, damage and name follow the creature","a list of effects: each item's DCs, damage and name follow the creature",
+"no ""0 ft.""","no ""0 ft.""",
+"Rebuild from standard sentences (its DCs, damage and name follow the creature)","Rebuild from standard sentences (its DCs, damage and name follow the creature)",
+"Rebuild as a list of effects (each item's DCs, damage and name follow the creature)","Rebuild as a list of effects (each item's DCs, damage and name follow the creature)",
+HP bonus,HP bonus,
+"A creature with no walking speed shows only its other speeds (""swim 40 ft."")","A creature with no walking speed shows only its other speeds (""swim 40 ft."")",
+e.g. that aren't silvered,e.g. that aren't silvered,
+New entry,New entry,
+Standard sentences,Standard sentences,
+New list of effects,New list of effects,
+List of effects,List of effects,
+Saves and skills from the ability scores and proficiency only,Saves and skills from the ability scores and proficiency only,
+Passive Perception bonus,Passive Perception bonus,
+Darkvision note,Darkvision note,
++ Sentences…,+ Sentences…,
++ List…,+ List…,
+A hit die off its size's (a Medium creature with d6s),A hit die off its size's (a Medium creature with d6s),
+e.g. unimpeded by magical darkness,e.g. unimpeded by magical darkness,
+"Saves and skills as printed, off the proficiency: {0}","Saves and skills as printed, off the proficiency: {0}",
+"Anything else, made of standard sentences (""…magically teleports up to # feet…"", ""…regains # hit points…""): its DCs, damage and name follow the creature","Anything else, made of standard sentences (""…magically teleports up to # feet…"", ""…regains # hit points…""): its DCs, damage and name follow the creature",
+"An intro and a list of effects (eye rays, breath weapons, a d6 table), each item a saving throw, standard sentences or an attack that follows the creature","An intro and a list of effects (eye rays, breath weapons, a d6 table), each item a saving throw, standard sentences or an attack that follows the creature",
+by size,by size,
+{0}: e.g. (40 ft. in wolf form),{0}: e.g. (40 ft. in wolf form),
+"A ray, a breath: a saving throw whose DC and damage follow the creature","A ray, a breath: a saving throw whose DC and damage follow the creature",
+An effect made of standard sentences,An effect made of standard sentences,
+"An attack roll (""Ranged Spell Attack: …"")","An attack roll (""Ranged Spell Attack: …"")",
+Name.,Name.,
+Name:,Name:,
+Add a sentence,Add a sentence,
+list item name,list item name,
+1–2,1–2,
+e.g. Fire Breath,e.g. Fire Breath,
+Intro sentences,Intro sentences,
+e.g. while enlarged,e.g. while enlarged,
+no damage: the rider says what a hit does,no damage: the rider says what a hit does,
+"search… (teleports, regains, frightened)","search… (teleports, regains, frightened)",
+"""The creature"" is written as its name, # are numbers you choose, … words you type; a DC follows an ability score and the CR, damage dice follow the CR.","""The creature"" is written as its name, # are numbers you choose, … words you type; a DC follows an ability score and the CR, damage dice follow the CR.",
+"The entry is made of standard sentences, each with its own numbers: a DC follows an ability score and the CR, damage dice follow the CR, the creature's name and pronoun follow a rename.","The entry is made of standard sentences, each with its own numbers: a DC follows an ability score and the CR, damage dice follow the CR, the creature's name and pronoun follow a rename.",
+"A list item's name before the sentence (""Fire Breath"")","A list item's name before the sentence (""Fire Breath"")",
+A bullet before it,A bullet before it,
+List item,List item,
+e.g. fabricate,e.g. fabricate,
+a ring of protection; a wand of web,a ring of protection; a wand of web,
+Add at least one sentence.,Add at least one sentence.,
+"An intro of standard sentences (""…uses one of the following breath weapons:""), then items, each made by a builder: a saving throw, standard sentences or an attack. Their DCs, damage and the creature's name follow it.","An intro of standard sentences (""…uses one of the following breath weapons:""), then items, each made by a builder: a saving throw, standard sentences or an attack. Their DCs, damage and the creature's name follow it.",
+"A number or a range of a table (""3"", ""1–2""); empty: none","A number or a range of a table (""3"", ""1–2""); empty: none",
+Item: saving throw,Item: saving throw,
+(none),(none),
+Add at least one item.,Add at least one item.,
+"More dice in melee than at range (""… in melee or … at range""); 0 = the same","More dice in melee than at range (""… in melee or … at range""); 0 = the same",
+Other damage at times,Other damage at times,
+Extra dice in melee,Extra dice in melee,
++ Sentence…,+ Sentence…,
+"No sentences yet: press ""+ Sentence…"".","No sentences yet: press ""+ Sentence…"".",
+Starts,Starts,
+Added to 8 + proficiency + the ability's modifier,Added to 8 + proficiency + the ability's modifier,
+Intro,Intro,
+Intro sentences…,Intro sentences…,
+"No items yet: add a saving throw, sentences or an attack.","No items yet: add a saving throw, sentences or an attack.",
+saving throw,saving throw,
+sentences,sentences,
+attack,attack,
+Number,Number,
+Item: attack,Item: attack,
+Item: sentences,Item: sentences,
+twice the dice,twice the dice,
+half the dice,half the dice,
+another die (as printed),another die (as printed),
+"the dice, besides fixed damage","the dice, besides fixed damage",
+Added to the dice,Added to the dice,
+"joined: ""{0}…""","joined: ""{0}…""",
+"""knows""","""knows""",
+A warlock's pact slots: every spell on one line of slots of this level (0 = none),A warlock's pact slots: every spell on one line of slots of this level (0 = none),
+How many pact slots,How many pact slots,
+"""knows the following spells"" instead of ""has the following spells prepared""","""knows the following spells"" instead of ""has the following spells prepared""",
+"""…casts Counterspell in response to the spell's trigger…""","""…casts Counterspell in response to the spell's trigger…""",
+table,table,
+"Pact slots (level, count)","Pact slots (level, count)",
+Slots as printed (table: the full caster's; 0: no count shown),Slots as printed (table: the full caster's; 0: no count shown),
+at will,at will,
+slots,slots,
+"Cast at will besides the slots (""can cast disguise self at will and has…"")","Cast at will besides the slots (""can cast disguise self at will and has…"")",
+"Not word for word: the builder writes it in its own words, and it plays the same in a fight (a sentence of mere description is left out)","Not word for word: the builder writes it in its own words, and it plays the same in a fight (a sentence of mere description is left out)",
+e.g. radiant,e.g. radiant,
+"""at the start of each of its turns""","""at the start of each of its turns""",
+Unless the damage is,Unless the damage is,
+dies,dies,
+is destroyed,is destroyed,
+"""…, provided it isn't incapacitated""","""…, provided it isn't incapacitated""",
+Advanced,Advanced,Gelişmiş
+Show every setting (the rarely needed ones too). Each block's ⋯ shows its own.,Show every setting (the rarely needed ones too). Each block's ⋯ shows its own.,Her ayarı göster (seyrek gerekenleri de). Her bloğun ⋯ düğmesi kendi ayarlarını gösterir.
+"Each property sets what the sheet and the battle use, and writes its sentence","Each property sets what the sheet and the battle use, and writes its sentence","Her özellik, sayfanın ve savaşın kullandığını ayarlar ve kendi cümlesini yazar"
+"Each property sets what the sheet and the battle use, and writes its sentence (on hover)","Each property sets what the sheet and the battle use, and writes its sentence (on hover)","Her özellik, sayfanın ve savaşın kullandığını ayarlar ve kendi cümlesini yazar (üzerine gelince)"
+"Every kind with how the books' magic items use it: how many, the common values, examples","Every kind with how the books' magic items use it: how many, the common values, examples","Kitapların büyülü eşyalarının her türü nasıl kullandığıyla: kaç tane, sık değerler, örnekler"
+Browse every property…,Browse every property…,Tüm özelliklere göz at…
+Already told by the description: it only sets the numbers. Add its sentence to the item's text too,Already told by the description: it only sets the numbers. Add its sentence to the item's text too,Açıklamada zaten anlatılıyor: yalnızca sayıları ayarlar. Cümlesini eşyanın metnine de ekle
+"nothing yet: +1 to a score, a resistance, a spell once a day, darkvision...","nothing yet: +1 to a score, a resistance, a spell once a day, darkvision...","henüz bir şey yok: bir puana +1, bir direnç, günde bir kez bir büyü, karanlık görüş..."
+"A power of another item, merged by wording","A power of another item, merged by wording","Başka bir eşyanın gücü, ifadesine göre birleştirilmiş"
+"Price, weight & attunement","Price, weight & attunement","Fiyat, ağırlık ve bağlanma"
+How often it can be used (written after its name),How often it can be used (written after its name),Ne sıklıkla kullanılabileceği (adından sonra yazılır)
+using,using,kullanarak
+damage,damage,hasar
+reach,reach,erişim
+ft.,ft.,ft.
+range,range,menzil
+plus,plus,artı
+then,then,sonra
+magic +,magic +,büyü +
+damage +,damage +,hasar +
+DC +,DC +,ZS +
+fixed damage,fixed damage,sabit hasar
+two-handed,two-handed,iki elle
+target,target,hedef
+at times,at times,bazen
+more dice in melee,more dice in melee,yakın dövüşte fazladan zar
+wide,wide,genişlik
+within,within,şu mesafede
+"save, DC from","save, DC from","kurtarma, ZS kaynağı"
+success:,success:,başarı:
+failure:,failure:,başarısızlık:
+it,it,o
+calls it,calls it,ona şöyle der
+relies on,relies on,dayandığı duyu
+regains,regains,geri kazanır
+hit points,hit points,can puanı
+unless hurt by,unless hurt by,şunun hasarıyla durur
+doesn't require,doesn't require,ihtiyaç duymaz
+AC + proficiency +,AC + proficiency +,ZS + yeterlilik +
+looks like,looks like,şuna benzer
+for,for,süre
+jumps,jumps,zıplar
+"ft. long,","ft. long,","ft. uzun,"
+ft. high,ft. high,ft. yüksek
+unless the damage is,unless the damage is,hasar şu değilse
+Its name: pick one or type your own,Its name: pick one or type your own,Adı: birini seç ya da kendin yaz
+What kind of attack,What kind of attack,Saldırı türü
+To hit and damage follow this ability score,To hit and damage follow this ability score,İsabet ve hasar bu yetenek puanını izler
++ modifier,+ modifier,+ değiştirici
+Add the ability modifier to damage,Add the ability modifier to damage,Yetenek değiştiricisini hasara ekle
+No damage: the rider says what a hit does,No damage: the rider says what a hit does,Hasar yok: isabetin ne yaptığını ek cümle söyler
+comma rider,comma rider,virgüllü ek
+Capitalized,Capitalized,Büyük harfli
+"Capitalized damage types (""Piercing damage"")","Capitalized damage types (""Piercing damage"")","Büyük harfli hasar türleri (""Piercing damage"")"
+"The saving throw, and the ability its DC (8 + proficiency + modifier) follows","The saving throw, and the ability its DC (8 + proficiency + modifier) follows",Kurtarma zarı ve ZS'sinin izlediği yetenek (8 + yeterlilik + değiştirici)
+"What it does, before the area (""exhales fire in a 60-foot cone"")","What it does, before the area (""exhales fire in a 60-foot cone"")","Alandan önce ne yaptığı (""60 fitlik koni içinde ateş solur"")"
+How the text calls the creature,How the text calls the creature,Metnin yaratıktan nasıl söz ettiği
+Add the ability modifier to the damage,Add the ability modifier to the damage,Yetenek değiştiricisini hasara ekle
+saves again each turn,saves again each turn,her tur yeniden kurtarma
+Saves again at the end of each of its turns,Saves again at the end of each of its turns,Her turunun sonunda yeniden kurtarma zarı atar
+Which standard trait,Which standard trait,Hangi standart özellik
+"""an opportunity attack""","""an opportunity attack""","""bir fırsat saldırısı"""
+"Instead of ""opportunity attacks""","Instead of ""opportunity attacks""","""fırsat saldırıları"" yerine"
+unless incapacitated,unless incapacitated,etkisiz değilse
+only at 1+ HP,only at 1+ HP,yalnızca 1+ CP'deyken
+"""If it takes…""","""If it takes…""","""Eğer … alırsa"""
+dies only at 0 HP on its turn,dies only at 0 HP on its turn,yalnızca kendi turunda 0 CP'deyse ölür
+a pronoun after its name,a pronoun after its name,adından sonra bir zamir
+"""magic can't put him to sleep""","""magic can't put him to sleep""","""büyü onu uyutamaz"""
+without provoking,without provoking,fırsat saldırısına yol açmadan
+Without provoking opportunity attacks,Without provoking opportunity attacks,Fırsat saldırılarına yol açmadan
+no extra,no extra,ek yok
+Extra damage dice of another type (a dragon's fire),Extra damage dice of another type (a dragon's fire),Başka türde fazladan hasar zarları (bir ejderhanın ateşi)
+what a hit also does,what a hit also does,isabetin ayrıca ne yaptığı
+Added to the damage only,Added to the damage only,Yalnızca hasara eklenir
+dice,dice,zar
+"A set amount instead of dice (""Hit: 1 piercing damage"")","A set amount instead of dice (""Hit: 1 piercing damage"")","Zar yerine sabit bir miktar (""Hit: 1 piercing damage"")"
+Its die when used with two hands,Its die when used with two hands,İki elle kullanıldığındaki zarı
+same,same,aynı
+"""… in melee or … at range""","""… in melee or … at range""","""… yakın dövüşte ya da … menzilde"""
+no dice,no dice,zar yok
+what else happens,what else happens,başka ne olduğu
+action,action,eylem
+After the damage; {dc} is this attack's save DC,After the damage; {dc} is this attack's save DC,Hasardan sonra; {dc} bu saldırının kurtarma ZS'sidir
+"May say DC {dc}, and {dmg} for the damage","May say DC {dc}, and {dmg} for the damage",DC {dc} ve hasar için {dmg} diyebilir
+"The action it uses (""Bite or Tail"" for a choice)","The action it uses (""Bite or Tail"" for a choice)","Kullandığı eylem (seçenek için ""Bite or Tail"")"
+Standard trait,Standard trait,Standart özellik
+Text written by hand,Text written by hand,Elle yazılmış metin
+alignment,alignment,yönelim
+Add to {0},Add to {0},{0} bölümüne ekle
+"Give the creature an item, a feat or a class feature","Give the creature an item, a feat or a class feature","Yaratığa bir eşya, bir özellik (feat) ya da bir sınıf özelliği ver"
+Turn every printed entry a builder writes word for word into blocks that follow the creature's stats,Turn every printed entry a builder writes word for word into blocks that follow the creature's stats,"Bir yapıcının kelimesi kelimesine yazdığı her basılı girdiyi, yaratığın değerlerini izleyen bloklara dönüştür"
+Unfold every section,Unfold every section,Her bölümü aç
+Fold every section,Fold every section,Her bölümü kapat
+= {0} HP,= {0} HP,= {0} CP
+"Challenge rating: attacks, DCs and damage are rescaled","Challenge rating: attacks, DCs and damage are rescaled","Zorluk derecesi: saldırılar, ZS'ler ve hasar yeniden ölçeklenir"
+Creature type,Creature type,Yaratık türü
+"Armor class, and what makes it","Armor class, and what makes it",Zırh sınıfı ve onu sağlayan şey
+Fit HP to CR: hit dice that give the typical HP of this CR (from the printed monsters),Fit HP to CR: hit dice that give the typical HP of this CR (from the printed monsters),CP'yi ZD'ye uydur: bu ZD'nin tipik CP'sini veren can zarları (basılı canavarlardan)
+Hit dice (the die follows the size),Hit dice (the die follows the size),Can zarları (zar boyuta göre)
+Proficient skills,Proficient skills,Yeterli olduğu beceriler
+Expertise: double proficiency,Expertise: double proficiency,Uzmanlık: iki kat yeterlilik
+Resistant,Resistant,Dirençli
+Immune,Immune,Bağışık
+Vulnerable,Vulnerable,Savunmasız
+Can't be,Can't be,Şu olamaz
+"Every trait and action of the bestiary, merged by name. Its bonuses, DCs, damage and name are made for this creature.","Every trait and action of the bestiary, merged by name. Its bonuses, DCs, damage and name are made for this creature.","Bestiyerdeki her özellik ve eylem, adına göre birleştirilmiş. Bonusları, ZS'leri, hasarı ve adı bu yaratık için yapılır."
+"Anything else, made of standard sentences: its DCs, damage and name follow the creature","Anything else, made of standard sentences: its DCs, damage and name follow the creature","Başka her şey, standart cümlelerden: ZS'leri, hasarı ve adı yaratığı izler"
+"An intro and a list of effects (eye rays, breath weapons, a d6 table)","An intro and a list of effects (eye rays, breath weapons, a d6 table)","Bir giriş ve bir etkiler listesi (göz ışınları, nefes silahları, bir d6 tablosu)"
+More,More,Daha fazla
+(no name),(no name),(adsız)
+"Alternatives, trades…","Alternatives, trades…","Seçenekler, takaslar…"
+{0} entries now follow the creature's stats.,{0} entries now follow the creature's stats.,{0} girdi artık yaratığın değerlerini izliyor.
+Nothing more to turn into blocks.,Nothing more to turn into blocks.,Bloklara dönüştürülecek başka bir şey yok.
+speed,speed,hız
+Add a speed,Add a speed,Bir hız ekle
+Speeds,Speeds,Hızlar
+Damage immunities,Damage immunities,Hasar bağışıklıkları
+Damage vulnerabilities,Damage vulnerabilities,Hasar savunmasızlıkları
+Nonmagical,Nonmagical,Büyülü olmayan
+A saving throw whose DC and damage follow the ability scores and CR,A saving throw whose DC and damage follow the ability scores and CR,ZS'si ve hasarı yetenek puanlarını ve ZD'yi izleyen bir kurtarma zarı
+"""The dragon makes a tail attack."": the battle page plays the action it names","""The dragon makes a tail attack."": the battle page plays the action it names","""Ejderha bir kuyruk saldırısı yapar."": savaş sayfası adı geçen eylemi oynar"
+A standard trait in the books' words: it follows the creature's name,A standard trait in the books' words: it follows the creature's name,Kitapların ifadesiyle standart bir özellik: yaratığın adını izler
+From the bestiary…,From the bestiary…,Bestiyerden…
+Standard sentences…,Standard sentences…,Standart cümleler…
+List of effects…,List of effects…,Etkiler listesi…
+Another attack,Another attack,Başka bir saldırı
+"""…, or it makes two Longbow attacks"", ""It can replace one attack with…""","""…, or it makes two Longbow attacks"", ""It can replace one attack with…""","""…, ya da iki Longbow saldırısı yapar"", ""Bir saldırının yerine … kullanabilir"""
+Edit as text by hand (the spell list stops following the stats),Edit as text by hand (the spell list stops following the stats),Elle metin olarak düzenle (büyü listesi değerleri izlemeyi bırakır)
+Ability scores & skills,Ability scores & skills,Yetenek puanları ve beceriler
+Resistances & immunities,Resistances & immunities,Dirençler ve bağışıklıklar
+"Items, feats & class features","Items, feats & class features","Eşyalar, özellikler ve sınıf özellikleri"
+Environments,Environments,Ortamlar
+Spellcasting (slots)…,Spellcasting (slots)…,Büyü kullanımı (yuvalar)…
+Innate spellcasting…,Innate spellcasting…,Doğuştan büyü kullanımı…
+"Saving throw (breath, aura, gaze)","Saving throw (breath, aura, gaze)","Kurtarma zarı (nefes, aura, bakış)"
+Multiattack…,Multiattack…,Çoklu saldırı…
+Uses an action,Uses an action,Bir eylem kullanır
+Edit as text by hand,Edit as text by hand,Elle metin olarak düzenle
+Open in a window…,Open in a window…,Bir pencerede aç…
+Item…,Item…,Eşya…
+Feat…,Feat…,Özellik (feat)…
+Class feature…,Class feature…,Sınıf özelliği…
+as,as,olarak
+"What it has, and what that gives it: a weapon becomes an attack, armor and a shield its armor class...","What it has, and what that gives it: a weapon becomes an attack, armor and a shield its armor class...","Neye sahip olduğu ve bunun ona ne verdiği: bir silah saldırı olur, zırh ve kalkan zırh sınıfını belirler..."
+Shown after the type,Shown after the type,Türden sonra gösterilir
+HP +,HP +,CP +
+set HP,set HP,CP'yi ayarla
+passive Perception +,passive Perception +,pasif Algı +
+blindsight note,blindsight note,kör görüş notu
+darkvision note,darkvision note,karanlık görüş notu
+none yet,none yet,henüz yok
+Its choices then show right here,Its choices then show right here,Seçenekleri o zaman burada görünür
+nothing yet,nothing yet,henüz bir şey yok
+{0} entries,{0} entries,{0} girdi
+Its class level (auto: from the CR),Its class level (auto: from the CR),Sınıf seviyesi (otomatik: ZD'den)
+from dice,from dice,zarlardan
+{0} note,{0} note,{0} notu
+printed bonuses,printed bonuses,basılı bonuslar
+e.g. (40 ft. in wolf form),e.g. (40 ft. in wolf form),ör. (kurt biçiminde 40 ft.)
+More settings,More settings,Daha fazla ayar
+"Type an exact value, then Enter","Type an exact value, then Enter","Tam bir değer yaz, sonra Enter"
+Fold or unfold,Fold or unfold,Aç ya da kapat
+Click for values; ‹ › step it,Click for values; ‹ › step it,Değerler için tıkla; ‹ › adım adım değiştirir
+"search, or type a new one…","search, or type a new one…",ara ya da yenisini yaz…
+Add “{0}”,Add “{0}”,“{0}” ekle
+Click to remove,Click to remove,Kaldırmak için tıkla
+exact,exact,tam
