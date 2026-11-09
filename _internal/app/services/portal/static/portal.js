@@ -3119,16 +3119,67 @@ function aimCount(a) {
   return (t.count || 1) + (t.per_level || 0) * Math.max(0, slot - (t.base_level != null ? t.base_level : lvl));
 }
 function aimArea(a) { return a.item.area || (a.item.target || {}).area || null; }
-function startAim(item) {
+/** Throw / Use an Object: options that carry what the inventory picker shows (an older battle's are plain labels). */
+const richOptions = opts => !!(opts && opts.length && opts.every(o => 'group' in o));
+const PICK_GROUPS = { pack: 'In your pack', ground: 'On the ground within reach', prop: 'Within reach' };
+const PICK_COSTS = { action: 'Action', bonus: 'Bonus action', attack: 'One attack', object: 'Free object use' };
+/** The inventory picker of Throw and Use an Object: each thing with its picture and what it does - to hit, damage
+ *  (its average) and range for a throw; the effect and the action it takes for a use - and how long a goodberry lasts. */
+function pickInventory(item, opts, done) {
+  const throwing = item.kind === 'throw';
+  let order = 'pack', needle = '';
+  const list = h('div', { class: 'invpick', role: 'listbox', 'aria-label': throwing ? S('Throw what?') : S('Use what?') });
+  const num = x => Number.isInteger(x) ? String(x) : x.toFixed(1);
+  const row = o => {
+    const bits = [];
+    if (throwing) {
+      if (o.hit != null) bits.push(h('span', { class: 'acc' }, S('{0} to hit', (o.hit >= 0 ? '+' : '') + o.hit)));
+      if (o.dmg) bits.push(h('span', null, h('span', { class: 'warn' }, o.dmg), o.avg != null ? h('span', { class: 'dim' }, ` (${S('avg {0}', num(o.avg))})`) : null));
+      if (o.range) bits.push(h('span', null, o.range));
+      if (o.cost === 'action') bits.push(h('span', { class: 'dim' }, S('takes the action')));
+    } else if (o.effect) bits.push(h('span', { class: 'good' }, S(o.effect)));
+    if (o.expires) bits.push(h('span', { class: 'warn' }, '⏳ ' + o.expires));
+    const sep = []; bits.forEach((b, i) => { if (i) sep.push(h('span', { class: 'dim' }, ' · ')); sep.push(b); });
+    const chip = throwing ? S((o.kind || 'improvised').charAt(0).toUpperCase() + (o.kind || 'improvised').slice(1)) : S(PICK_COSTS[o.cost] || 'Action');
+    return h('button', { class: 'ipr', role: 'option', onclick: () => { detailGone = null; closeDetail(); done(o.value); } },
+      h('img', { class: 'ipi', alt: '', src: o.prop ? `/prop/${o.prop}.webp` : `/itemsprite/${o.sprite || 'sack'}.png` }),
+      h('span', { class: 'ipt' },
+        h('span', { class: 'ipn' }, h('b', null, o.name || o.label), o.qty > 1 ? h('span', { class: 'dim' }, ` ×${o.qty}`) : null,
+          h('span', { class: 'chip' + (o.kind === 'thrown weapon' || o.cost === 'bonus' ? ' on' : '') }, chip)),
+        h('span', { class: 'ips small' }, ...sep)));
+  };
+  const draw = () => {
+    let rows = opts.filter(o => !needle || `${o.name || ''} ${o.label || ''}`.toLowerCase().includes(needle));
+    if (order === 'damage') rows = [...rows].sort((a, b) => (b.avg || 0) - (a.avg || 0));
+    if (order === 'hit') rows = [...rows].sort((a, b) => (b.hit != null ? b.hit : -99) - (a.hit != null ? a.hit : -99));
+    const groups = order === 'pack' ? Object.keys(PICK_GROUPS).filter(g => rows.some(o => o.group === g)) : [null];
+    const kids = [];
+    for (const g of groups) {
+      if (g && (groups.length > 1 || g !== 'pack')) kids.push(h('div', { class: 'title' }, S(PICK_GROUPS[g])));
+      kids.push(...(g ? rows.filter(o => o.group === g) : rows).map(row));
+    }
+    list.replaceChildren(...(kids.length ? kids : [h('div', { class: 'dim' }, S('Nothing matches.'))]));
+  };
+  draw();
+  detail(() => h('div', { class: 'invwrap' },
+    h('b', null, throwing ? S('Throw what?') : S('Use what?')),
+    h('div', { class: 'qrow' },
+      opts.length > 6 ? h('input', { type: 'search', placeholder: S('search…'), 'aria-label': S('Search'), oninput: e => { needle = e.target.value.trim().toLowerCase(); draw(); } }) : null,
+      throwing ? h('select', { 'aria-label': S('Order'), onchange: e => { order = e.target.value; draw(); } },
+        h('option', { value: 'pack' }, S('Pack order')), h('option', { value: 'damage' }, S('Most damage')), h('option', { value: 'hit' }, S('Best to hit'))) : null),
+    list));
+}
+function startAim(item, chosen) {
   if (!item.ok) { say(item.why || S('Not now'), true); return; }
+  if (chosen == null && richOptions(item.options)) return pickInventory(item, item.options, v => startAim(item, v));   // Throw / Use: pick it first
   const t = item.target || { type: 'none' };
   UI.move = null;
   if (touch()) { UI.hover = null; UI.hoverKey = null; }      // no hover on touch: the area shows from the first tap
   const free = item.kind === 'spell' && item.level ? slotLevels(item.level) : [];    // the lowest slot that is left
   UI.aim = { item, targets: [], point: null, slot: item.level ? String(free.length ? free[0] : item.level) : '', dtype: (item.types || [])[0] || '',
-    option: item.options && item.options.length ? item.options[0].value : '', options: item.options || [], metamagic: '' };
+    option: chosen != null ? chosen : item.options && item.options.length ? item.options[0].value : '', options: item.options || [], metamagic: '' };
   if (t.type === 'fixed' || item.readied) { if (t.type === 'fixed') UI.aim.targets = [t.id]; return commitAim(); }   // a readied smite: one click lets it go
-  if (!aimNeedsClick(UI.aim) && item.kind !== 'spell' && !(item.types || []).length && !UI.aim.options.length) return commitAim();   // Dash, Dodge...: at once
+  if (!aimNeedsClick(UI.aim) && item.kind !== 'spell' && !(item.types || []).length && (!UI.aim.options.length || chosen != null)) return commitAim();   // Dash, Dodge, a potion picked...: at once
   const tgt = UI.target && ['creature', 'split'].includes(t.type) && ST.battle.combatants.find(c => c.id === UI.target), me = meInBattle();
   if (tgt && tgt.pos && !(me && me.pos && item.range != null && Geo.dist(me, tgt) > Math.max(5, item.range)))      // your target, in reach:
     UI.aim.pending = { key: tgt.pos.join(','), p: [tgt.pos[0] + .5, tgt.pos[1] + .5], token: tgt };                // one click (or Enter) on
@@ -3238,7 +3289,11 @@ function renderAimbar() {
   }
   if ((a.item.types || []).length) kids.push(h('select', { onchange: e => { a.dtype = e.target.value; } },
     ...a.item.types.map(x => h('option', { value: x, selected: x === a.dtype }, S(x.charAt(0).toUpperCase() + x.slice(1))))));
-  if (a.options.length) kids.push(h('select', { onchange: e => { a.option = e.target.value; } },
+  if (richOptions(a.options)) {                              // Throw: what was picked; a tap picks again
+    const o = a.options.find(x => x.value === a.option) || a.options[0];
+    kids.push(btn('🎒 ' + (o.name || o.label) + (o.dmg ? ` (${o.dmg})` : o.effect ? ` (${S(o.effect)})` : ''),
+      () => pickInventory(a.item, a.options, v => { if (UI.aim === a) { a.option = v; renderAimbar(); } }), 'sm', S('Pick something else')));
+  } else if (a.options.length) kids.push(h('select', { onchange: e => { a.option = e.target.value; } },
     ...a.options.map(o => h('option', { value: o.value, selected: o.value === a.option }, o.label))));
   if ((a.item.metamagic || []).length) kids.push(h('select', { onchange: e => { a.metamagic = e.target.value; }, tip: S('Metamagic (sorcery points)') },
     h('option', { value: '' }, S('No Metamagic')),
@@ -3867,7 +3922,8 @@ function itemCard(it, from, menu, ...extras) {
       setTimeout(() => { if (UI.dragging) document.body.classList.add('dragging', 'drag-' + from); });
     } },
     it.icon ? gi(it.icon, 'sm ii') : null, h('span', { class: 'n' }, it.label), it.note ? h('span', { class: 'nt', 'aria-hidden': 'true' }, '📝') : null,
-    it.qty > 1 ? h('span', { class: 'q' }, '×' + it.qty) : null, ...extras);
+    it.qty > 1 ? h('span', { class: 'q' }, '×' + it.qty) : null,
+    it.expires ? h('span', { class: 'q warn', tip: S('Made by a spell: it runs out with time (rests, rounds, days on the road)') }, '⏳ ' + it.expires) : null, ...extras);
 }
 /** An item's name, count and description in the detail sheet (a new entry, or an item changed): save({item, amount, note}). */
 function itemForm(title, init, save, verb) {

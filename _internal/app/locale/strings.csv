@@ -473,7 +473,7 @@ Core rules,Core rules,Temel kurallar
 Supplements,Supplements,Ek kitaplar
 Settings,Settings,Mekânlar
 Other,Other,Diğer
-"Only the ticked books are offered: in character creation and level-up, and in the monster and item searches. Characters keep everything they already have.","Only the ticked books are offered: in character creation and level-up, and in the monster and item searches. Characters keep everything they already have.","Yalnızca işaretli kitaplar sunulur: karakter yaratma ve seviye atlamada, ayrıca canavar ve eşya aramalarında. Karakterler sahip olduklarını korur."
+"Only the ticked books are offered: in character creation and level-up, and in the monster and item searches. Characters keep everything they already have. The box before a category ticks or unticks all its books.","Only the ticked books are offered: in character creation and level-up, and in the monster and item searches. Characters keep everything they already have. The box before a category ticks or unticks all its books.","Yalnızca işaretli kitaplar sunulur: karakter yaratma ve seviye atlamada, ayrıca canavar ve eşya aramalarında. Karakterler sahip olduklarını korur. Bir kategorinin önündeki kutu, o kategorinin tüm kitaplarını işaretler ya da işareti kaldırır."
 Core rules only,Core rules only,Yalnız temel kurallar
 Select all,Select all,Tümünü seç
 No adventures,No adventures,Maceralar hariç
@@ -5012,7 +5012,7 @@ Free-for-all: every member on a team of their own,Free-for-all: every member on 
 "Seconds between an AI creature's steps, so players can follow","Seconds between an AI creature's steps, so players can follow",
 Its team,Its team,
 AI pace,AI pace,
-Generation draws from the books ticked here (all ticked: every book ticked in Settings ▸ Sourcebooks).,Generation draws from the books ticked here (all ticked: every book ticked in Settings ▸ Sourcebooks).,
+Generation draws from the books ticked here (all ticked: every book ticked in Settings ▸ Sourcebooks). A category's box ticks or unticks all its books.,Generation draws from the books ticked here (all ticked: every book ticked in Settings ▸ Sourcebooks). A category's box ticks or unticks all its books.,"Oluşturma, burada işaretli kitaplardan yararlanır (hepsi işaretliyse: Ayarlar ▸ Kaynak kitaplar'da işaretli her kitap). Bir kategorinin kutusu, tüm kitaplarını işaretler ya da işareti kaldırır."
 Arena: a trophy into the stash after each win,Arena: a trophy into the stash after each win,
 Anyone may watch,Anyone may watch,
 The points of a point-buy hero (27 in the rules),The points of a point-buy hero (27 in the rules),
@@ -5180,40 +5180,7 @@ Name already used,Name already used,
 Save as copy,Save as copy,
 Overwrite,Overwrite,
 "You already have '{0}'. Overwrite it, or save this as a copy?","You already have '{0}'. Overwrite it, or save this as a copy?",
-"Play the loops and effects on this computer's speakers.
-Turn it off when you are in the voice channel too, or you hear them twice.","Play the loops and effects on this computer's speakers.
-Turn it off when you are in the voice channel too, or you hear them twice.",
-"Mix the loops and effects into the music players hear on the player page
-(they press Listen there and set their own volume).","Mix the loops and effects into the music players hear on the player page
-(they press Listen there and set their own volume).",
-"Delay
-Holds the whole stream back by this many milliseconds. Useful for testing or lining the audio up with a video.","Delay
-Holds the whole stream back by this many milliseconds. Useful for testing or lining the audio up with a video.",
-"{0}
-From freesound.org: {1} (CC0)","{0}
-From freesound.org: {1} (CC0)",
 Replace the saved encounter '{0}'?,Replace the saved encounter '{0}'?,
-"{0}
-Added by hand (not on Discord): send them their portal link yourself.","{0}
-Added by hand (not on Discord): send them their portal link yourself.",
-"{0}
-Discord ID {1}","{0}
-Discord ID {1}",
-"Bot token
-Saved on this computer; the bot starts by itself when the app opens.","Bot token
-Saved on this computer; the bot starts by itself when the app opens.",
-"Log channel
-Rolls, XP and the battle log are posted here.","Log channel
-Rolls, XP and the battle log are posted here.",
-"Log to a thread or voice channel chat
-When set, log messages go here instead of the log channel.","Log to a thread or voice channel chat
-When set, log messages go here instead of the log channel.",
-"{0}
-{1}","{0}
-{1}",
-"Void
-Nothing is sent to Discord.","Void
-Nothing is sent to Discord.",
 Feature catalog,Feature catalog,
 Wordings,Wordings,
 "{0} · on {1} creatures, {2}","{0} · on {1} creatures, {2}",
@@ -5305,19 +5272,6 @@ the creature,the creature,
 "An alternative: ""…, or it makes two Longbow attacks""","An alternative: ""…, or it makes two Longbow attacks""",
 Remove this option,Remove this option,
 uses,uses,
-"The apps streamed from the Audio window (and its loops and effects, if Player page is ticked there).
-Each player presses Listen on the page and sets their own volume.","The apps streamed from the Audio window (and its loops and effects, if Player page is ticked there).
-Each player presses Listen on the page and sets their own volume.",
-"Dungeonomicon Battlegrounds - duels, skirmishes and arena runs for D&D 5e, apart from any campaign: you open lobbies, the players join them from their own Battlegrounds link and fight.
-
-Open windows from the Window menu and drag their tabs to dock them anywhere: beside another window, as a tab, floating, or pinned to a side bar. Save arrangements under Layout.","Dungeonomicon Battlegrounds - duels, skirmishes and arena runs for D&D 5e, apart from any campaign: you open lobbies, the players join them from their own Battlegrounds link and fight.
-
-Open windows from the Window menu and drag their tabs to dock them anywhere: beside another window, as a tab, floating, or pinned to a side bar. Save arrangements under Layout.",
-"Dungeonomicon - an all-in-one Dungeon Master helper for D&D 5e with Discord bot support.
-
-Open windows from the Window menu and drag their tabs to dock them anywhere: beside another window, as a tab, floating, or pinned to a side bar. Save arrangements under Layout.","Dungeonomicon - an all-in-one Dungeon Master helper for D&D 5e with Discord bot support.
-
-Open windows from the Window menu and drag their tabs to dock them anywhere: beside another window, as a tab, floating, or pinned to a side bar. Save arrangements under Layout.",
 Injured,Injured,Hafif yaralı
 Extremely Wounded,Extremely Wounded,Ağır yaralı
 Mud,Mud,Çamur
@@ -5800,3 +5754,32 @@ Not an item,Not an item,
 Identified: the players see what it is. Click to make it unidentified again.,Identified: the players see what it is. Click to make it unidentified again.,
 "Unidentified: the players see it as ""{0}"", with no description. Click to mark it identified.","Unidentified: the players see it as ""{0}"", with no description. Click to mark it identified.",
 Unidentified,Unidentified,
+Tick or untick every book of this category,Tick or untick every book of this category,Bu kategorinin tüm kitaplarını işaretle ya da işareti kaldır
+Throw what?,Throw what?,Ne fırlatılsın?
+Use what?,Use what?,Ne kullanılsın?
+{0} to hit,{0} to hit,{0} isabet
+avg {0},avg {0},ort. {0}
+takes the action,takes the action,eylemi harcar
+Order,Order,Sıra
+Pack order,Pack order,Çanta sırası
+Most damage,Most damage,En çok hasar
+Best to hit,Best to hit,En iyi isabet
+Pick something else,Pick something else,Başka bir şey seç
+"Made by a spell: it runs out with time (rests, rounds, days on the road)","Made by a spell: it runs out with time (rests, rounds, days on the road)","Bir büyüyle yapıldı: zamanla tükenir (dinlenmeler, turlar, yolda geçen günler)"
+In your pack,In your pack,Çantanda
+On the ground within reach,On the ground within reach,"Yerde, uzanabileceğin yerde"
+Within reach,Within reach,Uzanabileceğin yerde
+One attack,One attack,Bir saldırı
+Free object use,Free object use,Serbest nesne kullanımı
+Thrown weapons deal their own damage; anything else is an improvised weapon (1d4). It lands by the target.,Thrown weapons deal their own damage; anything else is an improvised weapon (1d4). It lands by the target.,Fırlatma silahları kendi hasarlarını verir; geri kalan her şey doğaçlama silahtır (1d4). Hedefin yanına düşer.
+"Potions, gear and food you can use in the fight. Double-click to use it.","Potions, gear and food you can use in the fight. Double-click to use it.","Savaşta kullanabileceğin iksirler, eşyalar ve yiyecekler. Kullanmak için çift tıkla."
+Throw,Throw,Fırlat
+Time passes,Time passes,Zaman geçer
+Let it pass,Let it pass,Geçsin
+Time passes…,Time passes…,Zaman geçer…
+Hours,Hours,Saat
+Minutes,Minutes,Dakika
+Let hours go by for what this character carries (a goodberry lasts 24 hours),Let hours go by for what this character carries (a goodberry lasts 24 hours),Bu karakterin taşıdıkları için saatler geçsin (bir iyi yemiş 24 saat dayanır)
+Thrown weapon,Thrown weapon,Fırlatma silahı
+Improvised,Improvised,Doğaçlama
+Flask,Flask,Şişe

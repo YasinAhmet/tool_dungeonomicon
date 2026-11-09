@@ -403,3 +403,11 @@ body.bgmode [data-need~="edit_hp"],body.bgmode [data-need~="rest"],body.bgmode [
 #actionbar .gdiv.fold.shut.legendary{border-left-color:#f472b6;color:#f472b6}#actionbar .gdiv.fold.shut:hover{background:var(--hover)}
 #actionbar button.lvtag{border:0;padding:0;font:inherit;font-size:11px;font-weight:600}#actionbar button.lvtag:hover{background:#4c3870}
 #actionbar .lvtag.shut{width:auto;padding:0 5px}
+/* the inventory picker of Throw and Use an Object */
+#detail .invwrap{display:flex;flex-direction:column;gap:8px}#detail .invwrap .qrow input[type=search]{flex:1;min-width:0}
+.invpick{display:flex;flex-direction:column;gap:4px}.invpick .title{margin-top:4px}
+.invpick .ipr{display:flex;gap:10px;align-items:center;text-align:left;white-space:normal;padding:6px 8px;background:var(--raised);border:1px solid var(--border);border-radius:6px}
+.invpick .ipr:hover,.invpick .ipr:focus-visible{background:var(--hover);border-color:var(--accent-dim)}
+.invpick .ipi{width:34px;height:34px;image-rendering:pixelated;flex:none;object-fit:contain}
+.invpick .ipt{display:flex;flex-direction:column;gap:2px;min-width:0}.invpick .ipn{display:flex;gap:6px;align-items:baseline;flex-wrap:wrap}
+.invpick .chip{font-size:10.5px;padding:0 5px;border-radius:3px;background:var(--input);color:var(--dim)}.invpick .chip.on{color:var(--good)}
