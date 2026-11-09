@@ -382,3 +382,24 @@ body.bgmode [data-need~="edit_hp"],body.bgmode [data-need~="rest"],body.bgmode [
 @media (max-width:900px){#bgbody{flex-direction:column}#bgside{width:auto}.mrow{grid-template-columns:minmax(0,1fr) auto}.mrow .small{grid-column:2}}
 @media (max-width:480px){.bgform{grid-template-columns:1fr 1fr}.bgform.mons{grid-template-columns:1fr 1fr}.pointbuy .pbgrid{grid-template-columns:1fr 1fr}.pool{grid-template-columns:1fr}.mlist{max-height:40vh}#bgflog{width:min(320px,86%)}}
 @media (pointer:coarse){.pb button.mini{min-width:36px;min-height:34px}.mrow{min-height:40px}.chip.team{min-height:36px}}
+/* aiming an action: the map's edges dim in with a faint amber rim, eased in from a touch larger, then breathing slowly */
+#vignette{position:absolute;inset:-4%;z-index:2;pointer-events:none;opacity:0;transform:scale(1.08);
+  background:radial-gradient(ellipse 72% 68% at 50% 50%,transparent 58%,rgba(255,140,40,.07) 74%,rgba(6,8,12,.62) 100%);
+  transition:opacity .28s ease,transform .38s cubic-bezier(.2,.8,.2,1)}
+#vignette.on{opacity:1;transform:scale(1);animation:vigbreathe 3.2s ease-in-out .4s infinite}
+@keyframes vigbreathe{0%,100%{transform:scale(1)}50%{transform:scale(1.018)}}
+@media (prefers-reduced-motion:reduce){#vignette{transition:opacity .2s linear;transform:none}#vignette.on{animation:none}}
+
+.hpword{font-weight:600;white-space:nowrap}
+
+/* categories that fold under their heading (spell levels, feature sources) and the action bar's group bars and level tags */
+.fold{cursor:pointer;display:inline-flex;align-items:center;gap:4px;user-select:none;border-radius:3px}.fold:hover{color:var(--text)}
+.fold:focus-visible{outline:1px solid var(--accent-dim)}.fold .arw{display:inline-block;width:10px}.fold .cnt{font-weight:400;opacity:.75;letter-spacing:0}
+.card.shut>.title{margin-bottom:0}
+#actionbar .gdiv.fold{display:inline-block;width:8px;height:30px;padding:0 2px;border:0;margin:0 1px;background-clip:content-box;vertical-align:top}
+#actionbar .gdiv.fold:hover{padding:0 1px}
+#actionbar .gdiv.fold.shut{width:auto;padding:0 6px;background:var(--panel);border:1px solid var(--border);border-left:4px solid var(--good);color:var(--good);font-size:11px;font-weight:600}
+#actionbar .gdiv.fold.shut.bonus{border-left-color:var(--warn);color:var(--warn)}#actionbar .gdiv.fold.shut.free{border-left-color:var(--dim);color:var(--dim)}
+#actionbar .gdiv.fold.shut.legendary{border-left-color:#f472b6;color:#f472b6}#actionbar .gdiv.fold.shut:hover{background:var(--hover)}
+#actionbar button.lvtag{border:0;padding:0;font:inherit;font-size:11px;font-weight:600}#actionbar button.lvtag:hover{background:#4c3870}
+#actionbar .lvtag.shut{width:auto;padding:0 5px}

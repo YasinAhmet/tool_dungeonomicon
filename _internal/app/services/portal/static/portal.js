@@ -18,6 +18,13 @@ const store = (k, v) => { try {   // dp_: what a browser kept before the rename,
   if (v === undefined) return JSON.parse(localStorage.getItem('dm_' + k) ?? localStorage.getItem('dp_' + k));
   localStorage.setItem('dm_' + k, JSON.stringify(v)); localStorage.removeItem('dp_' + k);
 } catch { return null; } };
+const FOLDS = new Set(store('folds') || []);   // the categories folded away on this device: spell levels, feature sources, action groups
+const folded = k => FOLDS.has(k);
+const flipFold = (k, redraw) => { FOLDS.has(k) ? FOLDS.delete(k) : FOLDS.add(k); store('folds', [...FOLDS]); redraw(); };
+// a category's heading that folds it away: ▾/▸, its name and how many it holds (Enter or Space from the keyboard too)
+const foldHead = (k, text, n, redraw) => h('span', { class: 'fold', role: 'button', tabindex: 0, 'aria-expanded': String(!folded(k)),
+  onclick: () => flipFold(k, redraw), onkeydown: e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); flipFold(k, redraw); } } },
+  h('span', { class: 'arw' }, folded(k) ? '▸' : '▾'), text, n != null ? h('span', { class: 'cnt' }, `(${n})`) : null);
 const UI = { tab: store('tab') || 'overview', view: 'map', adv: '', target: null, inspect: null, cam: null, camFit: null, feed: store('feed') || 'all',
   open: new Set(), slot: '', amount: '', drag: null, ghost: null, move: null, tile: 32, local: [], editNote: store('editnote'),
   noteDraft: store('notedraft') || '', editDraft: store('editdraft') || {}, spellsOpen: !!store('spells'), mute: !!store('mute'),
@@ -478,7 +485,8 @@ function render() {
   header();
   const b = ST.battle;
   if (UI.aim && !b.actions) UI.aim = null;
-  if (UI.move && !canMove(b)) UI.move = null;
+  turnPick(b);
+  if (UI.move && !moveArmed(b)) UI.move = null;
   if (UI.place && !(ST.team && canTeamDrop())) UI.place = null;
   renderNow();
   renderMusic();
@@ -1932,6 +1940,8 @@ function renderMap() {
   $('round').textContent = b.status === 'active' ? S('Round {0}', b.round) : b.status === 'setup' ? S('Waiting for the battle to start.') : S('No battle right now.');
   if (UI.target && !b.combatants.some(c => c.id === UI.target)) UI.target = null;
   if (UI.inspect && !b.combatants.some(c => c.id === UI.inspect)) UI.inspect = null;
+  if (UI.sel && !b.combatants.some(c => c.id === UI.sel)) UI.sel = null;
+  const walker = moveArmed(b) ? mover() : null;      // the token a right-click walks: ringed
   const W = b.map.w, H = b.map.h, vw = wrap.clientWidth, vh = Math.max(160, wrap.clientHeight), dpr = window.devicePixelRatio || 1;
   if (cv.width !== Math.round(vw * dpr) || cv.height !== Math.round(vh * dpr)) {
     cv.width = Math.round(vw * dpr); cv.height = Math.round(vh * dpr); cv.style.width = vw + 'px'; cv.style.height = vh + 'px';
@@ -1947,9 +1957,10 @@ function renderMap() {
     };
     UI.camFit = { x: 8 - spread(bx, bw, (vw - 16) / z, W) * z, y: 8 + top - spread(by, bh, (vh - 16 - top) / z, H) * z, z };
   }
-  const main = floorsOf(b.map).find(([f]) => f === 0)[1];   // a floor added or taken away below: the main floor stays put
-  if (UI.cam && UI.main != null && UI.main !== main) UI.cam.x -= (main - UI.main) * UI.cam.z;
-  UI.main = main;
+  const main = floorsOf(b.map).find(([f]) => f === 0)[1] + (b.map.ox || 0), top = b.map.oy || 0;   // a floor added or taken
+  if (UI.cam && UI.main != null && UI.main !== main) UI.cam.x -= (main - UI.main) * UI.cam.z;      // away below, the map grown
+  if (UI.cam && UI.top != null && UI.top !== top) UI.cam.y -= (top - UI.top) * UI.cam.z;           // on its left or top: what
+  UI.main = main; UI.top = top;                                                                    // is on it stays put
   const cam = UI.cam || UI.camFit, T = cam.z;
   UI.tile = T;
   const g = cv.getContext('2d');
@@ -1961,18 +1972,31 @@ function renderMap() {
   const FW = b.map.fw || W, floors = floorsOf(b.map);   // the floors of a building, side by side (gaps between them)
   g.fillStyle = b.map.light === 'dark' ? '#0c0e12' : b.map.light === 'dim' ? '#12151c' : '#161a22';
   for (const [, x0] of floors) g.fillRect(x0 * T, 0, FW * T, H * T);
+  const view = [(-cam.x - shx) / T, (-cam.y - shy) / T, (vw - cam.x - shx) / T, (vh - cam.y - shy) / T];   // the tiles in sight
+  UI.view = view;
   const ground = drawImages(g, b, T, 'ground');        // a battle map picture: under the grid
+  drawTerrain(g, b, T, view);                          // painted mud, water, undergrowth...
+  drawRoads(g, b, T, view);
+  drawHighGround(g, b, T, view);
   g.strokeStyle = ground ? 'rgba(170,180,200,.22)' : '#232a37'; g.lineWidth = 1;
-  for (const [, x0] of floors) {
-    for (let x = x0; x <= x0 + FW; x++) { g.beginPath(); g.moveTo(Math.round(x * T) + .5, 0); g.lineTo(Math.round(x * T) + .5, H * T); g.stroke(); }
-    for (let y = 0; y <= H; y++) { g.beginPath(); g.moveTo(x0 * T, Math.round(y * T) + .5); g.lineTo((x0 + FW) * T, Math.round(y * T) + .5); g.stroke(); }
+  if (T >= 6) {                                        // (zoomed far out the lines would only grey the map)
+    g.beginPath();                                     // only the lines in sight, in one go
+    const j0 = Math.max(0, Math.floor(view[1])), j1 = Math.min(H, Math.ceil(view[3]));
+    for (const [, x0] of floors) {
+      const i0 = Math.max(0, Math.floor(view[0] - x0)), i1 = Math.min(FW, Math.ceil(view[2] - x0));
+      if (i0 > i1 || j0 > j1) continue;
+      for (let x = x0 + i0; x <= x0 + i1; x++) { g.moveTo(Math.round(x * T) + .5, j0 * T); g.lineTo(Math.round(x * T) + .5, j1 * T); }
+      for (let y = j0; y <= j1; y++) { g.moveTo((x0 + i0) * T, Math.round(y * T) + .5); g.lineTo((x0 + i1) * T, Math.round(y * T) + .5); }
+    }
+    g.stroke();
   }
   if (floors.length > 1) {                             // each floor's name over it
     g.font = `600 ${Math.max(10, Math.min(14, T * .45))}px Segoe UI`; g.textAlign = 'center'; g.textBaseline = 'bottom';
     for (const [f, x0] of floors) { g.fillStyle = f === 0 ? '#e6e9ef' : '#9aa3b5'; g.fillText(floorName(f), (x0 + FW / 2) * T, -4); }
   }
   drawRooms(g, b, T, dpr);
-  drawMap(g, b, T);
+  drawCliffs(g, b, T, view);
+  drawMap(g, b, T, view);
   drawLight(g, b, T, dpr);
   drawZones(g, b, T);                                  // (spell areas over the dark: they stay readable)
   drawGround(g, b, T);
@@ -1988,10 +2012,10 @@ function renderMap() {
   for (const c of b.combatants) {
     if (!c.pos) continue;
     const box = c.box || [c.pos[0], c.pos[1], c.span], walked = FX.pos(c.id);   // a Tiny token: half a tile, where it stands
-    const [x, y] = UI.drag && UI.drag.id === c.id ? UI.drag.at : walked ? [walked[0] + box[0] - c.pos[0], walked[1] + box[1] - c.pos[1]] : box;
-    const pose = UI.drag && UI.drag.id === c.id ? null : FX.pose(c.id);   // a lunge, a flinch, a fade
+    const [x, y] = walked ? [walked[0] + box[0] - c.pos[0], walked[1] + box[1] - c.pos[1]] : box;
+    const pose = FX.pose(c.id);   // a lunge, a flinch, a fade
     const s = box[2] * T, cx = x * T + s / 2 + (pose ? pose[0] * T : 0), cy = y * T + s / 2 + (pose ? pose[1] * T : 0);
-    const veil = UI.drag && UI.drag.id === c.id ? null : c.veil;   // banished, invisible...: see-through and tinted
+    const veil = c.veil;   // banished, invisible...: see-through and tinted
     const r = (s / 2 - 2) * (pose ? pose[2] : 1) * (veil ? veil[1] : 1);
     g.globalAlpha = (pose ? pose[3] : 1) * (veil ? veil[0] : 1);
     if (c.conc && !c.out) {                            // concentrating: a dashed ring at its feet, in the colour of its magic
@@ -2008,7 +2032,10 @@ function renderMap() {
     g.strokeStyle = aimed ? '#ff8c28' : c.turn ? '#fbbf24' : c.mine ? '#7c8cff' : c.ring || '#0009';   // else its faction's colour
     if (!c.framed || aimed || c.turn || c.mine) { g.beginPath(); g.arc(cx, cy, r, 0, Math.PI * 2); g.stroke(); }   // a framed token has its own border
     if (c.turn) { g.lineWidth = 1.5; g.beginPath(); g.arc(cx, cy, r + 3.5, 0, Math.PI * 2); g.stroke(); }          // whose turn: a double ring
-    if (c.id === UI.target || c.id === UI.inspect) {      // the target: a dashed ring (not only a colour)
+    if (walker && c.id === walker.id && !UI.aim) {      // picked to walk: a soft green halo outside its rings
+      g.save(); g.strokeStyle = '#4ade80'; g.lineWidth = 2.5; g.shadowColor = '#4ade80'; g.shadowBlur = Math.max(6, r * .5);
+      g.beginPath(); g.arc(cx, cy, r + (c.turn ? 7 : 4), 0, Math.PI * 2); g.stroke(); g.restore();
+    } else if (c.id === UI.target || c.id === UI.inspect) {      // the target: a dashed ring (not only a colour)
       g.strokeStyle = c.id === UI.target ? '#f87171' : '#e6e9ef'; g.lineWidth = 2.5; g.setLineDash([Math.max(3, r * .35), Math.max(2, r * .22)]);
       g.beginPath(); g.arc(cx, cy, r + (c.turn ? 7 : 3.5), 0, Math.PI * 2); g.stroke(); g.setLineDash([]);
     }
@@ -2042,30 +2069,24 @@ function renderMap() {
   }
   drawImages(g, b, T, 'top');                          // roofs, canopies: over the tokens
   groundLabel(g, b, T);
-  if (UI.drag) {                                       // dragging my token: how far, and what is left
-    const d = UI.drag, c = b.combatants.find(x => x.id === d.id), left = moveLeft(b);
-    let ft = 5 * Math.max(Math.abs(d.at[0] - d.start[0]), Math.abs(d.at[1] - d.start[1]));
-    const pk = c && c.pos && ft ? movePeek(c, d.at[0], d.at[1]) : null;   // the real way there, and opportunity attacks on it
-    if (pk && pk.path && pk.path.length) { drawWay(g, T, c, { ...pk, x: d.at[0], y: d.at[1], cost: null }, 18); ft = pk.cost || ft; }
-    if (c && ft) {
-      const text = left != null ? S('{0} ft / {1} left', ft, Math.max(0, left - ft)) : S('{0} ft', ft), x = (d.at[0] + c.span / 2) * T, y = d.at[1] * T - 6;
-      g.font = '600 12px Segoe UI'; g.textAlign = 'center'; g.textBaseline = 'bottom';
-      const w = g.measureText(text).width + 10;
-      g.fillStyle = '#0b0d12d0'; g.fillRect(x - w / 2, y - 17, w, 18);
-      g.fillStyle = left != null && ft > left ? '#f87171' : '#e6e9ef'; g.fillText(text, x, y);
-    }
-  }
   FX.over(g, T);
   drawPing(g, T);
   if (FX.frame) return;                                // an animation frame: the board only
   $('target').replaceChildren(...targetInfo(b));
-  const mine = b.combatants.find(c => c.mine), walk = canMove(b) && mine && mine.pos, tap = touch();
+  const tap = touch(), walk = walker ? 'armed' : canMove(b) && mover() ? 'pick' : '';
   $('hint').textContent = UI.aim ? (tap ? S('Tap to aim, tap the same place again (or Confirm) to use it. Tap ✕ to cancel.') : S('Right-click or Esc cancels.')) :
-    (walk ? (tap ? S('Tap a tile to see the way, tap again (or Move here) to go - or drag your token.') : S('Click a tile (or drag your token) to move there.')) + ' · ' : '') +
+    (walk === 'armed' ? (tap ? S('Tap a tile to see the way, tap again (or Move here) to go.') : S('Right-click a tile to walk there.')) + ' · '
+      : walk === 'pick' ? (tap ? S('Tap your token to pick it, then tap where it should go.') : S('Click your token to pick it, then right-click where it should go.')) + ' · ' : '') +
     (tap ? S('Drag to move around, pinch to zoom, tap a creature to target it. Hold a button for its details.') : S('Drag to move around, scroll to zoom, click a creature to target it.')) +
     (!tap && !UI.aim && b.actions ? ' · ' + S('Keys 1–9: actions, Ctrl+Space: end turn') : '');
   $('hint').title = $('hint').textContent;          // (one line on short screens: all of it on hover)
   renderOrder(b);
+}
+/** A creature's hit points as this player may see them: exact (their own side's, or shown by the DM), else in words
+ *  coloured green (Stable) to red (Extremely Wounded). */
+function hpWords(c) {
+  if (c.hp != null) return h('span', null, `${c.hp}/${c.max_hp}`);
+  return h('span', { class: 'hpword', style: c.health_color ? `color:${c.health_color}` : '' }, c.health || '');
 }
 /** The target line above the map: the creature you target (or last tapped) - name, health, conditions, distance. */
 function targetInfo(b) {
@@ -2074,7 +2095,7 @@ function targetInfo(b) {
   const me = meInBattle() || b.combatants.find(x => x.mine && x.pos), look = badgeLook();
   const far = me && me.pos && c.pos && me.id !== c.id ? Geo.dist(me, c) : null;
   return [h('span', { class: 'tgt', tip: () => tokenCard(c), 'aria-label': (c.id === UI.target ? S('Target') : S('Selected')) + ': ' + c.name },
-    c.id === UI.target ? '🎯 ' : '👁 ', h('b', null, c.name), ' · ' + (c.hp != null ? `${c.hp}/${c.max_hp}` : c.health),   // the rest on hover
+    c.id === UI.target ? '🎯 ' : '👁 ', h('b', null, c.name), ' · ', hpWords(c),   // the rest on hover
     ...(c.badges || []).slice(0, 3).map(k => h('span', { class: 'bdg', style: `color:${(look[k] || [])[1] || 'var(--warn)'}` }, gi(k, 'sm'))),
     far != null ? ' · ' + S('{0} ft', far) : null),
     ' ', h('button', { class: 'sm flat', onclick: () => { UI.target = null; UI.inspect = null; renderMap(); }, 'aria-label': S('Clear the target') }, '✕')];
@@ -2091,7 +2112,7 @@ function renderOrder(b) {
     h('i', null, c.init ?? '–'), h('span', { class: 'dot', style: `background:${dot[side(c)]}` }),
     h('span', { class: 'n' }, (c.turn ? '▶ ' : '') + c.name),
     ...(c.badges || []).slice(0, 3).map(k => h('span', { class: 'bdg', style: `color:${(badgeLook()[k] || [])[1] || 'var(--warn)'}` }, gi(k))),
-    h('span', { class: 'hpw' }, c.hp != null ? `${c.hp}/${c.max_hp}` : c.health))));
+    h('span', { class: 'hpw' }, hpWords(c)))));
   const cur = b.combatants.findIndex(c => c.turn);
   if (cur >= 0 && b.status === 'active' && $('order').children[cur]) $('order').children[cur].scrollIntoView({ block: 'nearest', inline: 'nearest' });
   const btn = $('endturn');
@@ -2346,6 +2367,201 @@ function drawLine(g, d, T) {
   }
   trace(); g.strokeStyle = d.color; g.lineWidth = w; g.stroke();
 }
+/** Painted difficult terrain (mud, water, undergrowth...): each kind one patch, tile by tile, its standing-out corners
+ * rounded off and its inside corners filled in round (groundart.py: terrain_shape draws the same). */
+const TERRAIN = { round: .35, cache: new WeakMap() };
+function terrainPiece(path, pts) {                     // wound the way rect() winds: the pieces meet without a seam
+  let a = 0;
+  for (let i = 0; i < pts.length; i++) { const [x1, y1] = pts[i], [x2, y2] = pts[(i + 1) % pts.length]; a += x1 * y2 - x2 * y1; }
+  if (a < 0) pts = pts.slice().reverse();
+  pts.forEach(([x, y], i) => i ? path.lineTo(x, y) : path.moveTo(x, y)); path.closePath();
+}
+function terrainArc(cx, cy, sx, sy, r) {
+  const out = [];
+  for (let i = 0; i <= 5; i++) { const t = i * Math.PI / 10; out.push([cx + sx * r * Math.cos(t), cy + sy * r * Math.sin(t)]); }
+  return out;
+}
+function terrainShape(cells) {
+  const has = new Set(cells.map(([x, y]) => x + ',' + y)), on = (x, y) => has.has(x + ',' + y), r = TERRAIN.round;
+  const fill = new Path2D(), edge = new Path2D(), near = new Map(), Q = [[-1, -1], [1, -1], [-1, 1], [1, 1]];
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+  for (const [x, y] of cells) {
+    x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x + 1); y1 = Math.max(y1, y + 1);
+    const whole = Q.every(([sx, sy]) => on(x + sx, y) || on(x, y + sy));
+    for (const [sx, sy] of Q) {
+      for (const [nx, ny] of [[x + sx, y], [x, y + sy], [x + sx, y + sy]]) if (!on(nx, ny)) near.set(nx + ',' + ny, [nx, ny]);
+      if (whole) continue;
+      const cx = x + (sx > 0 ? 1 : 0), cy = y + (sy > 0 ? 1 : 0), mx = x + .5, my = y + .5;
+      if (on(x + sx, y) || on(x, y + sy)) { fill.rect(Math.min(mx, cx), Math.min(my, cy), .5, .5); continue; }
+      const arc = terrainArc(cx - sx * r, cy - sy * r, sx, sy, r);         // a corner standing out: rounded
+      terrainPiece(fill, [[mx, my], [cx, my], ...arc, [mx, cy]]);
+      arc.forEach(([px, py], i) => i ? edge.lineTo(px, py) : edge.moveTo(px, py));
+    }
+    if (whole) fill.rect(x, y, 1, 1);
+    for (const [dx, dy, ax, ay, bx, by, ends] of [[0, -1, x, y, x + 1, y, [[-1, -1], [1, -1]]], [0, 1, x, y + 1, x + 1, y + 1, [[-1, 1], [1, 1]]],
+                                                  [-1, 0, x, y, x, y + 1, [[-1, -1], [-1, 1]]], [1, 0, x + 1, y, x + 1, y + 1, [[1, -1], [1, 1]]]]) {
+      if (on(x + dx, y + dy)) continue;                // an open side: its outline, cut short where a corner is round
+      const cut = ends.map(([sx, sy]) => { const [nx, ny] = dy ? [x + sx, y] : [x, y + sy]; return on(nx, ny) && !on(x + sx, y + sy) ? 0 : r; });
+      if (dy) { edge.moveTo(ax + cut[0], ay); edge.lineTo(bx - cut[1], by); } else { edge.moveTo(ax, ay + cut[0]); edge.lineTo(bx, by - cut[1]); }
+    }
+  }
+  for (const [x, y] of near.values()) {                // inside corners: filled in round
+    for (const [sx, sy] of Q) {
+      if (!(on(x + sx, y) && on(x, y + sy) && on(x + sx, y + sy))) continue;
+      const cx = x + (sx > 0 ? 1 : 0), cy = y + (sy > 0 ? 1 : 0), arc = terrainArc(cx - sx * r, cy - sy * r, sx, sy, r);
+      terrainPiece(fill, [[cx, cy], ...arc]);
+      arc.forEach(([px, py], i) => i ? edge.lineTo(px, py) : edge.moveTo(px, py));
+    }
+  }
+  return { fill, edge, box: [x0, y0, x1, y1] };
+}
+function shade(hex, k, a) {                            // a colour darker (k < 1) or lighter (k > 1), with alpha a
+  const n = parseInt(hex.slice(1), 16), c = v => Math.max(0, Math.min(255, Math.round(k > 1 ? v + (255 - v) * (k - 1) : v * k)));
+  return `rgba(${c(n >> 16)},${c((n >> 8) & 255)},${c(n & 255)},${a})`;
+}
+function terrainMarks(g, kind, col, cells, view) {     // each tile's texture, fixed for the tile (groundart.py: _marks)
+  const rnd = roomRand, dark = shade(col, .74, .67), light = shade(col, 1.35, .59);
+  const seen = cells.filter(([x, y]) => x >= view[0] - 1 && x <= view[2] + 1 && y >= view[1] - 1 && y <= view[3] + 1);
+  g.beginPath();
+  if (kind === 'water') {
+    for (const [x, y] of seen) for (let i = 0; i < 2; i++) {
+      const cx = x + .22 + .5 * rnd(x, y, 510 + i), cy = y + .25 + .5 * rnd(x, y, 520 + i), w = .14 + .08 * rnd(x, y, 530 + i);
+      g.moveTo(cx - w, cy); g.quadraticCurveTo(cx - w / 2, cy - .06, cx, cy); g.quadraticCurveTo(cx + w / 2, cy + .06, cx + w, cy);
+    }
+    g.strokeStyle = light; g.lineWidth = .035; g.lineCap = 'round'; g.stroke(); return;
+  }
+  if (kind === 'brush') {
+    for (const [x, y] of seen) for (let i = 0; i < 3; i++) {
+      const cx = x + .18 + .64 * rnd(x, y, 610 + i), cy = y + .3 + .55 * rnd(x, y, 620 + i);
+      for (const a of [-.5, 0, .5]) { g.moveTo(cx, cy); g.lineTo(cx + .09 * Math.sin(a), cy - .11 * Math.cos(a)); }
+    }
+    g.strokeStyle = dark; g.lineWidth = .03; g.lineCap = 'round'; g.stroke(); return;
+  }
+  if (kind === 'ice') {
+    for (const [x, y] of seen) { const cx = x + .2 + .6 * rnd(x, y, 710), cy = y + .2 + .6 * rnd(x, y, 720); g.moveTo(cx - .12, cy + .08); g.lineTo(cx + .12, cy - .08); }
+    g.strokeStyle = 'rgba(255,255,255,.67)'; g.lineWidth = .03; g.lineCap = 'round'; g.stroke(); return;
+  }
+  if (kind === 'sand') {
+    for (const [x, y] of seen) for (let i = 0; i < 5; i++) {
+      const cx = x + .12 + .76 * rnd(x, y, 810 + i), cy = y + .12 + .76 * rnd(x, y, 820 + i); g.moveTo(cx + .022, cy); g.arc(cx, cy, .022, 0, Math.PI * 2);
+    }
+    g.fillStyle = dark; g.fill(); return;
+  }
+  if (kind === 'rubble') {
+    for (const [x, y] of seen) for (let i = 0; i < 3; i++) {
+      const cx = x + .2 + .6 * rnd(x, y, 910 + i), cy = y + .2 + .6 * rnd(x, y, 920 + i), r = .06 + .05 * rnd(x, y, 930 + i);
+      g.beginPath();
+      for (let j = 0; j < 5; j++) {
+        const px = cx + r * (.7 + .4 * rnd(x, y, 940 + i * 5 + j)) * Math.cos(j * 1.2566), py = cy + r * (.7 + .4 * rnd(x, y, 960 + i * 5 + j)) * Math.sin(j * 1.2566);
+        j ? g.lineTo(px, py) : g.moveTo(px, py);
+      }
+      g.closePath(); g.fillStyle = i % 2 ? light : dark; g.fill(); g.strokeStyle = 'rgba(40,36,30,.78)'; g.lineWidth = .02; g.stroke();
+    }
+    return;
+  }
+  for (const [x, y] of seen) for (let i = 0; i < 2; i++) {     // mud: darker clods, and a wet glint below
+    const cx = x + .2 + .6 * rnd(x, y, 410 + i), cy = y + .2 + .6 * rnd(x, y, 420 + i);
+    g.moveTo(cx + .07 + .06 * rnd(x, y, 430 + i), cy); g.ellipse(cx, cy, .07 + .06 * rnd(x, y, 430 + i), .05 + .04 * rnd(x, y, 440 + i), 0, 0, Math.PI * 2);
+  }
+  g.fillStyle = dark; g.fill(); g.beginPath();
+  for (const [x, y] of seen) { const cx = x + .25 + .5 * rnd(x, y, 450), cy = y + .25 + .5 * rnd(x, y, 460); g.moveTo(cx + .03, cy); g.ellipse(cx, cy, .03, .02, 0, 0, Math.PI * 2); }
+  g.fillStyle = light; g.fill();
+}
+function drawTerrain(g, b, T, view) {
+  const ds = (b.drawings || []).filter(d => d.type === 'terrain' && d.tiles && d.tiles.length);
+  if (!ds.length) return;
+  let shapes = TERRAIN.cache.get(b.drawings);         // (worked out once a board: b.drawings is new with every change)
+  if (!shapes) {
+    const kinds = {};
+    for (const d of ds) (kinds[d.kind || 'mud'] ||= []).push(...d.tiles);
+    shapes = Object.entries(kinds).map(([kind, cells]) => ({ kind, cells, ...terrainShape(cells) }));
+    TERRAIN.cache.set(b.drawings, shapes);
+  }
+  const colors = b.terrain_colors || {};
+  g.save(); g.scale(T, T);
+  for (const t of shapes) {
+    if (!inSight(t.box, view, 1)) continue;
+    const col = colors[t.kind] || '#6e4f33';
+    g.fillStyle = shade(col, 1, .82); g.fill(t.fill);
+    terrainMarks(g, t.kind, col, t.cells, view);
+    g.strokeStyle = shade(col, .62, .85); g.lineWidth = .05; g.lineCap = g.lineJoin = 'round'; g.stroke(t.edge);
+  }
+  g.restore();
+}
+/** Roads: the surface between two edges drawn side by side (paired by the table: battle/shapes.py road_pairs), then
+ * every edge as a kerb with stones along it (groundart.py: paint_roads). */
+function drawRoads(g, b, T, view) {
+  const roads = (b.drawings || []).filter(d => d.type === 'road' && d.pts && d.pts.length > 1);
+  if (!roads.length) return;
+  const col = Object.fromEntries(roads.map(d => [d.id, d.color || '#c9b27a'])), rnd = roomRand;
+  g.save(); g.scale(T, T);
+  for (const pr of b.roads || []) {
+    const box = drawingBox({ pts: pr.poly });
+    if (!inSight(box, view)) continue;
+    g.beginPath();
+    for (const ring of [pr.poly, pr.hole]) if (ring) { ring.forEach(([x, y], i) => i ? g.lineTo(x, y) : g.moveTo(x, y)); g.closePath(); }
+    g.fillStyle = shade(col[pr.ids[0]] || '#c9b27a', 1, .59); g.fill('evenodd');
+  }
+  for (const d of roads) {
+    if (!inSight(drawingBox(d), view)) continue;
+    const pts = d.closed ? d.pts.concat([d.pts[0]]) : d.pts, c = col[d.id];
+    g.beginPath(); pts.forEach(([x, y], i) => i ? g.lineTo(x, y) : g.moveTo(x, y));
+    g.strokeStyle = shade(c, .45, .86); g.lineWidth = .07; g.lineCap = g.lineJoin = 'round'; g.stroke();
+    g.beginPath();
+    for (let i = 0; i < pts.length - 1; i++) {        // stones along the kerb, either side
+      const [x1, y1] = pts[i], [x2, y2] = pts[i + 1], n = Math.hypot(x2 - x1, y2 - y1);
+      if (n < 1e-6) continue;
+      const ux = (x2 - x1) / n, uy = (y2 - y1) / n;
+      for (let k = 0; k < Math.floor(n / .55); k++) {
+        const t = (k + .5) * .55, s = rnd(d.id * 31 + i, k, 1) < .5 ? 1 : -1, off = .1 + .08 * rnd(d.id * 31 + i, k, 2);
+        const cx = x1 + ux * t - uy * off * s, cy = y1 + uy * t + ux * off * s, r = .035 + .02 * rnd(d.id * 31 + i, k, 3);
+        g.moveTo(cx + r, cy); g.ellipse(cx, cy, r, .03, 0, 0, Math.PI * 2);
+      }
+    }
+    g.fillStyle = shade(c, .77, 1); g.fill(); g.strokeStyle = shade(c, .45, .86); g.lineWidth = .02; g.stroke();
+  }
+  g.restore();
+}
+/** A cliff's edges as [a, b, high]: the high ground where orient(a, b, p) * high > 0 - inside a closed one, else on its
+ * 'side' (battle/sight.py: cliff_segments). */
+function cliffSegments(d) {
+  const seq = d.pts.map(([x, y]) => [x, y]);
+  if (d.closed && seq.length > 2) seq.push(seq[0]);
+  let high = (d.side || 1) >= 0 ? 1 : -1;
+  if (d.closed && seq.length > 3) { let a = 0; for (let i = 1; i < seq.length; i++) a += seq[i - 1][0] * seq[i][1] - seq[i][0] * seq[i - 1][1]; high = a > 0 ? 1 : -1; }
+  const out = [];
+  for (let i = 1; i < seq.length; i++) if (seq[i - 1][0] !== seq[i][0] || seq[i - 1][1] !== seq[i][1]) out.push([seq[i - 1], seq[i], high]);
+  return out;
+}
+const HACHURE = { slope: [.34, .16], steep: [.2, .26], sheer: [.13, .36] };
+function drawHighGround(g, b, T, view) {               // inside a closed cliff the ground is a shade lighter
+  const tops = (b.drawings || []).filter(d => d.type === 'cliff' && d.closed && d.pts && d.pts.length > 2 && inSight(drawingBox(d), view));
+  if (!tops.length) return;
+  g.save(); g.scale(T, T); g.fillStyle = 'rgba(255,238,205,.12)';
+  for (const d of tops) { g.beginPath(); d.pts.forEach(([x, y], i) => i ? g.lineTo(x, y) : g.moveTo(x, y)); g.closePath(); g.fill(); }
+  g.restore();
+}
+function drawCliffs(g, b, T, view) {                   // the edge in ink, hachures down its low side (groundart.py: paint_cliffs)
+  const cliffs = (b.drawings || []).filter(d => d.type === 'cliff' && d.pts && d.pts.length > 1 && inSight(drawingBox(d), view, .8));
+  if (!cliffs.length) return;
+  g.save(); g.scale(T, T); g.lineCap = 'round'; g.lineJoin = 'round';
+  for (const d of cliffs) {
+    const [step, size] = HACHURE[d.steep] || HACHURE.steep, ticks = new Path2D(), edge = new Path2D();
+    for (const [[ax, ay], [bx, by], high] of cliffSegments(d)) {
+      const n = Math.hypot(bx - ax, by - ay), ux = (bx - ax) / n, uy = (by - ay) / n, lx = uy * high, ly = -ux * high, k = Math.max(1, Math.floor(n / step));
+      for (let i = 0; i < k; i++) {
+        const t = (i + .5) * n / k, len = size * (i % 2 ? .55 : 1), px = ax + ux * t, py = ay + uy * t;
+        ticks.moveTo(px, py); ticks.lineTo(px + lx * len, py + ly * len);
+      }
+    }
+    (d.closed ? d.pts.concat([d.pts[0]]) : d.pts).forEach(([x, y], i) => i ? edge.lineTo(x, y) : edge.moveTo(x, y));
+    const w = d.steep === 'sheer' ? .11 : .07;
+    for (const [col, extra] of [['rgba(232,218,190,.59)', .06], ['#3a2e24', 0]]) {   // a pale halo under the ink: seen on any ground
+      g.strokeStyle = col; g.lineWidth = .03 + extra; g.stroke(ticks); g.lineWidth = w + extra; g.stroke(edge);
+    }
+  }
+  g.restore();
+}
 /** An opened door's leaf swung out of the wall, a window's casements, a gate's two leaves (drawtools.py: paint_leaf),
  * about the tile's middle, already turned; `s` the picture's size in pixels. */
 const LEAVES = { window: 'panes', ink_window: 'panes', ink_double_door: 'pair', ink_gate: 'pair', ink_sliding_door: null, ink_revolving_door: null, ink_portcullis: null };
@@ -2397,9 +2613,25 @@ function drawLight(g, b, T, dpr) {
   g.drawImage(c.cv, 0, 0, x1 * T, H * T);
   g.restore();
 }
-function drawMap(g, b, T) {
+/** Where a drawing lies, [x0, y0, x1, y1] in tiles (a turned picture: the square round it); null when unknown. */
+function drawingBox(d) {
+  if (d.pts && d.pts.length) {
+    let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    for (const [x, y] of d.pts) { x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x); y1 = Math.max(y1, y); }
+    return [x0, y0, x1, y1];
+  }
+  if (d.type === 'image') { const r = Math.max(d.w, d.h) * .75, cx = d.x + d.w / 2, cy = d.y + d.h / 2; return [cx - r, cy - r, cx + r, cy + r]; }
+  if (d.type === 'symbol') { const n = ((ST.battle.props || {})[d.sym]) || 1; return [d.x, d.y, d.x + n, d.y + n]; }
+  return null;
+}
+function inSight(box, view, pad = .6) {
+  return !view || !box || !(box[2] + pad < view[0] || box[0] - pad > view[2] || box[3] + pad < view[1] || box[1] - pad > view[3]);
+}
+function drawMap(g, b, T, view) {
   const flying = FX.hidden('did');                     // a thrown prop still in the air: not yet where it lands
   for (const d of b.drawings || []) {
+    if (d.type === 'road' || d.type === 'cliff' || d.type === 'terrain') continue;   // (drawTerrain, drawRoads, drawCliffs)
+    if (!inSight(drawingBox(d), view)) continue;
     if (d.type === 'image') { if ((d.layer || 'map') === 'map') drawImage(g, d, T); continue; }
     if (flying.has(d.id)) continue;
     if (d.type === 'path' && d.pts.length > 1 && coverOf(d) === 'wall') continue;   // a wall: drawn like a room's (drawRooms)
@@ -2530,22 +2762,27 @@ function centerOn(t) {
   UI.cam = { x: wrap.clientWidth / 2 - t.pos[0] * c.z - s / 2, y: Math.max(160, wrap.clientHeight) / 2 - t.pos[1] * c.z - s / 2, z: c.z };
 }
 const pointers = new Map();          // active pointers (two = pinch)
-let press = null;                    // {sx, sy, cam, token, mode: 'pan' | 'token' | 'pinch', moved}
+let press = null;                    // {sx, sy, cam, token, mode: 'pan' | 'item' | 'pinch', moved}
 const board = $('board');
 function pinchDistance() { const [a, b] = [...pointers.values()]; return Math.max(1, Math.hypot(a[0] - b[0], a[1] - b[1])); }
 function pinchMid() { const [a, b] = [...pointers.values()]; return [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]; }
+/* The mouse: the left button picks (a creature, an action's target, a confirmation) and drags the map around; the right
+ * button walks my token - on my turn in a fight, or out of one once I've picked my token. The middle button drags too.
+ * Touch: a drag moves the map; with my token picked, a tap on a tile shows the way and a second tap (or Move here) goes. */
+let rpress = null;                   // the right button: {sx, sy} where it went down
 board.addEventListener('pointerdown', e => {
-  if (!ST || e.button > 0) return;
+  if (!ST) return;
+  if (e.button === 2) { rpress = { sx: screenAt(e)[0], sy: screenAt(e)[1] }; return; }
+  if (e.button > 1) return;
   try { board.setPointerCapture(e.pointerId); } catch { /* a pointer already gone */ }
   pointers.set(e.pointerId, screenAt(e));
-  if (pointers.size === 2) { press = { mode: 'pinch', d: pinchDistance(), mid: pinchMid(), cam: camNow() }; UI.drag = null; return; }
-  const at = tileAt(e), c = tokenAt(pointAt(e)), b = ST.battle, [sx, sy] = screenAt(e);
-  const own = c && c.mine && canMove(b) && !UI.aim;
+  if (pointers.size === 2) { press = { mode: 'pinch', d: pinchDistance(), mid: pinchMid(), cam: camNow() }; return; }
+  const c = tokenAt(pointAt(e)), [sx, sy] = screenAt(e);
   const fingers = e.pointerType !== 'mouse';                 // a finger wobbles: more slack before a tap becomes a drag
-  const me = meInBattle(), it = !c && !UI.aim ? groundAt(pointAt(e)) : null;
+  const me = mover(), it = !c && !UI.aim && e.button === 0 ? groundAt(pointAt(e)) : null;
   const reach = !!(it && me && me.pos && Geo.toPoint(me, [it.x, it.y]) <= 5);
-  press = { sx, sy, cam: camNow(), token: c, mode: own ? 'token' : reach ? 'item' : 'pan', moved: false, touch: fingers, slop: fingers ? 10 : 5 };
-  if (own) UI.drag = { id: c.id, from: at, at: c.pos.slice(), start: c.pos.slice() };
+  press = { sx, sy, cam: camNow(), token: c, mode: reach ? 'item' : 'pan', moved: false, touch: fingers, slop: fingers ? 10 : 5, middle: e.button === 1 };
+  if (e.button === 1) e.preventDefault();                    // (no auto-scroll)
   if (reach) UI.item = { id: it.id, at: pointAt(e), moved: false };
 });
 board.addEventListener('pointermove', e => {
@@ -2558,20 +2795,18 @@ board.addEventListener('pointermove', e => {
   }
   if (!press) {
     const c = ST && tokenAt(pointAt(e)), it = ST && !c && !UI.aim ? groundAt(pointAt(e)) : null;
-    board.style.cursor = UI.aim ? 'crosshair' : c || it ? 'pointer' : 'grab';
+    board.style.cursor = UI.aim || UI.place ? 'crosshair' : c || it ? 'pointer' : 'grab';
     if ((it ? it.id : null) !== (UI.groundHover ?? null)) { UI.groundHover = it ? it.id : null; requestAnimationFrame(renderMap); }
     if (c && !UI.aim) { if (UI.tipFor !== c.id + '|' + ST.v) { UI.tipFor = c.id + '|' + ST.v; tip({ clientX: e.clientX, clientY: e.clientY, currentTarget: { getBoundingClientRect: () => ({ left: e.clientX + 12, top: e.clientY - 8, bottom: e.clientY + 18 }) } }, () => tokenCard(c)); } }
     else if (UI.tipFor) { UI.tipFor = null; tip(); }
-    const p = pointAt(e), key = UI.aim || (ST && canMove(ST.battle)) ? p.join(',') : '';
+    const p = pointAt(e), key = UI.aim || (ST && moveArmed(ST.battle)) ? p.join(',') : '';
     if (key !== UI.hoverKey) { UI.hoverKey = key; UI.hover = key ? p : null; requestAnimationFrame(renderMap); }
     return;
   }
   const [sx, sy] = screenAt(e), dx = sx - press.sx, dy = sy - press.sy;
   if (!press.moved && Math.abs(dx) + Math.abs(dy) < press.slop) return;
   press.moved = true; tip();
-  if (press.mode === 'token') {
-    const at = tileAt(e); UI.drag.at = [UI.drag.start[0] + at[0] - UI.drag.from[0], UI.drag.start[1] + at[1] - UI.drag.from[1]];
-  } else if (press.mode === 'item') {
+  if (press.mode === 'item') {
     UI.item.at = pointAt(e); UI.item.moved = true;
   } else {
     board.style.cursor = 'grabbing';
@@ -2592,21 +2827,34 @@ function release(e) {
     renderMap();
     return;
   }
-  if (p.mode === 'token') {
-    const d = UI.drag; UI.drag = null;
-    if (d && (d.at[0] !== d.start[0] || d.at[1] !== d.start[1])) walkTo(d.id, d.at[0], d.at[1]);
-    else { if (!p.moved && p.token) tapToken(p.token); else renderMap(); }
-  } else if (p.mode === 'pan' && !p.moved) {
+  if (p.mode === 'pan' && !p.moved && !p.middle) {
     if (Date.now() < (UI.quietUntil || 0)) return;           // the second tap of a double tap that just used an action
     if (UI.place) { const d = UI.place; UI.place = null; renderAimbar(); moveItem(d, 'map', tileAt(e)); return; }
     if (UI.aim) { if (p.touch) aimTap(pointAt(e), p.token); else aimClick(pointAt(e), p.token); return; }
     const b = ST.battle;
-    if (p.token) tapToken(p.token);                          // a click on a creature targets it (yours: shows it)
-    else if (canMove(b)) {
-      const [x, y] = tileAt(e);
-      if (p.touch) moveTap(x, y); else { const me = meInBattle(); if (me && me.pos) walkTo(me.id, x, y); else act('move', { x, y }); }
-    } else if (UI.move) cancelMove();
+    if (p.token) tapToken(p.token);                          // a click on a creature targets it (yours: picks it)
+    else if (p.touch && moveArmed(b)) { const [x, y] = tileAt(e); moveTap(x, y); }   // touch: the way there, to confirm
+    else {                                                   // a click on the ground: lets go of my token
+      if (UI.move) cancelMove();
+      if (UI.sel) { if (UI.inspect === UI.sel) UI.inspect = null; UI.sel = null; renderMap(); }
+    }
   }
+}
+/** A right-click: cancels the aim (or the item being put down); otherwise walks my token to that tile. */
+function rightClick(e) {
+  if (!ST) return;
+  if (UI.aim) return cancelAim();
+  if (UI.place) return cancelPlace();
+  const b = ST.battle, me = mover();
+  if (!canMove(b) || !me) {
+    if (me && b.settings.move_tokens && b.status === 'active') say(S('You can move your token on your turn.'), true);
+    return;
+  }
+  if (!moveArmed(b)) { say(S('Click your token first to pick it, then right-click where it should go.')); return; }
+  const [x, y] = tileAt(e);
+  if (me.pos && x >= me.pos[0] && x < me.pos[0] + me.span && y >= me.pos[1] && y < me.pos[1] + me.span) return;   // on itself
+  if (UI.move) { UI.move = null; renderAimbar(); }
+  if (me.pos) walkTo(me.id, x, y); else act('move', { x, y });   // (not on the map yet: put there)
 }
 /** A creature's hover card on the map: its name and health, its conditions and effects as pictures, how far it is,
  *  and what a click does. */
@@ -2614,23 +2862,51 @@ function tokenCard(c) {
   const b = ST.battle, me = meInBattle() || b.combatants.find(x => x.mine && x.pos), look = badgeLook();
   const pct = c.hp != null && c.max_hp ? Math.max(0, Math.min(100, 100 * c.hp / c.max_hp)) : null;
   return h('div', { class: 'tokcard' },
-    h('div', { class: 'tc-head' }, h('b', null, c.name), h('span', { class: 'grow' }), h('span', { class: c.hp != null ? '' : 'dim' }, c.hp != null ? `${c.hp}/${c.max_hp}` : c.health)),
+    h('div', { class: 'tc-head' }, h('b', null, c.name), h('span', { class: 'grow' }), hpWords(c)),
     pct != null ? h('div', { class: 'hpbar' }, h('div', { style: `width:${pct}%;background:${pct > 50 ? '#4ade80' : pct > 25 ? '#fbbf24' : '#f87171'}` })) : null,
     (c.badges || []).length ? h('div', { class: 'conds' }, ...c.badges.map(k => h('span', { style: `color:${(look[k] || [])[1] || 'var(--warn)'}` }, gi(k))),
       h('span', { class: 'small warn' }, c.conditions.join(', '))) : c.conditions.length ? h('div', { class: 'small warn' }, c.conditions.join(', ')) : null,
     me && me.pos && c.pos && me.id !== c.id ? h('div', { class: 'dim small' }, S('{0} ft away', Geo.dist(me, c))) : null,
     c.untargetable && !c.mine ? h('div', { class: 'small warn' }, S("Can't be targeted now (banished, ethereal or sealed away)")) : null,
-    h('div', { class: 'dim small' }, c.mine ? S('Click: show your details') : c.id === UI.target ? S('Click: clear the target')
+    h('div', { class: 'dim small' }, c.mine ? (isMover(c) && ST.battle.settings.move_tokens ? S('Click: pick your token (then right-click a tile to walk there)') : S('Click: show your details'))
+      : c.id === UI.target ? S('Click: clear the target')
       : c.untargetable ? S('Click: show it') : S('Click: make it your target')));
 }
 function tapToken(c) {
-  if (c.mine || (c.untargetable && c.id !== UI.target)) UI.inspect = UI.inspect === c.id ? null : c.id;   // (out of reach: shown, not a target)
+  if (isMover(c)) {                                          // my token: picked (its details shown) or let go
+    const on = UI.sel === c.id; UI.sel = on ? null : c.id; UI.inspect = on ? null : c.id;
+  } else if (c.mine || (c.untargetable && c.id !== UI.target)) UI.inspect = UI.inspect === c.id ? null : c.id;   // (out of reach: shown, not a target)
   else { UI.target = c.id === UI.target ? null : c.id; UI.inspect = null; }
   if (UI.move) { UI.move = null; renderAimbar(); }
   renderMap();
 }
 /** May I move my token now: on my turn in a fight; any time out of combat. */
 const canMove = b => !!b.settings.move_tokens && (b.status === 'active' ? !!b.my_turn : true);   // out of combat, before or after: free
+/** The token a move walks: the one whose turn it is (mine), else my character's. */
+const mover = () => ST && (meInBattle() || myToken() || ST.battle.combatants.find(c => c.mine && c.pos));
+const isMover = c => { const m = mover(); return !!(m && c && m.id === c.id); };
+/** Does a right-click walk my token now: on my turn in a fight (it is picked for me); out of one, once I've picked it
+ *  (a click on it) - or, not on the map yet, to put it there. */
+const moveArmed = b => {
+  if (!canMove(b)) return false;
+  const m = mover();
+  return !!m && (b.status === 'active' || !m.pos || UI.sel === m.id);
+};
+/** My turn starts: my token is picked (and shown, when it is off the screen); it ends: let go. */
+function turnPick(b) {
+  const mine = b.status === 'active' && !!b.my_turn;
+  if (mine && !UI.myTurn) {
+    const m = mover();
+    if (m) {
+      UI.sel = m.id;
+      if (m.pos && UI.cam) {
+        const c = UI.cam, wrap = $('mapwrap'), x = m.pos[0] * c.z + c.x, y = m.pos[1] * c.z + c.y, s = m.span * c.z, pad = Math.max(s, 40);
+        if (x < pad || y < pad || x + s > wrap.clientWidth - pad || y + s > Math.max(160, wrap.clientHeight) - pad) centerOn(m);   // off (or at) the edge
+      }
+    }
+  } else if (!mine && UI.myTurn && b.status === 'active') UI.sel = null;
+  UI.myTurn = mine;
+}
 /** The movement left this turn (out of combat: no limit). */
 const moveLeft = b => b.status === 'active' && b.actions && b.actions.turn ? b.actions.turn.move : null;
 /** Walk my token there; a ghost stays at the destination until the table answers (no snapping back meanwhile). */
@@ -2656,12 +2932,13 @@ function moveGo() {
   return m ? walkTo(m.id, m.x, m.y) : null;
 }
 function cancelMove() { UI.move = null; renderAimbar(); renderMap(); }
-board.addEventListener('contextmenu', e => { if (UI.aim) { e.preventDefault(); cancelAim(); } });
+board.addEventListener('contextmenu', e => e.preventDefault());   // the right button is the map's: no browser menu
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
     if (closeDetail()) return;
     if (!$('menupop').classList.contains('hide')) { $('menupop').classList.add('hide'); $('menu').focus(); return; }
     if (UI.place) cancelPlace(); else if (UI.aim) cancelAim(); else if (UI.move) cancelMove();
+    else if (UI.sel && ST && ST.battle.status !== 'active') { if (UI.inspect === UI.sel) UI.inspect = null; UI.sel = null; renderMap(); }
   }
   if (e.key === 'Enter' && UI.aim && document.activeElement === document.body) { if (UI.aim.pending) aimPick(); else commitAim(); }
   const typing = /^(INPUT|TEXTAREA|SELECT)$/.test((document.activeElement || {}).tagName || '');
@@ -2672,7 +2949,14 @@ document.addEventListener('keydown', e => {
     if (it && ST && ST.battle.actions) { e.preventDefault(); tip(); startAim(it); }
   }
 });
-board.addEventListener('pointerup', release);
+board.addEventListener('pointerup', e => {
+  if (e.button === 2) {                                      // a right-click (not a right-drag)
+    const r = rpress; rpress = null;
+    if (r) { const [sx, sy] = screenAt(e); if (Math.abs(sx - r.sx) + Math.abs(sy - r.sy) < 8) rightClick(e); }
+    return;
+  }
+  release(e);
+});
 board.addEventListener('dragover', e => { if (dragKind(e)) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; } });
 board.addEventListener('drop', e => {                       // an item card: on that tile, or to the creature there (Ctrl: one)
   const d = dragData(e);
@@ -2912,6 +3196,9 @@ async function commitAim() {
 /** The bar over the map while aiming (what to click, the slot it spends, who is hit) - or, on touch, the walk to confirm. */
 function renderAimbar() {
   const bar = $('aimbar'), a = UI.aim;
+  let vig = $('vignette');                                   // aiming (or putting an item down): the map's edges dim in
+  if (!vig) { vig = h('div', { id: 'vignette', 'aria-hidden': 'true' }); $('mapwrap').append(vig); }
+  vig.classList.toggle('on', !!(a || UI.place));
   if (!a && UI.place) {
     bar.classList.remove('hide');
     bar.replaceChildren(h('b', null, '🎒 ' + UI.place.label), h('span', { class: 'dim' },
@@ -2969,15 +3256,15 @@ function renderAimbar() {
   keepFocus(bar, () => bar.replaceChildren(...kids));
 }
 function drawAim(g, b, T) {
-  const a = UI.aim, me = meInBattle();
+  const a = UI.aim, me = a ? meInBattle() : mover();
   if (!a && UI.move) {                                       // touch: the way to the tapped tile, to confirm
     const m = UI.move, c = b.combatants.find(x => x.id === m.id);
     if (c && c.pos) drawWay(g, T, c, m);
     return;
   }
   if (!a) {
-    const hv = UI.hover;                                     // on my turn: where a click would walk to
-    if (hv && !touch() && canMove(b) && me && me.pos && !UI.drag) {
+    const hv = UI.hover;                                     // my token picked: where a right-click would walk to
+    if (hv && !touch() && moveArmed(b) && me && me.pos) {
       const tile = [Math.floor(hv[0]), Math.floor(hv[1])];
       if (!tokenAt(tile) && tile[0] >= 0 && tile[1] >= 0 && tile[0] < b.map.w && tile[1] < b.map.h) {
         const pk = movePeek(me, tile[0], tile[1]);          // the table's answer: the real way, and opportunity attacks on it
@@ -3117,18 +3404,27 @@ function renderActions() {
   const strip = [];                       // every group in one wrapping strip, a thin bar in its cost colour first (its name on hover)
   UI.hotkeys = a.groups.filter(g => g.key !== 'reaction').flatMap(g => g.items).slice(0, 9);   // keys 1-9, in the strip's order
   const divider = (title, cls) => h('span', { class: 'gdiv ' + cls, tip: title, 'aria-label': title, role: 'separator' });
+  const flip = k => () => { tip(); flipFold(k, renderActions); };
+  const grip = (g, cls) => {             // a group's bar folds it away; folded, it shows ▸ and how many it holds
+    const k = 'bar:' + g.key, shut = folded(k), words = `${g.title}\n${shut ? S('Folded: click to unfold') : S('Click to fold away')}`;
+    return h('button', { class: 'gdiv fold ' + cls + (shut ? ' shut' : ''), tip: words, 'aria-label': g.title, 'aria-expanded': String(!shut), onclick: flip(k) },
+      shut ? `▸${g.items.length}` : null);
+  };
   for (const g of a.groups) {
     if (g.key === 'reaction') continue;
-    strip.push(divider(g.title, COST_CLASS[g.key] || 'free'), ...g.items.map(button));
+    strip.push(grip(g, COST_CLASS[g.key] || 'free'), ...(folded('bar:' + g.key) ? [] : g.items.map(button)));
   }
   const open = UI.spellsOpen;
   if (a.spells.length) strip.push(divider(S('Spells'), 'spell'), ibtn('spell-book', open ? S('Hide spells') : S('Show spells'),
     () => { UI.spellsOpen = !open; store('spells', UI.spellsOpen); renderActions(); }, 'act ico spell' + (open ? ' on' : '')));
   if (strip.length) kids.push(h('div', { class: 'row strip' }, ...strip));
   if (a.spells.length && open) {            // one strip too: a level tag (its slots on hover) before each level's spells
-    const tag = g => { const words = g.title + (g.slots ? `\n${S('Level {0} spell slots: {1} of {2} left', g.level, g.slots.left, g.slots.total)}` : '');
-      return h('span', { class: 'lvtag' + (g.slots && !g.slots.left ? ' used' : ''), tip: words, 'aria-label': words, role: 'separator' }, g.level ? String(g.level) : '◌'); };
-    kids.push(h('div', { class: 'row strip spellstrip' }, ...a.spells.flatMap(g => [tag(g), ...g.items.map(button)])));
+    const tag = g => { const k = 'barspells:' + g.level, shut = folded(k), n = g.level ? String(g.level) : '◌';
+      const words = g.title + (g.slots ? `\n${S('Level {0} spell slots: {1} of {2} left', g.level, g.slots.left, g.slots.total)}` : '')
+        + `\n${shut ? S('Folded: click to unfold') : S('Click to fold away')}`;
+      return h('button', { class: 'lvtag fold' + (g.slots && !g.slots.left ? ' used' : '') + (shut ? ' shut' : ''), tip: words, 'aria-label': words,
+        'aria-expanded': String(!shut), onclick: flip(k) }, shut ? `${n}▸${g.items.length}` : n); };
+    kids.push(h('div', { class: 'row strip spellstrip' }, ...a.spells.flatMap(g => [tag(g), ...(folded('barspells:' + g.level) ? [] : g.items.map(button))])));
   }
   if ((a.toggles || []).length) kids.push(h('div', { class: 'row' }, h('span', { class: 'title' }, S('Feats')), ...toggleChips(a.toggles, true)));
   if (a.reactions.length) {                 // a picture per reaction, its setting as a corner mark: ? ask, ✓ always, ✕ never
@@ -3439,9 +3735,10 @@ function spellsTab(c) {
   if (loose.length) out.push(h('div', { class: 'card' }, h('div', { class: 'title' }, S('Spell slots')),
     ...loose.map(s => h('div', { class: 'li' }, h('span', { class: 'n' }, s.label), ...pipsOf(s)))));
   for (const g of c.spells) {
-    const mine = c.slots.find(s => String(s.key) === String(g.level));
-    out.push(h('div', { class: 'card' }, h('div', { class: 'title lvl' }, g.title, mine ? h('span', { class: 'grow' }) : null, ...(mine ? pipsOf(mine) : [])),
-      h('div', { class: 'chips' }, ...g.spells.map(sp => h('span', { class: 'chip', tip: `${sp.label}\n${sp.time} · ${sp.range}\n\n${sp.text}`,
+    const mine = c.slots.find(s => String(s.key) === String(g.level)), k = 'spells:' + g.level;   // each level folds under its title
+    out.push(h('div', { class: 'card' + (folded(k) ? ' shut' : '') }, h('div', { class: 'title lvl' }, foldHead(k, g.title, g.spells.length, renderSheet),
+      mine ? h('span', { class: 'grow' }) : null, ...(mine ? pipsOf(mine) : [])),
+      folded(k) ? null : h('div', { class: 'chips' }, ...g.spells.map(sp => h('span', { class: 'chip', tip: `${sp.label}\n${sp.time} · ${sp.range}\n\n${sp.text}`,
         more: () => spellButtons(c, sp, g.level),
         onclick: go(() => castChip(c, sp, g.level)),
         oncontextmenu: e => { if (sp.ritual && lastPointer === 'mouse') { e.preventDefault(); act('cast', { spell: sp.name, ritual: true }); } } },
@@ -3673,7 +3970,9 @@ function inventoryTab(c) {
 }
 
 function featuresTab(c) {
-  return c.features.map(g => h('div', { class: 'card' }, h('div', { class: 'title' }, g.source), ...g.items.map(f => {
+  return c.features.map(g => h('div', { class: 'card' + (folded('features:' + g.source) ? ' shut' : '') },   // each source folds under its title
+    h('div', { class: 'title' }, foldHead('features:' + g.source, g.source, g.items.length, renderSheet)),
+    ...(folded('features:' + g.source) ? [] : g.items).map(f => {
     const key = g.source + '|' + f.name, open = UI.open.has(key);
     return h('div', { class: 'feat' }, h('div', { class: 'li click', tip: open ? null : `${f.label}\n${f.text}`,   // folded: its text on hover
       onclick: () => { tip(); open ? UI.open.delete(key) : UI.open.add(key); renderSheet(); } },

@@ -7,3 +7,7 @@ modules/*.dpmod
 # those are part of the program)
 __pycache__/
 startup_error.log
+
+# Update.exe's downloads in progress, and its old copy after it replaced itself
+.update/
+Update.exe.old

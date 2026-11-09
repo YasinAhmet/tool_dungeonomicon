@@ -1897,8 +1897,8 @@ vs,vs,karşı
 {0} ft,{0} ft,{0} ft
 "Tap to aim, tap the same place again (or Confirm) to use it. Tap ✕ to cancel.","Tap to aim, tap the same place again (or Confirm) to use it. Tap ✕ to cancel.","Nişan almak için dokun, kullanmak için aynı yere yeniden dokun (ya da Onayla). İptal için ✕'e dokun."
 Right-click or Esc cancels.,Right-click or Esc cancels.,Sağ tık ya da Esc iptal eder.
-"Tap a tile to see the way, tap again (or Move here) to go - or drag your token.","Tap a tile to see the way, tap again (or Move here) to go - or drag your token.","Yolu görmek için bir kareye dokun, gitmek için yeniden dokun (ya da Buraya git) - veya jetonunu sürükle."
-Click a tile (or drag your token) to move there.,Click a tile (or drag your token) to move there.,Oraya gitmek için bir kareye tıkla (ya da jetonunu sürükle).
+"Tap a tile to see the way, tap again (or Move here) to go.","Tap a tile to see the way, tap again (or Move here) to go.","Yolu görmek için bir kareye dokun, gitmek için yeniden dokun (ya da Buraya git)."
+Right-click a tile to walk there.,Right-click a tile to walk there.,Oraya yürümek için bir kareye sağ tıkla.
 "Drag to move around, pinch to zoom, tap a creature to target it. Hold a button for its details.","Drag to move around, pinch to zoom, tap a creature to target it. Hold a button for its details.","Gezinmek için sürükle, yakınlaşmak için kıstır, hedef almak için bir yaratığa dokun. Ayrıntılar için bir düğmeye basılı tut."
 {0} ft away,{0} ft away,{0} ft uzakta
 your action,your action,eylemin
@@ -2024,7 +2024,7 @@ Berry bush,Berry bush,
 Cactus,Cactus,
 Stump,Stump,
 Flowers,Flowers,
-Rubble,Rubble,
+Rubble,Rubble,Moloz
 Ore vein,Ore vein,
 Tomb,Tomb,
 Gravestone,Gravestone,
@@ -2505,7 +2505,7 @@ Cross,Cross,
 Classic objects,Classic objects,
 Barrels,Barrels,
 Stacked barrels,Stacked barrels,
-Undergrowth,Undergrowth,
+Undergrowth,Undergrowth,Çalılık
 Puddle,Puddle,
 Bridge,Bridge,
 Loose planks,Loose planks,
@@ -2580,7 +2580,7 @@ cuts the walls around its tile while open (O opens and closes it),cuts the walls
 a mark on the map,a mark on the map,
 {0} cover,{0} cover,
 blocks the tile,blocks the tile,
-difficult terrain,difficult terrain,
+difficult terrain,difficult terrain,zorlu arazi
 light {0} ft,light {0} ft,
 Take it off the quick bar,Take it off the quick bar,
 Pin to the quick bar above the map,Pin to the quick bar above the map,
@@ -5169,3 +5169,351 @@ Players may open duels,Players may open duels,Oyuncular düello açabilir
 "{0} joined the battle, initiative rolled.","{0} joined the battle, initiative rolled.","{0} savaşa katıldı, inisiyatif atıldı."
 No free tile near there.,No free tile near there.,Oraya yakın boş kare yok.
 Nobody to bring.,Nobody to bring.,Getirilecek kimse yok.
+"Click your token first to pick it, then right-click where it should go.","Click your token first to pick it, then right-click where it should go.","Önce jetonuna tıklayıp seç, sonra gideceği yere sağ tıkla."
+Click: pick your token (then right-click a tile to walk there),Click: pick your token (then right-click a tile to walk there),Tıkla: jetonunu seç (sonra yürümek için bir kareye sağ tıkla)
+"Tap your token to pick it, then tap where it should go.","Tap your token to pick it, then tap where it should go.","Seçmek için jetonuna dokun, sonra gideceği yere dokun."
+"Click your token to pick it, then right-click where it should go.","Click your token to pick it, then right-click where it should go.","Seçmek için jetonuna tıkla, sonra gideceği yere sağ tıkla."
+You can move your token on your turn.,You can move your token on your turn.,Jetonunu kendi sıranda hareket ettirebilirsin.
+Armor and shields,Armor and shields,
+All items,All items,
+Name already used,Name already used,
+Save as copy,Save as copy,
+Overwrite,Overwrite,
+"You already have '{0}'. Overwrite it, or save this as a copy?","You already have '{0}'. Overwrite it, or save this as a copy?",
+"Play the loops and effects on this computer's speakers.
+Turn it off when you are in the voice channel too, or you hear them twice.","Play the loops and effects on this computer's speakers.
+Turn it off when you are in the voice channel too, or you hear them twice.",
+"Mix the loops and effects into the music players hear on the player page
+(they press Listen there and set their own volume).","Mix the loops and effects into the music players hear on the player page
+(they press Listen there and set their own volume).",
+"Delay
+Holds the whole stream back by this many milliseconds. Useful for testing or lining the audio up with a video.","Delay
+Holds the whole stream back by this many milliseconds. Useful for testing or lining the audio up with a video.",
+"{0}
+From freesound.org: {1} (CC0)","{0}
+From freesound.org: {1} (CC0)",
+Replace the saved encounter '{0}'?,Replace the saved encounter '{0}'?,
+"{0}
+Added by hand (not on Discord): send them their portal link yourself.","{0}
+Added by hand (not on Discord): send them their portal link yourself.",
+"{0}
+Discord ID {1}","{0}
+Discord ID {1}",
+"Bot token
+Saved on this computer; the bot starts by itself when the app opens.","Bot token
+Saved on this computer; the bot starts by itself when the app opens.",
+"Log channel
+Rolls, XP and the battle log are posted here.","Log channel
+Rolls, XP and the battle log are posted here.",
+"Log to a thread or voice channel chat
+When set, log messages go here instead of the log channel.","Log to a thread or voice channel chat
+When set, log messages go here instead of the log channel.",
+"{0}
+{1}","{0}
+{1}",
+"Void
+Nothing is sent to Discord.","Void
+Nothing is sent to Discord.",
+Feature catalog,Feature catalog,
+Wordings,Wordings,
+"{0} · on {1} creatures, {2}","{0} · on {1} creatures, {2}",
+Wordings ({0}) - how many creatures use each,Wordings ({0}) - how many creatures use each,
+attack: follows the creature's stats,attack: follows the creature's stats,
+adapted to CR {0},adapted to CR {0},
+Used by: {0},Used by: {0},
+"Added {0} ({1}), made for CR {2}.","Added {0} ({1}), made for CR {2}.",
+"search features, or a creature to see its features…","search features, or a creature to see its features…",
+"Every trait and action of the bestiary, merged by name: the most common first. Pick a wording and its usage, then add it - bonuses, DCs, damage and the name are made for {0} (CR {1}); an attack keeps its numbers, so it follows the creature's stats.","Every trait and action of the bestiary, merged by name: the most common first. Pick a wording and its usage, then add it - bonuses, DCs, damage and the name are made for {0} (CR {1}); an attack keeps its numbers, so it follows the creature's stats.",
+Usage,Usage,
+Add as,Add as,
+Build Multiattack…,Build Multiattack…,
+"Multiattack
+One Multiattack, built from this creature's own attacks: how many of each, alternatives (""or it makes two Longbow attacks"") and an attack it can trade for Spellcasting or another action. {0} creatures have one.","Multiattack
+One Multiattack, built from this creature's own attacks: how many of each, alternatives (""or it makes two Longbow attacks"") and an attack it can trade for Spellcasting or another action. {0} creatures have one.",
+Configure…,Configure…,
++ Item…,+ Item…,
+"Weapons, armor, shields, magic items","Weapons, armor, shields, magic items",
++ Feat…,+ Feat…,
+A feat's benefits as a trait,A feat's benefits as a trait,
++ Class feature…,+ Class feature…,
+"Any class's or subclass's feature, or a class option (invocations, maneuvers, fighting styles...)","Any class's or subclass's feature, or a class option (invocations, maneuvers, fighting styles...)",
+Unpacked into the creature's own entries.,Unpacked into the creature's own entries.,
+"Items, feats & class features ({0})","Items, feats & class features ({0})",
+"what it has, and what that gives it","what it has, and what that gives it",
+With its items: AC {0} ({1}). The AC above counts when it wears no body armor.,With its items: AC {0} ({1}). The AC above counts when it wears no body armor.,
++ From catalog…,+ From catalog…,
++ Multiattack…,+ Multiattack…,
+Change its numbers; the text is written from them,Change its numbers; the text is written from them,
+Turn this into plain text (it stops following the stats),Turn this into plain text (it stops following the stats),
+(written when the stat block updates),(written when the stat block updates),
+"Give the creature a weapon (it becomes an attack), armor and a shield (its armor class), a magic item, a feat or a class feature - each adds what it gives.","Give the creature a weapon (it becomes an attack), armor and a shield (its armor class), a magic item, a feat or a class feature - each adds what it gives.",
+Its class level (0: from the CR),Its class level (0: from the CR),
+Where its text goes in the stat block,Where its text goes in the stat block,
+monster wording,monster wording,
+rules wording,rules wording,
+"Monster wording: as a printed creature with this feature has it (what the battle page plays). Rules wording: the feat's or feature's own text, told about this creature.","Monster wording: as a printed creature with this feature has it (what the battle page plays). Rules wording: the feat's or feature's own text, told about this creature.",
+"Unpack: turn what it gives into this creature's own entries, to change by hand","Unpack: turn what it gives into this creature's own entries, to change by hand",
+"Every trait and action of the bestiary, merged by name (one Bite, one Magic Resistance...). Its bonuses, DCs, damage and name are made for this creature.","Every trait and action of the bestiary, merged by name (one Bite, one Magic Resistance...). Its bonuses, DCs, damage and name are made for this creature.",
+An attack kept as its numbers: it follows the ability scores and CR,An attack kept as its numbers: it follows the ability scores and CR,
+"How many attacks of which kind, alternatives, and what an attack can be traded for","How many attacks of which kind, alternatives, and what an attack can be traded for",
+Follows the creature's stats.,Follows the creature's stats.,
+Written from its choices; renaming an attack renames it here too.,Written from its choices; renaming an attack renames it here too.,
+Rebuild as a configurable attack,Rebuild as a configurable attack,
+Rebuild as a configurable Multiattack,Rebuild as a configurable Multiattack,
+Melee weapon,Melee weapon,
+Ranged weapon,Ranged weapon,
+Melee or ranged (thrown),Melee or ranged (thrown),
+Ranged spell,Ranged spell,
+Melee spell,Melee spell,
+Melee or ranged spell,Melee or ranged spell,
+Select one to see what it gives this creature.,Select one to see what it gives this creature.,
+printed creature's wording,printed creature's wording,
+Give to the creature,Give to the creature,
+{0} found,{0} found,
+{0} given to {1}.,{0} given to {1}.,
+add the ability modifier to damage,add the ability modifier to damage,
+one target,one target,
+e.g. the target is grappled (escape DC {dc}).,e.g. the target is grappled (escape DC {dc}).,
+Rider (after the damage). {dc} is the creature's save DC for this attack.,Rider (after the damage). {dc} is the creature's save DC for this attack.,
+"To hit, damage and the DC follow the creature's ability scores and CR from now on.","To hit, damage and the DC follow the creature's ability scores and CR from now on.",
+"How many attacks of which kind the creature makes with its action. Add another option for an alternative (""…, or it makes two Longbow attacks"").","How many attacks of which kind the creature makes with its action. Add another option for an alternative (""…, or it makes two Longbow attacks"").",
+Add at least one attack.,Add at least one attack.,
+"A weapon becomes an attack (bigger creatures' weapons deal extra dice), armor and a shield set its armor class, a magic item adds what it does.","A weapon becomes an attack (bigger creatures' weapons deal extra dice), armor and a shield set its armor class, a magic item adds what it does.",
+"A feat's benefits as a trait, told about the creature.","A feat's benefits as a trait, told about the creature.",
+"A class feature at the level you choose, told about the creature - or, when a printed creature has the same feature, in its wording, which the battle page plays.","A class feature at the level you choose, told about the creature - or, when a printed creature has the same feature, in its wording, which the battle page plays.",
+The class level of the feature (0: from the CR),The class level of the feature (0: from the CR),
+Use the wording a printed creature has for the same feature (what the battle page knows),Use the wording a printed creature has for the same feature (what the battle page knows),
+A magic weapon's bonus to attack and damage rolls,A magic weapon's bonus to attack and damage rolls,
+Damage dice,Damage dice,
+Two-handed die,Two-handed die,
+Magic bonus,Magic bonus,
+Extra damage,Extra damage,
+0 dice = none,0 dice = none,
+Read from: {0},Read from: {0},
+no,no,
+one attack,one attack,
+two attacks,two attacks,
+It can replace,It can replace,
+with a use of,with a use of,
+"This creature has no attacks yet: add some (or give it a weapon) first, or type the names.","This creature has no attacks yet: add some (or give it a weapon) first, or type the names.",
+Option {0},Option {0},
++ Or another option,+ Or another option,
+In the wording of {0}.,In the wording of {0}.,
+Adds to the stat block:,Adds to the stat block:,
+the creature,the creature,
++ Attack,+ Attack,
+"An alternative: ""…, or it makes two Longbow attacks""","An alternative: ""…, or it makes two Longbow attacks""",
+Remove this option,Remove this option,
+uses,uses,
+"The apps streamed from the Audio window (and its loops and effects, if Player page is ticked there).
+Each player presses Listen on the page and sets their own volume.","The apps streamed from the Audio window (and its loops and effects, if Player page is ticked there).
+Each player presses Listen on the page and sets their own volume.",
+"Dungeonomicon Battlegrounds - duels, skirmishes and arena runs for D&D 5e, apart from any campaign: you open lobbies, the players join them from their own Battlegrounds link and fight.
+
+Open windows from the Window menu and drag their tabs to dock them anywhere: beside another window, as a tab, floating, or pinned to a side bar. Save arrangements under Layout.","Dungeonomicon Battlegrounds - duels, skirmishes and arena runs for D&D 5e, apart from any campaign: you open lobbies, the players join them from their own Battlegrounds link and fight.
+
+Open windows from the Window menu and drag their tabs to dock them anywhere: beside another window, as a tab, floating, or pinned to a side bar. Save arrangements under Layout.",
+"Dungeonomicon - an all-in-one Dungeon Master helper for D&D 5e with Discord bot support.
+
+Open windows from the Window menu and drag their tabs to dock them anywhere: beside another window, as a tab, floating, or pinned to a side bar. Save arrangements under Layout.","Dungeonomicon - an all-in-one Dungeon Master helper for D&D 5e with Discord bot support.
+
+Open windows from the Window menu and drag their tabs to dock them anywhere: beside another window, as a tab, floating, or pinned to a side bar. Save arrangements under Layout.",
+Injured,Injured,Hafif yaralı
+Extremely Wounded,Extremely Wounded,Ağır yaralı
+Mud,Mud,Çamur
+Ice,Ice,Buz
+Sand,Sand,Kum
+"Paint difficult terrain tile by tile: mud, water, undergrowth, rubble, ice, sand (it costs double movement). Painting over another kind replaces it. Shift+drag clears the paint","Paint difficult terrain tile by tile: mud, water, undergrowth, rubble, ice, sand (it costs double movement). Painting over another kind replaces it. Shift+drag clears the paint","Zorlu araziyi kare kare boya: çamur, su, çalılık, moloz, buz, kum (iki kat hareket harcatır). Başka bir türün üstüne boyamak onu değiştirir. Shift+sürükle boyayı siler"
+"Erase: drag over drawings, symbols, rooms, doors and painted terrain to remove them","Erase: drag over drawings, symbols, rooms, doors and painted terrain to remove them","Silgi: kaldırmak için çizimlerin, sembollerin, odaların, kapıların ve boyalı arazinin üzerinden sürükle"
+"Slope: walked up at double cost, down for free; no cover","Slope: walked up at double cost, down for free; no cover","Yamaç: çıkışı iki kat hareket, inişi ek bedelsiz; siper vermez"
+Steep: a climb - double movement up or down; half cover from below,Steep: a climb - double movement up or down; half cover from below,Dik: tırmanış - inerken de çıkarken de iki kat hareket; aşağıdan yarım siper
+Sheer: nobody walks up or down it (flyers and climbers do); half cover from below,Sheer: nobody walks up or down it (flyers and climbers do); half cover from below,Sarp: kimse yürüyerek inip çıkamaz (uçanlar ve tırmananlar geçer); aşağıdan yarım siper
+Snap to the grid: a line's corners land on tile corners. Untick it to keep the line as drawn (smoothed a little). Each drawing tool remembers its own,Snap to the grid: a line's corners land on tile corners. Untick it to keep the line as drawn (smoothed a little). Each drawing tool remembers its own,Izgaraya hizala: çizginin köşeleri karelerin köşelerine oturur. İşareti kaldırırsan çizgi çizildiği gibi kalır (biraz yumuşatılır). Her çizim aracı kendi ayarını hatırlar
+Snap,Snap,Hizala
+Grow near the edge,Grow near the edge,Kenara yaklaşınca büyüt
+"A token moving within {0} tiles of the map's edge makes the map bigger on that side (every floor alike, up to {1} tiles)","A token moving within {0} tiles of the map's edge makes the map bigger on that side (every floor alike, up to {1} tiles)","Bir jeton haritanın kenarına {0} kare yaklaşınca harita o yönde büyür (her kat aynı şekilde, en çok {1} kare)"
+Cliff,Cliff,Uçurum
+Road edge,Road edge,Yol kenarı
+Slope: going up costs double,Slope: going up costs double,Yamaç: çıkmak iki kat hareket
+"Steep: a climb, double either way","Steep: a climb, double either way","Dik: tırmanış, iki yönde de iki kat"
+Sheer: only flyers and climbers cross it,Sheer: only flyers and climbers cross it,Sarp: yalnızca uçanlar ve tırmananlar geçer
+Flip: the high ground on the other side,Flip: the high ground on the other side,Çevir: yüksek zemin öbür tarafta
+Click to fold or unfold,Click to fold or unfold,Katlamak ya da açmak için tıklayın
+Folded: click to unfold,Folded: click to unfold,Katlı: açmak için tıklayın
+Click to fold away,Click to fold away,Katlamak için tıklayın
+every player sees the exact HP,every player sees the exact HP,
+"its own faction sees the exact HP, the other players: {0}","its own faction sees the exact HP, the other players: {0}",
+Discovered: the players know its name,Discovered: the players know its name,Keşfedildi: oyuncular adını biliyor
+Undiscovered: the players see it as {0},Undiscovered: the players see it as {0},Keşfedilmedi: oyuncular onu {0} olarak görüyor
+End {0} now,End {0} now,{0} şimdi bitsin
+Ending it ends the spell everywhere it holds,Ending it ends the spell everywhere it holds,
+End concentration,End concentration,Konsantrasyonu bitir
+{0} form,{0} form,
+"A changed shape (Wild Shape, Polymorph)","A changed shape (Wild Shape, Polymorph)",
+Leave {0} form,Leave {0} form,
+From: {0},From: {0},
+"Its panel: conditions, effects, faction, what the players see, tools…","Its panel: conditions, effects, faction, what the players see, tools…",
+Show its card in the Inspector,Show its card in the Inspector,
+"What the players see: a creature outside this session's group (Party ▸ ☑ playing this session) is unknown to them until you mark it discovered; hit points are exact for their own faction only, else Stable, Injured, Wounded or Extremely Wounded.","What the players see: a creature outside this session's group (Party ▸ ☑ playing this session) is unknown to them until you mark it discovered; hit points are exact for their own faction only, else Stable, Injured, Wounded or Extremely Wounded.",
+Players see: all their names,Players see: all their names,
+Players don't know {0} of these names,Players don't know {0} of these names,
+Name the players see,Name the players see,
+What do the players call {0} until they know its name? (empty: Unknown creature),What do the players call {0} until they know its name? (empty: Unknown creature),
+In this session's group: the players always know it,In this session's group: the players always know it,
+"Without it, players of another faction see Stable, Injured, Wounded or Extremely Wounded","Without it, players of another faction see Stable, Injured, Wounded or Extremely Wounded",
+Ctrl+Z brings it back.,Ctrl+Z brings it back.,
+Brings: {0},Brings: {0},
+Held by {0}'s concentration,Held by {0}'s concentration,
+Players see:,Players see:,Oyuncular görüyor:
+Click to hide the name again,Click to hide the name again,
+Click to tell the players its name,Click to tell the players its name,
+Now: {0},Now: {0},
+Unknown creature,Unknown creature,Bilinmeyen yaratık
+Name the players see while it is undiscovered…,Name the players see while it is undiscovered…,
+Bonuses,Bonuses,
+Defenses,Defenses,
+Senses and movement,Senses and movement,
+Powers of other items,Powers of other items,
+What it grants,What it grants,
+Add a property,Add a property,
+Add to the item,Add to the item,
+Add this power,Add this power,
+{0} powers,{0} powers,
+"Every kind of property the books' magic items have, merged: how many items use it, its most common values, examples. Or borrow a power of another item, merged by wording.","Every kind of property the books' magic items have, merged: how many items use it, its most common values, examples. Or borrow a power of another item, merged by wording.",
+Property,Property,
+"It writes, for this item:","It writes, for this item:",
+"search the powers, or an item's name…","search the powers, or an item's name…",
+On {0} of the books' magic items.,On {0} of the books' magic items.,
+No book item has it in this wording.,No book item has it in this wording.,
+Most common: {0},Most common: {0},
+e.g. {0},e.g. {0},
+"each property sets what the sheet and the battle use, and writes its sentence","each property sets what the sheet and the battle use, and writes its sentence",
++ Add property…,+ Add property…,
+"Nothing yet: add what the item grants - +1 to a score, a resistance, a spell it casts once a day, darkvision...","Nothing yet: add what the item grants - +1 to a score, a resistance, a spell it casts once a day, darkvision...",
+user's,user's,
+walking,walking,
+Its wording is kept (the battle page reads many of them); 'this cloak' becomes this item's word.,Its wording is kept (the battle page reads many of them); 'this cloak' becomes this item's word.,
+Added {0}: set it on its card.,Added {0}: set it on its card.,
+Added a power of {0}.,Added a power of {0}.,
+"A bonus, a resistance, a sense, a spell it casts, extra weapon damage, or a power of another item","A bonus, a resistance, a sense, a spell it casts, extra weapon damage, or a power of another item",
+From {0}.,From {0}.,
+Already told by the description: it only sets the numbers.,Already told by the description: it only sets the numbers.,
+Write it in the text,Write it in the text,
+On {0} items,On {0} items,
+Add its sentence to the item's text too,Add its sentence to the item's text too,
+Browse the powers…,Browse the powers…,
+Set rarity to {0},Set rarity to {0},
+The DMG's rarity for what the item grants,The DMG's rarity for what the item grants,
+Grants like a {0} item,Grants like a {0} item,
+Health: Stable,Stable,Sağlam
+Health: Injured,Injured,Hafif yaralı
+Health: Wounded,Wounded,Yaralı
+Health: Extremely Wounded,Extremely Wounded,Ağır yaralı
+Health: Defeated,Defeated,Yenildi
+(now),(now),
+Immunity,Immunity,
+Advantage on saves,Advantage on saves,
+Hard to catch,Hard to catch,
+Hard to hit,Hard to hit,
+Double speed,Double speed,
+Used in a fight,Used in a fight,
+its own,its own,
+"A bonus, a resistance, a sense, a spell it casts, extra weapon damage, a blast with a saving throw, or a power of another item","A bonus, a resistance, a sense, a spell it casts, extra weapon damage, a blast with a saving throw, or a power of another item",
+standard trait: follows the creature's name,standard trait: follows the creature's name,
+saving throw: its DC and damage follow the creature's stats,saving throw: its DC and damage follow the creature's stats,
+Rebuild as a configurable saving throw (its DC and damage follow the stats),Rebuild as a configurable saving throw (its DC and damage follow the stats),
+Rebuild as a standard trait (it follows the creature's name),Rebuild as a standard trait (it follows the creature's name),
+Rebuild as using another action (renaming that action renames it here),Rebuild as using another action (renaming that action renames it here),
+Blindsight note,Blindsight note,
+New saving throw,New saving throw,
+New trait,New trait,
+Trait,Trait,
+New legendary action,New legendary action,
+e.g. blind beyond this radius,e.g. blind beyond this radius,
++ Trait…,+ Trait…,
++ Saving throw…,+ Saving throw…,
++ Uses an action…,+ Uses an action…,
+"A standard trait in the books' words (Magic Resistance, Regeneration, Keen Smell...): it follows the creature's name","A standard trait in the books' words (Magic Resistance, Regeneration, Keen Smell...): it follows the creature's name",
+"A breath weapon, an area or a gaze: a saving throw whose DC and damage follow the ability scores and CR","A breath weapon, an area or a gaze: a saving throw whose DC and damage follow the ability scores and CR",
+"""The dragon makes a tail attack."", ""…uses its Frightful Presence."", ""…moves up to half its speed."": the battle page plays the action it names","""The dragon makes a tail attack."", ""…uses its Frightful Presence."", ""…moves up to half its speed."": the battle page plays the action it names",
+Cone,Cone,
+Cube,Cube,
+Sphere at a point it can see,Sphere at a point it can see,
+Sphere centered on itself,Sphere centered on itself,
+Each creature within … feet of it,Each creature within … feet of it,
+"Creatures of its choice around it, aware of it","Creatures of its choice around it, aware of it",
+One creature it can see,One creature it can see,
+The target (told before),The target (told before),
+"capitalized damage types (""Piercing damage"")","capitalized damage types (""Piercing damage"")",
+"rider after a comma ("", and the target…"")","rider after a comma ("", and the target…"")",
+Saving throw action,Saving throw action,
+e.g. exhales fire,e.g. exhales fire,
+add the ability modifier,add the ability modifier,
+saves again at the end of each of its turns,saves again at the end of each of its turns,
+"What else happens; may say DC {dc}, and {dmg} for the damage","What else happens; may say DC {dc}, and {dmg} for the damage",
+its name,its name,
+Rider (after the save),Rider (after the save),
+The DC (8 + proficiency + the ability's modifier) and the damage follow the creature's ability scores and CR from now on.,The DC (8 + proficiency + the ability's modifier) and the damage follow the creature's ability scores and CR from now on.,
+only if it has at least 1 hit point,only if it has at least 1 hit point,
+e.g. acid or fire,e.g. acid or fire,
+dies only if it starts its turn with 0 hit points,dies only if it starts its turn with 0 hit points,
+"a pronoun after its name (""magic can't put him to sleep"")","a pronoun after its name (""magic can't put him to sleep"")",
+e.g. isn't in sunlight or running water,e.g. isn't in sunlight or running water,
+"""If it takes…"" (not its name)","""If it takes…"" (not its name)",
+e.g. an ordinary object,e.g. an ordinary object,
+"""an opportunity attack"" (not ""opportunity attacks"")","""an opportunity attack"" (not ""opportunity attacks"")",
+Doesn't require,Doesn't require,
+AC bonus over proficiency,AC bonus over proficiency,
+Indistinguishable from,Indistinguishable from,
+Extra d6s,Extra d6s,
+For,For,
+Wording,Wording,
+Long and high jump (ft.),Long and high jump (ft.),
+"The books' wording, about this creature: it follows its name, and the battle page plays it.","The books' wording, about this creature: it follows its name, and the battle page plays it.",
+Uses another action,Uses another action,
+"""its"" before the action","""its"" before the action",
+half its speed,half its speed,
+without provoking opportunity attacks,without provoking opportunity attacks,
+"The battle page plays it as that action, at this entry's cost (Costs 2 Actions in its name).","The battle page plays it as that action, at this entry's cost (Costs 2 Actions in its name).",
+Added to the damage only (a printed creature's damage off its to-hit numbers),Added to the damage only (a printed creature's damage off its to-hit numbers),
+Added to the rider's DC {dc},Added to the rider's DC {dc},
+"A set amount instead of dice (""Hit: 1 piercing damage""); 0 = the dice","A set amount instead of dice (""Hit: 1 piercing damage""); 0 = the dice",
+"The rider starts with ""and"" and follows the damage after a comma","The rider starts with ""and"" and follows the damage after a comma",
+Damage bonus,Damage bonus,
+DC bonus,DC bonus,
+Fixed damage,Fixed damage,
+no damage,no damage,
+Added to the DC worked out from the ability,Added to the DC worked out from the ability,
+A flat bonus to the damage,A flat bonus to the damage,
+Area or target,Area or target,
+Size (ft.),Size (ft.),
+Width (ft.),Width (ft.),
+DC from,DC from,
+On a success,On a success,
+On a failure,On a failure,
+The text calls it,The text calls it,
+Breath,Breath,
+Parry adds the proficiency bonus plus this to its AC,Parry adds the proficiency bonus plus this to its AC,
+Sneak Attack's d6s,Sneak Attack's d6s,
+Relies on,Relies on,
+Hit points regained,Hit points regained,
+Stopped by damage of,Stopped by damage of,
+…and only if it,…and only if it,
+Then,Then,
+It,It,
+"Action (""Bite or Tail"" for a choice)","Action (""Bite or Tail"" for a choice)",
+Count,Count,
+"An action, several (""Greatsword or Shortbow""), or an attack of no action named (""melee attack"")","An action, several (""Greatsword or Shortbow""), or an attack of no action named (""melee attack"")",
+half damage,half damage,
+one,one,
+a / an,a / an,
+no condition,no condition,
+(no duration),(no duration),
+save DC,save DC,
+spell attack bonus,spell attack bonus,
+How the stat block words innate spells,How the stat block words innate spells,
+Say the spell save DC (a list of utility spells may leave it out),Say the spell save DC (a list of utility spells may leave it out),
+"Say ""+N to hit with spell attacks"" (left out when no spell makes an attack roll)","Say ""+N to hit with spell attacks"" (left out when no spell makes an attack roll)",
+"""…'s innate spellcasting ability is…""","""…'s innate spellcasting ability is…""",
+"""…casts one of the following spells…""","""…casts one of the following spells…""",
+Shows,Shows,
