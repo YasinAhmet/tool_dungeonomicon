@@ -3547,6 +3547,14 @@ function renderSheet() {
         () => longRest(), 'acc'))),
     h('div', { class: 'hpbar' }, h('div', { style: `width:${pct}%;background:${pct > 50 ? '#4ade80' : pct > 25 ? '#fbbf24' : '#f87171'}` })),
   ];
+  const idf = c.identify || {};
+  if (idf.pending > 0) {                             // an Identify spell was cast: which item does it look at?
+    head.push(h('div', { class: 'card warn' }, h('div', { class: 'title' }, '🔍 ' + S('Identify')),
+      h('div', { class: 'dim small' }, idf.options.length ? S('Choose the item your Identify spell looks at.') : S('None of your items is unidentified.')),
+      h('div', { class: 'row', style: 'flex-wrap:wrap;gap:6px;margin-top:6px' },
+        ...idf.options.map(o => btn('🔍 ' + o.label, () => act('identify', { item: o.name }), 'sm primary', S('Identify it'))),
+        btn(S('Not an item'), () => act('identify_cancel', {}, true), 'sm', S('The spell looked at something else (a creature, an item the DM tells you about)')))));
+  }
   if (c.current_hp <= 0) {
     const s = c.death_saves;
     head.push(h('div', { class: 'card warn' }, h('div', { class: 'title' }, S('Death saves')),
@@ -3927,12 +3935,14 @@ function inventoryTab(c) {
   };
   const card = (it, from) => ({ from, item: it.name, qty: it.qty, label: it.label });
   const passOn = d => mates.map(m => ['→ ' + m.name, () => moveItem(d, m.name), '']);
-  const myMenu = it => () => [it.usable ? [S('Use'), () => act('use_item', { item: it.name })] : null,
+  const identifying = (c.identify || {}).pending > 0;
+  const myMenu = it => () => [it.unidentified && identifying ? ['🔍 ' + S('Identify it'), () => act('identify', { item: it.name })] : null,
+    it.usable ? [S('Use'), () => act('use_item', { item: it.name })] : null,
     it.wearable ? [it.equipped ? S('Unequip') : S('Equip'), () => act('equip', { item: it.name, on: !it.equipped }, true), ''] : null,
     it.attunable ? [it.attuned ? S('Break attunement') : S('Attune'), () => act('attune', { item: it.name, on: !it.attuned }, true), ''] : null,
     team && trade ? ['→ ' + S('Team inventory'), () => moveItem(card(it, 'mine'), 'team'), ''] : null, ...passOn(card(it, 'mine')),
     write ? [S('Edit…'), () => edit(it, 'edit_item'), ''] : null, may(onMap ? 'trade_items' : 'write_items') ? [S('Drop'), () => drop(it), 'danger'] : null];
-  const edit = (it, action) => itemForm(S('Change {0}', it.label), { name: it.name, qty: it.qty, note: it.note },
+  const edit = (it, action) => itemForm(S('Change {0}', it.label), { name: it.unidentified ? it.label : it.name, qty: it.qty, note: it.note },
     v => act(action, { item: it.name, qty: v.amount, note: v.note, new_name: v.item }, true));
   const outOfTeam = async it => {
     const n = await askQty(S('Take how many {0} out of the team inventory for good? (of {1})', it.label, it.qty), it.qty, S('Remove'));

@@ -5792,3 +5792,11 @@ Click for values; ‹ › step it,Click for values; ‹ › step it,Değerler i�
 Add “{0}”,Add “{0}”,“{0}” ekle
 Click to remove,Click to remove,Kaldırmak için tıkla
 exact,exact,tam
+Choose the item your Identify spell looks at.,Choose the item your Identify spell looks at.,
+None of your items is unidentified.,None of your items is unidentified.,
+Identify it,Identify it,
+Not an item,Not an item,
+"The spell looked at something else (a creature, an item the DM tells you about)","The spell looked at something else (a creature, an item the DM tells you about)",
+Identified: the players see what it is. Click to make it unidentified again.,Identified: the players see what it is. Click to make it unidentified again.,
+"Unidentified: the players see it as ""{0}"", with no description. Click to mark it identified.","Unidentified: the players see it as ""{0}"", with no description. Click to mark it identified.",
+Unidentified,Unidentified,
