@@ -2262,6 +2262,10 @@ uses a level {0} slot ({1} left),uses a level {0} slot ({1} left),
 "(pick one under Playing, or start the battle in the Initiative window)","(pick one under Playing, or start the battle in the Initiative window)",
 (out of combat: full budget for every action),(out of combat: full budget for every action),
 Level {0} slot ({1} left),Level {0} slot ({1} left),
+Level {0} pact slot ({1} left),Level {0} pact slot ({1} left),
+Cast at,Cast at,
+Uses: {0},Uses: {0},
+No spell slot left,No spell slot left,
 No creature to play,No creature to play,
 "Drag it onto the map, or click it and then a tile.","Drag it onto the map, or click it and then a tile.",
 Search props…,Search props…,
@@ -5783,3 +5787,77 @@ Let hours go by for what this character carries (a goodberry lasts 24 hours),Let
 Thrown weapon,Thrown weapon,Fırlatma silahı
 Improvised,Improvised,Doğaçlama
 Flask,Flask,Şişe
+usual AC {0},usual AC {0},olağan ZS {0}
+from {0},from {0},kaynak: {0}
+"Click: send the bot to a voice channel, leave, or add a player from Discord","Click: send the bot to a voice channel, leave, or add a player from Discord","Tıkla: botu bir ses kanalına gönder, ayrıl ya da Discord'dan oyuncu ekle"
+Add a player from Discord…,Add a player from Discord…,Discord'dan oyuncu ekle…
+Discord bot settings…,Discord bot settings…,Discord botu ayarları…
+The bot is offline: start it in the Discord bot settings.,The bot is offline: start it in the Discord bot settings.,Bot çevrimdışı: Discord botu ayarlarından başlat.
+No bot token yet: enter it in the Discord bot settings.,No bot token yet: enter it in the Discord bot settings.,Henüz bot token'ı yok: Discord botu ayarlarına gir.
+Pick a server on the toolbar's left first (the void sends nothing).,Pick a server on the toolbar's left first (the void sends nothing).,Önce araç çubuğunun solundan bir sunucu seç (boşluk hiçbir şey göndermez).
+Voice channels on {0},Voice channels on {0},{0} ses kanalları
+Voice,Voice,Ses
+No voice channel the bot can see on this server.,No voice channel the bot can see on this server.,Bu sunucuda botun görebildiği ses kanalı yok.
+The host ends the duel to go back to the lobby.,The host ends the duel to go back to the lobby.,Lobiye dönmek için düelloyu kurucu bitirir.
+"On your turn: the big buttons are your attacks and Dash, Dodge, Disengage; press End turn when you are done.","On your turn: the big buttons are your attacks and Dash, Dodge, Disengage; press End turn when you are done.","Sıran gelince: büyük düğmeler saldırıların ve Atıl, Savuş, Geri Çekil; bitince Turu bitir'e bas."
+Only the fighters play; you see every move.,Only the fighters play; you see every move.,Yalnızca dövüşenler oynar; sen her hamleyi görürsün.
+"A ready-made hero of a core class, level 1 to 12: the same one every time, with the spells you pick.","A ready-made hero of a core class, level 1 to 12: the same one every time, with the spells you pick.","Temel bir sınıftan hazır bir kahraman, seviye 1-12: her seferinde aynısı, seçtiğin büyülerle."
+"A monster of a challenge rating from this lobby's books: one you pick from the list, or a random one.","A monster of a challenge rating from this lobby's books: one you pick from the list, or a random one.",Bu lobinin kitaplarından bir zorluk derecesinde canavar: listeden seçtiğin biri ya da rastgele biri.
+The premade's class: the core classes of this lobby's books.,The premade's class: the core classes of this lobby's books.,Hazır kahramanın sınıfı: bu lobinin kitaplarındaki temel sınıflar.
+"Level 1 to 12: a higher level has more hit points, attacks and spell slots.","Level 1 to 12: a higher level has more hit points, attacks and spell slots.","Seviye 1-12: yüksek seviyede daha çok can, saldırı ve büyü yuvası olur."
+"Pick the cantrips and spells your hero fights with, from this lobby's books. What you leave open keeps the premade's own pick.","Pick the cantrips and spells your hero fights with, from this lobby's books. What you leave open keeps the premade's own pick.",Kahramanının dövüşeceği küçük büyüleri ve büyüleri bu lobinin kitaplarından seç. Boş bıraktıkların hazır kahramanın kendi seçimi kalır.
+Back to the premade's own spells,Back to the premade's own spells,Hazır kahramanın kendi büyülerine dön
+Which of your characters fights (as a copy).,Which of your characters fights (as a copy).,Karakterlerinden hangisi dövüşür (bir kopyası olarak).
+How tough the monster is: about a match for a hero of that level.,How tough the monster is: about a match for a hero of that level.,Canavarın ne kadar güçlü olduğu: aşağı yukarı o seviyedeki bir kahramanın dengi.
+"One from the list (its book in brackets), or a random one picked when the duel starts.","One from the list (its book in brackets), or a random one picked when the duel starts.",Listeden biri (kitabı parantez içinde) ya da düello başlarken seçilen rastgele biri.
+Your pick isn't in this lobby's books any more: pick again.,Your pick isn't in this lobby's books any more: pick again.,Seçimin artık bu lobinin kitaplarında yok: yeniden seç.
+Fight as what is picked above instead,Fight as what is picked above instead,Bunun yerine yukarıda seçilen olarak dövüş
+Join with what is picked above. You can change it until the duel starts.,Join with what is picked above. You can change it until the duel starts.,Yukarıda seçilenle katıl. Düello başlayana kadar değiştirebilirsin.
+Leave this lobby and only watch,Leave this lobby and only watch,Bu lobiden çık ve yalnızca izle
+Close this lobby: everyone in it is taken out,Close this lobby: everyone in it is taken out,Bu lobiyi kapat: içindeki herkes çıkarılır
+Out of the fight,Out of the fight,Dövüş dışı
+{0} joined,{0} joined,{0} katıldı
+Fighting: click to watch.,Fighting: click to watch.,Dövüşüyor: izlemek için tıkla.
+"In the lobby: click to look, then join.","In the lobby: click to look, then join.","Lobide: bakmak için tıkla, sonra katıl."
+This lobby's books ({0}),This lobby's books ({0}),Bu lobinin kitapları ({0})
+"Premade heroes, their spells and the monsters come only from these books. Copies of your own characters keep what they have.","Premade heroes, their spells and the monsters come only from these books. Copies of your own characters keep what they have.","Hazır kahramanlar, büyüleri ve canavarlar yalnızca bu kitaplardan gelir. Kendi karakterlerinin kopyaları sahip olduklarını korur."
+Change books…,Change books…,Kitapları değiştir…
+See books,See books,Kitapları gör
+"Pick the books this lobby offers: the core rules and official rulebooks are on at first; custom books, modules and adventures are off.","Pick the books this lobby offers: the core rules and official rulebooks are on at first; custom books, modules and adventures are off.","Bu lobinin sunduğu kitapları seç: temel kurallar ve resmi kural kitapları baştan açıktır; özel kitaplar, modüller ve maceralar kapalıdır."
+Find a book,Find a book,Kitap ara
+Custom,Custom,Özel
+This lobby's books,This lobby's books,Bu lobinin kitapları
+"Premade heroes, their spells and the monsters come only from the ticked books. Copies of your own characters keep what they have.","Premade heroes, their spells and the monsters come only from the ticked books. Copies of your own characters keep what they have.","Hazır kahramanlar, büyüleri ve canavarlar yalnızca işaretli kitaplardan gelir. Kendi karakterlerinin kopyaları sahip olduklarını korur."
+Only the lobby's host can change them.,Only the lobby's host can change them.,Yalnızca lobinin kurucusu değiştirebilir.
+Official rulebooks,Official rulebooks,Resmi kural kitapları
+"The core rules and the official rulebooks (Xanathar's, Tasha's...): no adventures, no custom books","The core rules and the official rulebooks (Xanathar's, Tasha's...): no adventures, no custom books","Temel kurallar ve resmi kural kitapları (Xanathar, Tasha...): macera yok, özel kitap yok"
+"The Player's Handbook, the Dungeon Master's Guide and the Monster Manual","The Player's Handbook, the Dungeon Master's Guide and the Monster Manual","Oyuncu El Kitabı, Zindan Efendisi Rehberi ve Canavar Kılavuzu"
+Use these books,Use these books,Bu kitapları kullan
+Keep at least one book on.,Keep at least one book on.,En az bir kitabı açık bırak.
+Those books have no classes or monsters to fight as.,Those books have no classes or monsters to fight as.,Bu kitaplarda dövüşülecek sınıf ya da canavar yok.
+End the duel first: its fighters are made from the books it had.,End the duel first: its fighters are made from the books it had.,Önce düelloyu bitir: dövüşçüleri sahip olduğu kitaplardan yapıldı.
+ready,ready,hazır
+used this turn,used this turn,bu tur kullanıldı
+"One a turn: attack, cast a spell, Dash, Dodge, Disengage, Help, Hide... The green-edged buttons use it.","One a turn: attack, cast a spell, Dash, Dodge, Disengage, Help, Hide... The green-edged buttons use it.","Turda bir kez: saldırı, büyü, Atıl, Savuş, Geri Çekil, Yardım, Saklan... Yeşil kenarlı düğmeler bunu kullanır."
+"One a turn, only for things that say so: an off-hand attack, some spells and class features. The yellow-edged buttons use it.","One a turn, only for things that say so: an off-hand attack, some spells and class features. The yellow-edged buttons use it.","Turda bir kez, yalnızca bunu söyleyenler için: ikinci el saldırısı, bazı büyüler ve sınıf özellikleri. Sarı kenarlı düğmeler bunu kullanır."
+"One a round, even on others' turns: an opportunity attack, Shield... It comes back at the start of your turn.","One a round, even on others' turns: an opportunity attack, Shield... It comes back at the start of your turn.","Raunt başına bir kez, başkalarının turunda bile: fırsat saldırısı, Kalkan... Senin turunun başında geri gelir."
+{0} of {1} ft left,{0} of {1} ft left,{1} ft'nin {0} ft'si kaldı
+"On your turn, click a square on the map to walk there; you can split it up between actions. Dash doubles it.","On your turn, click a square on the map to walk there; you can split it up between actions. Dash doubles it.",Sıran gelince haritada bir kareye tıkla ve oraya yürü; eylemler arasında bölebilirsin. Atıl ikiye katlar.
+Death save,Death save,Ölüm zarı
+"10 or more is a success, under 10 a failure; a 20 brings you back with 1 HP. Three successes: stable. Three failures: dead.","10 or more is a success, under 10 a failure; a 20 brings you back with 1 HP. Three successes: stable. Three failures: dead.","10 ve üstü başarı, 10'un altı başarısızlık; 20 seni 1 canla geri getirir. Üç başarı: dengede. Üç başarısızlık: ölü."
+Extra Attack: your Attack action has more swings left this turn - attack again without spending anything.,Extra Attack: your Attack action has more swings left this turn - attack again without spending anything.,Ek Saldırı: Saldırı eyleminin bu tur daha vuruşu var - hiçbir şey harcamadan yeniden saldır.
+Legendary actions: {0} of {1} left,Legendary actions: {0} of {1} left,Efsanevi eylemler: {1} taneden {0} kaldı
+Used at the end of the others' turns; they come back at the start of yours.,Used at the end of the others' turns; they come back at the start of yours.,Başkalarının turlarının sonunda kullanılır; senin turunun başında geri gelir.
+Taking damage asks for a Constitution save to keep it; casting another concentration spell ends it.,Taking damage asks for a Constitution save to keep it; casting another concentration spell ends it.,Hasar alınca korumak için Bünye kurtarma zarı istenir; başka bir konsantrasyon büyüsü yapmak onu bitirir.
+"Act, move, then end your turn (Ctrl+Space).","Act, move, then end your turn (Ctrl+Space).","Eylemini yap, yürü, sonra turunu bitir (Ctrl+Boşluk)."
+Books…,Books…,Kitaplar…
+"Which books this lobby's heroes, spells and monsters come from. A new lobby has the core rules and the official rulebooks; custom books, modules and adventures are off.","Which books this lobby's heroes, spells and monsters come from. A new lobby has the core rules and the official rulebooks; custom books, modules and adventures are off.","Bu lobinin kahramanlarının, büyülerinin ve canavarlarının geldiği kitaplar. Yeni bir lobide temel kurallar ve resmi kural kitapları açıktır; özel kitaplar, modüller ve maceralar kapalıdır."
+Duel books,Duel books,Düello kitapları
+"Only the ticked books' classes, spells and monsters are offered in this lobby. Copies of the players' own characters keep what they have.","Only the ticked books' classes, spells and monsters are offered in this lobby. Copies of the players' own characters keep what they have.","Bu lobide yalnızca işaretli kitapların sınıfları, büyüleri ve canavarları sunulur. Oyuncuların kendi karakterlerinin kopyaları sahip olduklarını korur."
+{0} sourcebook(s) for this duel.,{0} sourcebook(s) for this duel.,Bu düello için {0} kaynak kitap.
+Looks:,Looks:,Görünüş:
+Wears:,Wears:,Giydiği:
+Holds:,Holds:,Tuttuğu:
+Ally,Ally,Müttefik
+Enemy,Enemy,Düşman
+in the shape of {0},in the shape of {0},{0} kılığında

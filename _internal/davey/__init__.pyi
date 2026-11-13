@@ -127,8 +127,6 @@ class EncryptionStats:
     """Total amounts of encryption attempts"""
     max_attempts: int
     """Maximum attempts reached at encryption"""
-    missing_keys: int
-    """Number of encryptions that failed due to a missing key"""
 
 class DecryptionStats:
     successes: int
@@ -139,10 +137,6 @@ class DecryptionStats:
     """Total decryption duration in microseconds"""
     attempts: int
     """Total amounts of decryption attempts"""
-    missing_keys: int
-    """Number of decryptions that failed due to a missing key"""
-    invalid_nonces: int
-    """Number of decryptions that failed due to an invalid nonce"""
     passthroughs: int
     """Total amounts of packets that passed through"""
 
@@ -188,8 +182,6 @@ class DaveSession:
     """The current status of the session."""
     ready: bool
     """Whether the session is ready to encrypt/decrypt."""
-    can_encrypt: bool
-    """Whether the session has a key to encrypt with."""
     voice_privacy_code: Optional[str]
     """
     Get the voice privacy code of this session's group.
@@ -252,44 +244,20 @@ class DaveSession:
             If provided, this will reject unexpected user IDs.
         """
         ...
-    def process_welcome(
-        self,
-        welcome: bytes,
-        recognized_user_ids: Optional[List[int]] = None,
-    ) -> None:
+    def process_welcome(self, welcome: bytes) -> None:
         """
-        Process a welcome message. Afterwards, prepare the transition with `prepare_transition` to start using the new keys.
+        Process a welcome message.
         See the [DAVE Protocol Whitepaper on opcode 30](https://daveprotocol.com/#dave_mls_welcome-30) for technical details.
 
         :param welcome: The welcome message to process.
-        :param recognized_user_ids: The recognized user IDs expected to be in the welcomed group.
         """
         ...
-    def process_commit(self, commit: bytes) -> bool:
+    def process_commit(self, commit: bytes) -> None:
         """
-        Process a commit. Afterwards, prepare the transition with `prepare_transition` to start using the new keys.
+        Process a commit.
         See the [DAVE Protocol Whitepaper on opcode 29](https://daveprotocol.com/#dave_mls_announce_commit_transition-29) for technical details.
 
         :param commit: The commit to process.
-        :returns: Whether the transition should be prepared.
-        """
-        ...
-    def prepare_transition(self, transition_id: int, protocol_version: int) -> None:
-        """
-        Prepare for a transition. This should be called after successfully processing a commit or welcome.
-        See the [DAVE Protocol Whitepaper on opcode 21](https://daveprotocol.com/#dave_protocol_prepare_transition-21) for technical details.
-
-        :param transition_id: The transition ID.
-        :param protocol_version: The protocol version being transitioned to.
-        """
-        ...
-    def execute_transition(self, transition_id: int) -> bool:
-        """
-        Execute a prepared transition, switching the encryption key.
-        See the [DAVE Protocol Whitepaper on opcode 22](https://daveprotocol.com/#dave_protocol_execute_transition-22) for technical details.
-
-        :param transition_id: The transition ID.
-        :returns: Whether a prepared transition was executed.
         """
         ...
     def get_verification_code(self, user_id: int) -> str:
@@ -355,7 +323,7 @@ class DaveSession:
         :param media_type: The media type to get stats for. Defaults to audio.
         """
         ...
-    def get_user_ids(self) -> List[int]:
+    def get_user_ids(self) -> List[str]:
         """Get the IDs of the users in the current group."""
         ...
     def can_passthrough(self, user_id: int) -> bool:

@@ -83,6 +83,9 @@ body.folded footer{height:34px}body.folded #feed,body.folded footer>.bar:last-ch
 #actionbar button.act.ico .uses{position:absolute;right:1px;bottom:0;font-size:9.5px;line-height:1;padding:1px 2px;border-radius:3px;
   background:#0f1115d0;color:var(--text)}
 #actionbar .mode{font-size:11px;padding:0 6px}
+#known{position:absolute;left:8px;bottom:8px;z-index:2;width:250px;max-height:60%;overflow:auto;display:flex;flex-direction:column;gap:3px;background:#161a21ee;border:1px solid var(--border);border-radius:6px;padding:6px 8px;font-size:12.5px;box-shadow:0 6px 18px #000a}
+#known .kn-head{display:flex;gap:8px;align-items:center}#known .kn-pic{flex:none;border-radius:50%}
+#known .hpbar{height:4px;background:var(--input);border-radius:2px;overflow:hidden}#known .hpbar>div{height:100%}
 #aimbar{position:absolute;left:8px;right:8px;top:8px;z-index:3;display:flex;gap:6px;align-items:center;flex-wrap:wrap;background:#161a21ee;border:1px solid var(--accent);border-radius:6px;padding:5px 8px;font-size:12.5px;box-shadow:0 6px 18px #000a}
 #aimbar select{padding:1px 4px}
 #react{position:fixed;inset:0;background:#0008;display:grid;place-items:center;z-index:7}
@@ -177,6 +180,7 @@ button.wait::after{content:'';display:inline-block;width:8px;height:8px;margin-l
   #order{flex-direction:row;overflow-x:auto;overflow-y:hidden}#order .oc{flex:none}#endturn{width:auto}#inittitle{display:none}
   .cols{grid-template-columns:1fr}
   #aimbar{left:4px;right:4px;top:4px}
+  #known{left:4px;bottom:4px;width:auto;max-width:calc(100% - 8px);max-height:45%}
   #react{place-items:end center;background:#0006}#detail{place-items:end center}     /* bottom sheets: the map stays in sight */
   #react .box,#detail .box{width:100%;max-height:70vh;overflow:auto;border-radius:12px 12px 0 0;padding-bottom:calc(14px + env(safe-area-inset-bottom))}
 }

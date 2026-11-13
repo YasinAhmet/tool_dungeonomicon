@@ -2073,6 +2073,7 @@ function renderMap() {
   drawPing(g, T);
   if (FX.frame) return;                                // an animation frame: the board only
   $('target').replaceChildren(...targetInfo(b));
+  renderKnown(b);
   const tap = touch(), walk = walker ? 'armed' : canMove(b) && mover() ? 'pick' : '';
   $('hint').textContent = UI.aim ? (tap ? S('Tap to aim, tap the same place again (or Confirm) to use it. Tap ✕ to cancel.') : S('Right-click or Esc cancels.')) :
     (walk === 'armed' ? (tap ? S('Tap a tile to see the way, tap again (or Move here) to go.') : S('Right-click a tile to walk there.')) + ' · '
@@ -2095,7 +2096,7 @@ function targetInfo(b) {
   const me = meInBattle() || b.combatants.find(x => x.mine && x.pos), look = badgeLook();
   const far = me && me.pos && c.pos && me.id !== c.id ? Geo.dist(me, c) : null;
   return [h('span', { class: 'tgt', tip: () => tokenCard(c), 'aria-label': (c.id === UI.target ? S('Target') : S('Selected')) + ': ' + c.name },
-    c.id === UI.target ? '🎯 ' : '👁 ', h('b', null, c.name), ' · ', hpWords(c),   // the rest on hover
+    c.id === UI.target ? '🎯 ' : '👁 ', h('b', null, c.name), ' · ', c.form ? `${c.form.name} ${c.form.hp}/${c.form.max_hp} · ` : '', hpWords(c),   // the rest on hover
     ...(c.badges || []).slice(0, 3).map(k => h('span', { class: 'bdg', style: `color:${(look[k] || [])[1] || 'var(--warn)'}` }, gi(k, 'sm'))),
     far != null ? ' · ' + S('{0} ft', far) : null),
     ' ', h('button', { class: 'sm flat', onclick: () => { UI.target = null; UI.inspect = null; renderMap(); }, 'aria-label': S('Clear the target') }, '✕')];
@@ -2734,7 +2735,13 @@ function propImage(key) {            // a map prop's (or symbol's) picture, fetc
 function image(id, v) {             // kept by its version: a new portrait (or a new creature under this id) loads again
   const d = typeof bgTokenRoom === 'function' ? bgTokenRoom() : 0;   // (a token on a Battlegrounds lobby's map: battlegrounds.js)
   const key = `${d}:${id}:${v}`;
-  if (!imgs[key]) { imgs[key] = new Image(); imgs[key].onload = () => renderMap(); imgs[key].src = `/token/${id}?v=${v}${d ? '&duel=' + d : ''}&k=${encodeURIComponent(KEY)}`; }
+  if (!imgs[key]) {
+    const im = imgs[key] = new Image(), url = `/token/${id}?v=${v}${d ? '&duel=' + d : ''}&k=${encodeURIComponent(KEY)}`;
+    let tries = 0;                                   // a picture that didn't come (the tunnel dropped it, the table was busy):
+    im.onload = () => renderMap();                   // asked again a little later, so no token stays without its picture
+    im.onerror = () => { if (++tries <= 6) setTimeout(() => { im.src = `${url}&r=${tries}`; }, Math.min(8000, 600 * 2 ** tries)); };
+    im.src = url;
+  }
   return imgs[key];
 }
 
@@ -2742,6 +2749,17 @@ function image(id, v) {             // kept by its version: a new portrait (or a
 const camNow = () => ({ ...(UI.cam || UI.camFit) });
 function screenAt(e) { const r = $('board').getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; }
 function tileAt(e) { const [x, y] = screenAt(e), c = camNow(); return [Math.floor((x - c.x) / c.z), Math.floor((y - c.y) / c.z)]; }
+function propAt([x, y]) {                                   // the topmost prop or map symbol on a tile (its hover card)
+  const tips = ST.battle.prop_tips || {}, props = ST.battle.props || {};
+  return [...(ST.battle.drawings || [])].reverse().find(d => d.type === 'symbol' && tips[d.sym] && x >= d.x && x < d.x + (props[d.sym] || 1) && y >= d.y && y < d.y + (props[d.sym] || 1));
+}
+function propTip(e, d) {                                    // its name, cover and what it does; a door says how it stands
+  const key = 'p' + d.id + (d.open ? 'o' : '');
+  if (UI.tipFor === key) return;
+  UI.tipFor = key;
+  const opens = (ST.battle.opens || DOORS).includes(d.sym);
+  tip(e, ST.battle.prop_tips[d.sym] + (opens ? '\n' + (d.open ? S('(open now)') : S('(shut now)')) : ''));
+}
 /** The creature at a point of the map (tile units: where the pointer is, or a tile's corner): a Tiny token drawn under
  *  the point first, then a Tiny one anywhere on that tile (half a tile across: hard to hit on a phone), then whoever
  *  stands there - a Tiny token over the big one it shares a tile with. */
@@ -2798,6 +2816,7 @@ board.addEventListener('pointermove', e => {
     board.style.cursor = UI.aim || UI.place ? 'crosshair' : c || it ? 'pointer' : 'grab';
     if ((it ? it.id : null) !== (UI.groundHover ?? null)) { UI.groundHover = it ? it.id : null; requestAnimationFrame(renderMap); }
     if (c && !UI.aim) { if (UI.tipFor !== c.id + '|' + ST.v) { UI.tipFor = c.id + '|' + ST.v; tip({ clientX: e.clientX, clientY: e.clientY, currentTarget: { getBoundingClientRect: () => ({ left: e.clientX + 12, top: e.clientY - 8, bottom: e.clientY + 18 }) } }, () => tokenCard(c)); } }
+    else if (!c && !it && !UI.aim && propAt(tileAt(e))) propTip(e, propAt(tileAt(e)));
     else if (UI.tipFor) { UI.tipFor = null; tip(); }
     const p = pointAt(e), key = UI.aim || (ST && moveArmed(ST.battle)) ? p.join(',') : '';
     if (key !== UI.hoverKey) { UI.hoverKey = key; UI.hover = key ? p : null; requestAnimationFrame(renderMap); }
@@ -2861,16 +2880,55 @@ function rightClick(e) {
 function tokenCard(c) {
   const b = ST.battle, me = meInBattle() || b.combatants.find(x => x.mine && x.pos), look = badgeLook();
   const pct = c.hp != null && c.max_hp ? Math.max(0, Math.min(100, 100 * c.hp / c.max_hp)) : null;
+  const f = c.form, fpct = f && f.max_hp ? Math.max(0, Math.min(100, 100 * f.hp / f.max_hp)) : null;   // in a beast's shape: its bar first
   return h('div', { class: 'tokcard' },
     h('div', { class: 'tc-head' }, h('b', null, c.name), h('span', { class: 'grow' }), hpWords(c)),
+    c.sub ? h('div', { class: 'dim small' }, c.sub) : null,                // a character's race and class
+    fpct != null ? h('div', { class: 'dim small' }, `${f.name} ${f.hp}/${f.max_hp}`) : null,
+    fpct != null ? h('div', { class: 'hpbar' }, h('div', { style: `width:${fpct}%;background:#d6a35c` })) : null,
     pct != null ? h('div', { class: 'hpbar' }, h('div', { style: `width:${pct}%;background:${pct > 50 ? '#4ade80' : pct > 25 ? '#fbbf24' : '#f87171'}` })) : null,
-    (c.badges || []).length ? h('div', { class: 'conds' }, ...c.badges.map(k => h('span', { style: `color:${(look[k] || [])[1] || 'var(--warn)'}` }, gi(k))),
-      h('span', { class: 'small warn' }, c.conditions.join(', '))) : c.conditions.length ? h('div', { class: 'small warn' }, c.conditions.join(', ')) : null,
+    ...effectLines(c, look),
     me && me.pos && c.pos && me.id !== c.id ? h('div', { class: 'dim small' }, S('{0} ft away', Geo.dist(me, c))) : null,
     c.untargetable && !c.mine ? h('div', { class: 'small warn' }, S("Can't be targeted now (banished, ethereal or sealed away)")) : null,
     h('div', { class: 'dim small' }, c.mine ? (isMover(c) && ST.battle.settings.move_tokens ? S('Click: pick your token (then right-click a tile to walk there)') : S('Click: show your details'))
       : c.id === UI.target ? S('Click: clear the target')
       : c.untargetable ? S('Click: show it') : S('Click: make it your target')));
+}
+/** Each condition and effect on a creature, a line each: its picture, rounds left, the save that ends it, whose it is. */
+function effectLines(c, look) {
+  return (c.effects || []).map(e => {
+    const note = [e.rounds ? S('{0} rds', e.rounds) : '', e.save || '', e.from ? S('from {0}', e.from) : ''].filter(Boolean).join(', ');
+    const colour = (look[e.key] || [])[1] || 'var(--warn)';
+    return h('div', { class: 'conds small', style: 'gap:4px' }, look[e.key] ? h('span', { style: `color:${colour}` }, gi(e.key)) : null,
+      h('span', { style: `color:${colour}` }, e.name), note ? h('span', { class: 'dim' }, ` (${note})`) : null);
+  });
+}
+/** The known-info card over the map for the creature you picked: what anyone at the table can see of it - its
+ *  picture, what it is, how hurt it looks, what it wears and holds, its conditions and effects, what it holds its
+ *  mind on - never its numbers, its spells or what is in its pack (the server sends none of that: api._seen). */
+function renderKnown(b) {
+  const box = $('known');
+  if (!box) return;
+  const id = UI.inspect || UI.target, c = id != null ? b.combatants.find(x => x.id === id) : null;
+  box.classList.toggle('hide', !c);
+  if (!c) { box.replaceChildren(); return; }
+  const seen = c.seen || {}, look = badgeLook(), me = meInBattle() || b.combatants.find(x => x.mine && x.pos);
+  const px = 46, dpr = window.devicePixelRatio || 1, cv = h('canvas', { class: 'kn-pic', width: px * dpr, height: px * dpr, style: `width:${px}px;height:${px}px` });
+  const g = cv.getContext('2d'); g.scale(dpr, dpr); tokenDisc(g, c, px / 2, px / 2, px / 2 - 1);
+  const side = c.mine ? S('You') : c.kind === 'pc' || c.ally ? S('Ally') : S('Enemy');
+  const pct = c.hp != null && c.max_hp ? Math.max(0, Math.min(100, 100 * c.hp / c.max_hp)) : null;
+  const line = (label, items) => items && items.length ? h('div', { class: 'small' }, h('span', { class: 'dim' }, label + ' '), items.join(', ')) : null;
+  box.replaceChildren(
+    h('div', { class: 'kn-head' }, cv,
+      h('div', { class: 'grow' }, h('b', null, c.name), h('div', { class: 'dim small' }, [side, seen.what, c.sub].filter(Boolean).join(' · '))),
+      h('button', { class: 'sm flat', onclick: () => { UI.target = null; UI.inspect = null; renderMap(); }, 'aria-label': S('Close') }, '✕')),
+    h('div', { class: 'small' }, h('span', { class: 'dim' }, S('Looks:') + ' '), c.out ? S('Down') : c.health,
+      c.form ? h('span', { class: 'dim' }, ' · ' + S('in the shape of {0}', c.form.name)) : null),
+    pct != null ? h('div', { class: 'hpbar' }, h('div', { style: `width:${pct}%;background:${pct > 50 ? '#4ade80' : pct > 25 ? '#fbbf24' : '#f87171'}` })) : null,
+    line(S('Wears:'), seen.wears), line(S('Holds:'), seen.holds),
+    c.conc ? h('div', { class: 'small' }, S('Concentrating on {0}', c.conc.spell)) : null,
+    ...effectLines(c, look),
+    me && me.pos && c.pos && me.id !== c.id ? h('div', { class: 'dim small' }, S('{0} ft away', Geo.dist(me, c))) : null);
 }
 function tapToken(c) {
   if (isMover(c)) {                                          // my token: picked (its details shown) or let go
@@ -3175,8 +3233,8 @@ function startAim(item, chosen) {
   const t = item.target || { type: 'none' };
   UI.move = null;
   if (touch()) { UI.hover = null; UI.hoverKey = null; }      // no hover on touch: the area shows from the first tap
-  const free = item.kind === 'spell' && item.level ? slotLevels(item.level) : [];    // the lowest slot that is left
-  UI.aim = { item, targets: [], point: null, slot: item.level ? String(free.length ? free[0] : item.level) : '', dtype: (item.types || [])[0] || '',
+  const free = item.kind === 'spell' && item.level ? slotLevels(item) : [];    // the lowest slot that is left (a pact slot counts)
+  UI.aim = { item, targets: [], point: null, slot: item.level ? String(free.length ? free[0].level : item.level) : '', dtype: (item.types || [])[0] || '',
     option: chosen != null ? chosen : item.options && item.options.length ? item.options[0].value : '', options: item.options || [], metamagic: '' };
   if (t.type === 'fixed' || item.readied) { if (t.type === 'fixed') UI.aim.targets = [t.id]; return commitAim(); }   // a readied smite: one click lets it go
   if (!aimNeedsClick(UI.aim) && item.kind !== 'spell' && !(item.types || []).length && (!UI.aim.options.length || chosen != null)) return commitAim();   // Dash, Dodge, a potion picked...: at once
@@ -3190,10 +3248,9 @@ function startAim(item, chosen) {
   renderAimbar(); renderMap(); renderActions();
 }
 function cancelAim() { UI.aim = null; renderAimbar(); renderMap(); renderActions(); }
-/** The spell slot levels (from `min` up) that still have a slot. */
-function slotLevels(min) {
-  const a = ST.battle.actions;
-  return a ? a.spells.filter(g => g.level >= min && g.slots && g.slots.left > 0).map(g => g.level) : [];
+/** The levels a spell can be cast at now, lowest first: [{level, left, pact}] (a warlock's pact slots at their level). */
+function slotLevels(item) {
+  return (item && item.slot_levels) || [];
 }
 /** Touch aiming: the first tap only shows (the area, who is hit, the creature picked); the same tap again or Confirm uses it. */
 function aimTap(p, token) {
@@ -3280,12 +3337,12 @@ function renderAimbar() {
   })[t.type] || S('Confirm to use it');
   kids.push(h('span', { class: 'dim' }, say_));
   if (a.item.kind === 'spell' && a.item.level > 0 && ST.battle.actions) {
-    const lv = slotLevels(a.item.level);
-    if (lv.length > 1) kids.push(h('select', { onchange: e => { a.slot = e.target.value; e.target.blur(); renderAimbar(); }, 'aria-label': S('Spell slot') },
-      ...lv.map(l => h('option', { value: String(l), selected: String(l) === a.slot }, S('Level {0} slot', l)))));
-    const g = ST.battle.actions.spells.find(x => String(x.level) === String(a.slot));
-    kids.push(h('span', { class: g && g.slots && g.slots.left ? 'acc' : 'bad' },
-      g && g.slots ? S('Uses a level {0} slot ({1} left)', a.slot, g.slots.left) : S('Uses a level {0} slot', a.slot)));
+    const lv = slotLevels(a.item);                  // the level to cast at: any slot left at the spell's level or up
+    const word = l => l.pact ? S('Level {0} pact slot ({1} left)', l.level, l.left) : S('Level {0} slot ({1} left)', l.level, l.left);
+    if (lv.length > 1) kids.push(h('span', { class: 'dim' }, S('Cast at')), h('select', { onchange: e => { a.slot = e.target.value; e.target.blur(); renderAimbar(); }, 'aria-label': S('Spell slot') },
+      ...lv.map(l => h('option', { value: String(l.level), selected: String(l.level) === a.slot }, word(l)))));
+    else if (lv.length) kids.push(h('span', { class: 'acc' }, S('Uses: {0}', word(lv[0]))));     // one way only (a warlock's pact level): nothing to ask
+    else kids.push(h('span', { class: 'bad' }, S('No spell slot left')));
   }
   if ((a.item.types || []).length) kids.push(h('select', { onchange: e => { a.dtype = e.target.value; } },
     ...a.item.types.map(x => h('option', { value: x, selected: x === a.dtype }, S(x.charAt(0).toUpperCase() + x.slice(1))))));
@@ -3432,19 +3489,28 @@ function renderActions() {
   if (!a) { el.classList.add('hide'); return; }
   el.classList.remove('hide');
   const t = a.turn, kids = [];
-  const res = (cls, n, label) => h('span', { class: `res ${cls}${n > 0 ? '' : ' used'}`, tip: label, 'aria-label': label },
+  const res = (cls, n, label, about) => h('span', { class: `res ${cls}${n > 0 ? '' : ' used'}`, 'aria-label': label,
+    tip: `${label}: ${n > 0 ? S('ready') : S('used this turn')}\n${about}` },
     h('i'), h('span', { class: 'lbl' }, label));             // (on phones the dot alone: its word on hold)
-  const econ = [res('action', t.action, S('Action')), res('bonus', t.bonus, S('Bonus action')), res('reaction', t.reaction, S('Reaction')),
-    h('span', { class: 'res' }, `🦶 ${Math.min(t.move, a.speed)}/${a.speed} ${S('ft')}`)];   // (speed 0 mid-turn: nothing left)
+  const left = Math.min(t.move, a.speed);                   // (speed 0 mid-turn: nothing left)
+  const econ = [res('action', t.action, S('Action'), S('One a turn: attack, cast a spell, Dash, Dodge, Disengage, Help, Hide... The green-edged buttons use it.')),
+    res('bonus', t.bonus, S('Bonus action'), S('One a turn, only for things that say so: an off-hand attack, some spells and class features. The yellow-edged buttons use it.')),
+    res('reaction', t.reaction, S('Reaction'), S("One a round, even on others' turns: an opportunity attack, Shield... It comes back at the start of your turn.")),
+    h('span', { class: 'res move' + (left > 0 ? '' : ' used'), tip: `${S('Movement')}: ${S('{0} of {1} ft left', left, a.speed)}\n${S('On your turn, click a square on the map to walk there; you can split it up between actions. Dash doubles it.')}` },
+      `🦶 ${left}/${a.speed} ${S('ft')}`)];
   const me = (typeof bgMe === 'function' && bgMe()) || ST.character, ds = me && me.death_saves;   // (on a lobby's map: my fighter)
   if (me && me.current_hp <= 0 && ds && ds.success < 3 && ds.failure < 3)    // dying: the save right here (the map view on a phone too)
-    econ.push(needs('roll', btn(`🎲 ${S('Death save')}  ✔ ${pips(ds.success, 3)} ✘ ${pips(ds.failure, 3)}`, () => act('death_save'), 'sm danger', S('Roll a death saving throw'))));
+    econ.push(needs('roll', btn(`🎲 ${S('Death save')}  ✔ ${pips(ds.success, 3)} ✘ ${pips(ds.failure, 3)}`, () => act('death_save'), 'sm danger',
+      S('Roll a death saving throw') + '\n' + S('10 or more is a success, under 10 a failure; a 20 brings you back with 1 HP. Three successes: stable. Three failures: dead.'))));
   for (const g of a.spells) if (g.level > 0 && g.slots && g.slots.total) econ.push(h('span', { class: 'res slot' + (g.slots.left ? '' : ' used'),
     tip: S('Level {0} spell slots: {1} of {2} left', g.level, g.slots.left, g.slots.total), 'aria-label': S('Level {0} spell slots: {1} of {2} left', g.level, g.slots.left, g.slots.total) },
     h('small', null, g.level), h('span', { class: 'pips' }, pips(g.slots.left, g.slots.total))));
-  if (t.attacks) econ.push(h('span', { class: 'acc' }, S('{0} more attack(s)', t.attacks)));
-  if (t.legendary_max) econ.push(h('span', { class: 'res' }, `★ ${t.legendary}/${t.legendary_max}`));
-  if (a.concentrating) econ.push(h('span', { class: 'warn' }, '◎ ' + a.concentrating));
+  if (t.attacks) econ.push(h('span', { class: 'acc', tip: S('{0} more attack(s)', t.attacks) + '\n' + S('Extra Attack: your Attack action has more swings left this turn - attack again without spending anything.') },
+    S('{0} more attack(s)', t.attacks)));
+  if (t.legendary_max) econ.push(h('span', { class: 'res', tip: S('Legendary actions: {0} of {1} left', t.legendary, t.legendary_max) + '\n' + S('Used at the end of the others\' turns; they come back at the start of yours.') },
+    `★ ${t.legendary}/${t.legendary_max}`));
+  if (a.concentrating) econ.push(h('span', { class: 'warn', tip: S('Concentrating on {0}', a.concentrating) + '\n' + S('Taking damage asks for a Constitution save to keep it; casting another concentration spell ends it.') },
+    '◎ ' + a.concentrating));
   if (!a.economy && a.in_combat) econ.push(h('span', { class: 'dim small' }, S('(the DM turned the action economy off)')));
   econ.push(h('span', { class: 'grow' }), advSeg(), !a.in_combat ? h('b', { class: 'good' }, S('Out of combat: any action, any time'))
     : a.is_turn ? h('b', { class: 'good' }, S('Your turn')) : h('span', { class: 'dim small' }, S('Not your turn: reactions only')));
