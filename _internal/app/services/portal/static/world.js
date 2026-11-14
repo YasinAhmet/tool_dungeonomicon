@@ -6,7 +6,22 @@
 'use strict';
 const WM = { cam: null, img: null, imgV: 0, pings: [], raf: 0, mode: store('mapmode') || '', lastStatus: null, ptrs: new Map(),
   drag: null, built: false, hover: null, glide: null };       // glide: the party's banner travelling to where the DM moved it
-const W_INK = '#3a281a', W_SEA_INK = '#2e4250', W_PAPER = 'rgba(236,222,184,', W_RED = '#a02a1e', W_PARTY = '#b02e22', W_ROUTE = '#462e1e';
+let W_INK = '#3a281a', W_SEA_INK = '#2e4250', W_PAPER = 'rgba(236,222,184,', W_RED = '#a02a1e', W_ROUTE = '#462e1e';   // (wLook sets them)
+const W_PARTY = '#b02e22';
+const W_INKS = {   // a look's own inks and paper (art.py PALETTES): the ink look's black and white; '': every other look's
+  ink: { ink: '#121212', sea: '#383838', paper: 'rgba(252,252,252,', red: '#121212', route: '#121212', region: 'rgba(18,18,18,.78)',
+    stamp: ['rgb(252,252,252)', 'rgb(16,16,16)'], ribbon: ['rgb(252,252,252)', 'rgb(204,204,204)', 'rgb(18,18,18)'],
+    tag: ['rgb(252,252,252)', 'rgb(232,232,232)', 'rgb(120,120,120)'] },
+  '': { ink: '#3a281a', sea: '#2e4250', paper: 'rgba(236,222,184,', red: '#a02a1e', route: '#462e1e', region: 'rgba(58,40,26,.78)',
+    stamp: ['rgb(226,208,164)', 'rgb(28,22,16)'], ribbon: ['rgb(236,218,176)', 'rgb(186,160,112)', 'rgb(58,40,26)'],
+    tag: ['rgb(240,226,190)', 'rgb(206,184,140)', 'rgb(150,120,80)'] },
+};
+let W_PAL = W_INKS[''];
+function wInked() { return ((ST && ST.world && ST.world.map) || {}).look === 'ink'; }   // black and white (art.py INKED)
+function wLook() {                                      // the shown map's inks and paper, before it is drawn (art.py set_look)
+  W_PAL = W_INKS[wInked() ? 'ink' : ''];
+  W_INK = W_PAL.ink; W_SEA_INK = W_PAL.sea; W_PAPER = W_PAL.paper; W_RED = W_PAL.red; W_ROUTE = W_PAL.route;
+}
 const W_SERIF = '"Palatino Linotype","Book Antiqua",Palatino,Georgia,serif';
 const W_TITLING = '"Felix Titling",' + W_SERIF;                // region names: a titling face where the player has one
 const W_NAME = { capital: 15, city: 13, town: 11, village: 9, fort: 10, ruin: 9, poi: 9 };
@@ -29,6 +44,15 @@ const W_LINES_PAINTED = Object.assign({}, W_LINES, {
   path: [['rgba(236,226,196,.35)', 2.0], ['rgba(44,32,22,.78)', 0.9, [0.8, 2.0]]],
   river: [['rgb(48,62,60)', 3.8], ['rgb(96,138,150)', 2.6], ['rgba(170,200,204,.6)', 0.7]],
 });
+const W_LINES_INK = Object.assign({}, W_LINES, {       // the ink look: black on white; a path a row of dots, a river grey
+  road: [['rgba(252,252,252,.84)', 3.6], ['rgb(18,18,18)', 1.5]],                       // between black banks (art.py LINE_LOOK_INK)
+  path: [['rgba(252,252,252,.75)', 2.6], ['rgb(18,18,18)', 1.45, [0.05, 2.1]]],
+  river: [['rgb(18,18,18)', 3.0], ['rgb(214,214,214)', 1.7]],
+  border: [['rgba(18,18,18,.14)', 5.0], ['rgba(18,18,18,.92)', 1.4, [4.0, 1.6, 1.0, 1.6]]],
+  guide: [['rgba(18,18,18,.47)', 0.7, [6.0, 4.0]]],
+  wall: [['rgb(18,18,18)', 3.0], ['rgb(18,18,18)', 5.6, [0.3, 1.0]]],
+});
+const W_DOT = 0.1;                                      // a dash shorter than this (in widths): a round dot (art.py DOT)
 const W_TAPER = [0.35, 1.9];                            // (painted) a river: narrow at its source, wide at its mouth (art.py)
 function wSmoothPts(pts) {                             // the points of wLinePath's curve, close together
   if (pts.length === 2) return pts.slice();
@@ -304,7 +328,7 @@ function wName(g, text, x, y, size, opts = {}) {      // a mark's name: on a pla
   if ('letterSpacing' in g) g.letterSpacing = ((opts.spacing || 0) * size * 0.55).toFixed(2) + 'px';
   const x0 = x + size * 0.6, tw = g.measureText(text).width;
   wPlaque(g, x0, y - size * 0.72, tw, size * 0.72);
-  wText(g, text, x0, y, size, Object.assign({}, opts, { noHalo: true, haloRGB: W_PAPER, color: opts.color || '#3a281a' }));
+  wText(g, text, x0, y, size, Object.assign({}, opts, { noHalo: true, haloRGB: W_PAPER, color: opts.color || W_PAL.ribbon[2] }));
 }
 function wText(g, text, x, y, size, opts = {}) {
   g.font = wFont(size, opts.italic, opts.bold, opts.face);
@@ -362,6 +386,11 @@ const W_INK_TINTS = {   // the painted look: an ink stamp's paper by its family 
   castle: '206,198,182', tower: '206,198,182', watchtower: '206,198,182', lighthouse: '230,222,206',
   temple: '218,206,184', ruins: '190,182,166', stones: '180,176,166', obelisk: '190,184,170',
   serpent: '104,140,132', whale: '126,146,156', kraken: '156,108,112', searocks: '150,146,136',
+  massif: '186,170,138', mesa: '176,160,128', crag: '176,160,128', boulders: '170,164,150', downs: '160,156,98',
+  forest: '98,134,70', copse: '104,140,72', greattree: '112,146,76', burg: '222,200,160', port: '222,200,160',
+  huts: '214,190,140', keep: '206,198,182', spire: '206,198,182', pillars: '190,182,166', shrine: '218,206,184',
+  barrow: '150,150,100', cairn: '180,176,166', dungeon: '180,176,166', pebbles: '180,176,166', islet: '214,196,150',
+  reef: '150,146,136', wreck: '170,150,120',
 };
 const W_INK_PALE = new Set(['waves', 'whirlpool']);
 const W_SIZED = {};                                    // a picture scaled down to about px tall, smoothly, once (key -> size -> canvas)
@@ -457,9 +486,9 @@ function wInkStamp(g, m, look) {                       // [h, anchor, w, paper, 
   }
   const tint = painted && W_INK_TINTS[fam];
   if ((ST.world.map || {}).look === 'antique' && 'filter' in g) g.filter = 'sepia(0.55) saturate(0.85)';   // (art.py grade)
-  g.fillStyle = tint ? `rgb(${tint})` : 'rgb(226,208,164)'; g.fill(sh[0], 'evenodd');
+  g.fillStyle = tint ? `rgb(${tint})` : W_PAL.stamp[0]; g.fill(sh[0], 'evenodd');
   if ('filter' in g) g.filter = 'none';
-  g.fillStyle = painted && W_INK_PALE.has(fam) ? 'rgba(214,228,224,.86)' : 'rgb(28,22,16)'; g.fill(sh[1], 'evenodd');
+  g.fillStyle = painted && W_INK_PALE.has(fam) ? 'rgba(214,228,224,.86)' : W_PAL.stamp[1]; g.fill(sh[1], 'evenodd');
   g.restore();
   }
   if (m.name && W_NAMES !== 'without') {
@@ -532,6 +561,7 @@ function wCompass(g, x, y, r) {
 }
 function wTerrain(g, m) {
   if (wPainted() && m.pa) return wStamp(g, { kind: 'art', art: m.pa, x: m.x, y: m.y, s: m.ps, r: 0 });   // its painted picture (art.py)
+  if (wInked() && m.ia) return wStamp(g, { kind: 'art', art: m.ia, x: m.x, y: m.y, s: m.is, r: 0 });    // the ink look: its ink stamp
   const { x, y, kind } = m, s = +m.s || 1, v = +m.v || 0;
   g.strokeStyle = W_INK; g.lineWidth = 1; g.lineJoin = 'round'; g.lineCap = 'round'; g.setLineDash([]);
   const shade = 'rgba(58,40,26,.27)';
@@ -576,7 +606,7 @@ function wLinePath(g, pts) {                         // straight to each midpoin
 function wDrawnLine(g, line) {
   wLinePath(g, line.pts);
   g.lineJoin = 'round';
-  const looks = wPainted() ? W_LINES_PAINTED : W_LINES;
+  const looks = wPainted() ? W_LINES_PAINTED : wInked() ? W_LINES_INK : W_LINES;
   if (wPainted() && line.style === 'river') {            // widening from its source to its mouth
     const pts = wSmoothPts(line.pts), n = pts.length - 1, layers = looks.river;
     g.lineCap = 'round';
@@ -592,7 +622,7 @@ function wDrawnLine(g, line) {
     return;
   }
   for (const [color, width, dashes] of looks[line.style] || looks.road) {
-    g.strokeStyle = color; g.lineWidth = width; g.lineCap = dashes ? 'butt' : 'round';
+    g.strokeStyle = color; g.lineWidth = width; g.lineCap = dashes && dashes[0] >= W_DOT ? 'butt' : 'round';
     g.setLineDash(dashes ? dashes.map(d => d * width) : []);
     g.stroke();
   }
@@ -609,7 +639,7 @@ function wLabel(g, lab) {
     if ('letterSpacing' in g) g.letterSpacing = (0.12 * fs * 0.55).toFixed(2) + 'px';
     const tw = g.measureText(text).width;
     (style === 'banner' ? wRibbon : wPlaque)(g, -tw / 2, size * 0.35 - fs * 0.72, tw, fs * 0.72);
-    wText(g, text, 0, size * 0.35, fs, { align: 'center', bold: true, spacing: 0.12, color: '#3a281a', noHalo: true, haloRGB: W_PAPER });
+    wText(g, text, 0, size * 0.35, fs, { align: 'center', bold: true, spacing: 0.12, color: W_PAL.ribbon[2], noHalo: true, haloRGB: W_PAPER });
     g.restore();
     return;
   }
@@ -638,7 +668,7 @@ function wLabel(g, lab) {
   const text = style === 'sea' ? lab.text : wCaps(lab.text), opts = {
     align: 'center', italic: style === 'sea', bold: style === 'region', spacing: style === 'sea' ? 0.14 : style === 'region' ? 0.32 : 0.1,
     face: style === 'region' ? W_TITLING : null,
-    color: pale ? 'rgb(230,238,234)' : style === 'sea' ? W_SEA_INK : style === 'region' ? (wPainted() ? 'rgba(58,40,26,.6)' : 'rgba(58,40,26,.78)') : W_INK,
+    color: pale ? 'rgb(230,238,234)' : style === 'sea' ? W_SEA_INK : style === 'region' ? (wPainted() ? 'rgba(58,40,26,.6)' : W_PAL.region) : W_INK,
     halo: Math.max(2, size * (pale ? 0.18 : 0.16)), haloA: style === 'sea' ? 0.6 : 0.75, haloRGB: pale ? 'rgba(14,28,38,' : null };
   if (+lab.bend) wBent(g, text, size * 0.35, size, opts, +lab.bend);
   else wText(g, text, 0, size * 0.35, size, opts);
@@ -662,6 +692,7 @@ function wGrid(g, grid, w, h) {                       // a faint grid over the m
   const px = +grid.px;
   g.save(); g.beginPath(); g.rect(0, 0, w, h); g.clip();
   g.strokeStyle = wPainted() ? 'rgba(250,244,226,.24)' : 'rgba(58,40,26,.22)'; g.lineWidth = 0.6; g.setLineDash([]);
+  if (wInked()) { g.strokeStyle = 'rgba(96,96,96,.47)'; g.lineWidth = 0.7; g.lineCap = 'butt'; g.setLineDash([3.5, 2.8]); }   // grey dashes (art.py)
   g.beginPath();
   if (grid.kind === 'square') {
     for (let x = px; x <= w; x += px) { g.moveTo(x, 0); g.lineTo(x, h); }
@@ -687,24 +718,24 @@ function wPlaque(g, rx, ry, rw, rh) {                // a parchment tag behind l
     g.lineTo(x + ww - k, y + hh); g.lineTo(x + k, y + hh); g.lineTo(x, y + hh - k); g.lineTo(x, y + k); g.closePath(); };
   cut(x0 + h * 0.06, y0 + h * 0.09, w, h, c); g.fillStyle = 'rgba(0,0,0,.27)'; g.fill();
   cut(x0, y0, w, h, c);
-  const gr = g.createLinearGradient(0, y0, 0, y0 + h); gr.addColorStop(0, 'rgb(240,226,190)'); gr.addColorStop(1, 'rgb(206,184,140)');
-  g.fillStyle = gr; g.fill(); g.lineJoin = 'round'; g.lineWidth = h * 0.07; g.strokeStyle = 'rgb(58,40,26)'; g.stroke();
-  const k = h * 0.12; cut(x0 + k, y0 + k, w - 2 * k, h - 2 * k, c * 0.7); g.lineWidth = h * 0.03; g.strokeStyle = 'rgb(150,120,80)'; g.stroke();
+  const gr = g.createLinearGradient(0, y0, 0, y0 + h); gr.addColorStop(0, W_PAL.tag[0]); gr.addColorStop(1, W_PAL.tag[1]);
+  g.fillStyle = gr; g.fill(); g.lineJoin = 'round'; g.lineWidth = h * 0.07; g.strokeStyle = W_PAL.ribbon[2]; g.stroke();
+  const k = h * 0.12; cut(x0 + k, y0 + k, w - 2 * k, h - 2 * k, c * 0.7); g.lineWidth = h * 0.03; g.strokeStyle = W_PAL.tag[2]; g.stroke();
 }
 function wRibbon(g, rx, ry, rw, rh) {                // a ribbon banner behind letters in the box (rx, ry, rw, rh)
   const h = rh * 1.7, pad = h * 0.7, x0 = rx - pad, x1 = rx + rw + pad, cy = ry + rh / 2, bow = h * 0.12;
-  g.lineJoin = 'round'; g.strokeStyle = 'rgb(58,40,26)'; g.lineWidth = h * 0.05;
+  g.lineJoin = 'round'; g.strokeStyle = W_PAL.ribbon[2]; g.lineWidth = h * 0.05;
   for (const side of [-1, 1]) {                         // the folded ends, behind and below the band
     const xe = side < 0 ? x0 : x1;
     g.beginPath(); g.moveTo(xe - side * h * 0.1, cy - h * 0.2); g.lineTo(xe + side * h * 0.95, cy + h * 0.05);
     g.lineTo(xe + side * h * 0.65, cy + h * 0.55); g.lineTo(xe + side * h * 0.95, cy + h * 1.05); g.lineTo(xe - side * h * 0.1, cy + h * 0.8);
-    g.closePath(); g.fillStyle = 'rgb(186,160,112)'; g.fill(); g.stroke();
+    g.closePath(); g.fillStyle = W_PAL.ribbon[1]; g.fill(); g.stroke();
   }
   g.beginPath(); g.moveTo(x0, cy - h / 2); g.quadraticCurveTo((x0 + x1) / 2, cy - h / 2 - bow * 2, x1, cy - h / 2);
   g.lineTo(x1, cy + h / 2); g.quadraticCurveTo((x0 + x1) / 2, cy + h / 2 - bow * 2, x0, cy + h / 2); g.closePath();
-  const gr = g.createLinearGradient(0, cy - h / 2, 0, cy + h / 2); gr.addColorStop(0, 'rgb(236,218,176)'); gr.addColorStop(1, 'rgb(186,160,112)');
+  const gr = g.createLinearGradient(0, cy - h / 2, 0, cy + h / 2); gr.addColorStop(0, W_PAL.ribbon[0]); gr.addColorStop(1, W_PAL.ribbon[1]);
   g.fillStyle = gr; g.fill(); g.stroke();
-  g.strokeStyle = 'rgb(186,160,112)'; g.lineWidth = h * 0.03;
+  g.strokeStyle = W_PAL.ribbon[1]; g.lineWidth = h * 0.03;
   for (const k of [-1, 1]) {
     g.beginPath(); g.moveTo(x0 + h * 0.15, cy + k * h * 0.36); g.quadraticCurveTo((x0 + x1) / 2, cy + k * h * 0.36 - bow * 2, x1 - h * 0.15, cy + k * h * 0.36); g.stroke();
   }
@@ -791,6 +822,7 @@ function drawWorld() {
     cv.width = Math.round(vw * dpr); cv.height = Math.round(vh * dpr); cv.style.width = vw + 'px'; cv.style.height = vh + 'px';
   }
   const g = cv.getContext('2d');
+  wLook();
   g.setTransform(dpr, 0, 0, dpr, 0, 0);
   const bg = g.createLinearGradient(0, 0, 0, vh); bg.addColorStop(0, '#1e1813'); bg.addColorStop(1, '#100d0b');
   g.fillStyle = bg; g.fillRect(0, 0, vw, vh);
