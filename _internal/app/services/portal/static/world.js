@@ -115,13 +115,13 @@ function renderWorld() {
   const W = ST.world, m = W.map;
   $('bname').textContent = m ? m.name : S('World map');
   $('round').textContent = S('Day {0}', W.food.day);
-  const mapKey = m ? m.id + '_' + m.v : '';
+  const mapKey = m ? m.id + '_' + m.v + '_' + vq() : '';      // (another picture quality: fetched again at that size)
   if (m && WM.mapId !== m.id) { WM.mapId = m.id; WM.cam = null; WM.shown = null; WM.glide = null; }   // the DM opened another map
   if (m && WM.imgV !== mapKey) {                          // a new version of the map: its picture once (kept by the browser)
     WM.imgV = mapKey;
     const img = new Image();
     img.onload = () => { WM.img = img; drawWorld(); };
-    img.src = m.img + '?k=' + encodeURIComponent(KEY);
+    img.src = m.img + '?q=' + vq() + '&k=' + encodeURIComponent(KEY);
   }
   if (!m) { WM.img = null; WM.imgV = 0; }
   const empty = $('wempty');

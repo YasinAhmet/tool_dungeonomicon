@@ -150,7 +150,7 @@ button.wait::after{content:'';display:inline-block;width:8px;height:8px;margin-l
 #menu{font-size:16px;padding:0 6px;flex:none}
 #menupop{position:absolute;top:38px;right:6px;z-index:9;background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:8px;display:flex;flex-direction:column;gap:6px;width:min(300px,92vw);box-shadow:0 10px 30px #000c}
 #menupop button{text-align:left;white-space:normal}#menupop label.f{margin:0}
-#music{font-size:16px;padding:0 6px;flex:none}#music.on{color:var(--accent)}
+#music{font-size:16px;padding:0 6px;flex:none}#music.on{color:var(--accent)}#music.connecting{animation:pulse 1s ease-in-out infinite}
 #musicpop{position:absolute;top:38px;right:6px;z-index:9;background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:8px;display:flex;flex-direction:column;gap:8px;width:min(300px,92vw);box-shadow:0 10px 30px #000c}
 #musicpop .vol{display:flex;align-items:center;gap:8px}#musicpop input[type=range]{flex:1;min-width:0;padding:0;accent-color:var(--accent);background:transparent;border:0;height:28px}
 #musicpop .vol output{width:38px;text-align:right;color:var(--dim);font-variant-numeric:tabular-nums}
@@ -414,4 +414,9 @@ body.bgmode [data-need~="edit_hp"],body.bgmode [data-need~="rest"],body.bgmode [
 .invpick .ipr:hover,.invpick .ipr:focus-visible{background:var(--hover);border-color:var(--accent-dim)}
 .invpick .ipi{width:34px;height:34px;image-rendering:pixelated;flex:none;object-fit:contain}
 .invpick .ipt{display:flex;flex-direction:column;gap:2px;min-width:0}.invpick .ipn{display:flex;gap:6px;align-items:baseline;flex-wrap:wrap}
+.optcard{border-color:var(--accent-dim)}.optcard .row{display:flex;gap:6px;align-items:center}.optcard input[type=search]{width:140px}
+.optpick{display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:4px;max-height:min(46vh,420px);overflow:auto;margin:6px 0}
+.optpick .title{grid-column:1/-1;margin-top:4px}
+.optpick .opt{display:flex;flex-direction:column;align-items:flex-start;gap:1px;text-align:left;white-space:normal;padding:5px 8px;border-radius:6px}
+.optpick .opt.on{background:var(--accent-dim);border-color:var(--accent)}.optpick .opt.on .dim{color:var(--text)}
 .invpick .chip{font-size:10.5px;padding:0 5px;border-radius:3px;background:var(--input);color:var(--dim)}.invpick .chip.on{color:var(--good)}

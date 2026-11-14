@@ -5861,3 +5861,84 @@ Holds:,Holds:,Tuttuğu:
 Ally,Ally,Müttefik
 Enemy,Enemy,Düşman
 in the shape of {0},in the shape of {0},{0} kılığında
+(open now),(open now),
+(shut now),(shut now),
+"Primal Beast: advantage on Strength attacks, +1d6 force on melee weapon hits, +10 ft speed, darkvision 120 ft","Primal Beast: advantage on Strength attacks, +1d6 force on melee weapon hits, +10 ft speed, darkvision 120 ft",
+"Great Tree: 10 temporary HP, advantage on Constitution saves and on Dexterity and Wisdom attacks","Great Tree: 10 temporary HP, advantage on Constitution saves and on Dexterity and Wisdom attacks",
+"Play the loops and effects on this computer's speakers.
+Turn it off when you are in the voice channel too, or you hear them twice.","Play the loops and effects on this computer's speakers.
+Turn it off when you are in the voice channel too, or you hear them twice.",
+"Mix the loops and effects into the music players hear on the player page
+(they press Listen there and set their own volume).","Mix the loops and effects into the music players hear on the player page
+(they press Listen there and set their own volume).",
+"Delay
+Holds the whole stream back by this many milliseconds. Useful for testing or lining the audio up with a video.","Delay
+Holds the whole stream back by this many milliseconds. Useful for testing or lining the audio up with a video.",
+"{0}
+From freesound.org: {1} (CC0)","{0}
+From freesound.org: {1} (CC0)",
+"{0} · {1}, {2}×{3} tiles","{0} · {1}, {2}×{3} tiles",
+Total cover,Total cover,
+Half cover,Half cover,
+Replace the map with this arena? Everything drawn on it now goes (Ctrl+Z brings it back).,Replace the map with this arena? Everything drawn on it now goes (Ctrl+Z brings it back).,
+<b>Arena maps</b>,<b>Arena maps</b>,
+"Ready battlegrounds of every size: walls, gates, cover and lights laid out","Ready battlegrounds of every size: walls, gates, cover and lights laid out",
+Load an arena…,Load an arena…,
+Replace this map with a premade arena: from a small pit to a whole battlefield,Replace this map with a premade arena: from a small pit to a whole battlefield,
+"{0}
+Added by hand (not on Discord): send them their portal link yourself.","{0}
+Added by hand (not on Discord): send them their portal link yourself.",
+"{0}
+Discord ID {1}","{0}
+Discord ID {1}",
+"Battlegrounds uses Dungeonomicon's bot: the token, the servers and their channels are read from its settings, never changed there. Change the token in Dungeonomicon; channels picked here last until Battlegrounds closes. Run the bot from one app at a time.","Battlegrounds uses Dungeonomicon's bot: the token, the servers and their channels are read from its settings, never changed there. Change the token in Dungeonomicon; channels picked here last until Battlegrounds closes. Run the bot from one app at a time.",
+"Bot token
+Saved on this computer; the bot starts by itself when the app opens.","Bot token
+Saved on this computer; the bot starts by itself when the app opens.",
+Dungeonomicon's bot token (read only: change it there),Dungeonomicon's bot token (read only: change it there),
+Bring the bot online when Battlegrounds opens (off: start it here when needed),Bring the bot online when Battlegrounds opens (off: start it here when needed),
+"Log channel
+Rolls, XP and the battle log are posted here.","Log channel
+Rolls, XP and the battle log are posted here.",
+"Log to a thread or voice channel chat
+When set, log messages go here instead of the log channel.","Log to a thread or voice channel chat
+When set, log messages go here instead of the log channel.",
+"{0}
+{1}","{0}
+{1}",
+•••••••• (Dungeonomicon's),•••••••• (Dungeonomicon's),
+No token in Dungeonomicon yet: enter it there,No token in Dungeonomicon yet: enter it there,
+"Void
+Nothing is sent to Discord.","Void
+Nothing is sent to Discord.",
+No bot token in Dungeonomicon yet: enter it there (Audio ▸ Discord bot).,No bot token in Dungeonomicon yet: enter it there (Audio ▸ Discord bot).,
+"Multiattack
+One Multiattack, built from this creature's own attacks: how many of each, alternatives (""or it makes two Longbow attacks"") and an attack it can trade for Spellcasting or another action. {0} creatures have one.","Multiattack
+One Multiattack, built from this creature's own attacks: how many of each, alternatives (""or it makes two Longbow attacks"") and an attack it can trade for Spellcasting or another action. {0} creatures have one.",
+"The apps streamed from the Audio window (and its loops and effects, if Player page is ticked there).
+Each player presses Listen on the page and sets their own volume.","The apps streamed from the Audio window (and its loops and effects, if Player page is ticked there).
+Each player presses Listen on the page and sets their own volume.",
+"Dungeonomicon Battlegrounds - duels, skirmishes and arena runs for D&D 5e, apart from any campaign: you open lobbies, the players join them from their own Battlegrounds link and fight.
+
+Open windows from the Window menu and drag their tabs to dock them anywhere: beside another window, as a tab, floating, or pinned to a side bar. Save arrangements under Layout.","Dungeonomicon Battlegrounds - duels, skirmishes and arena runs for D&D 5e, apart from any campaign: you open lobbies, the players join them from their own Battlegrounds link and fight.
+
+Open windows from the Window menu and drag their tabs to dock them anywhere: beside another window, as a tab, floating, or pinned to a side bar. Save arrangements under Layout.",
+"Dungeonomicon - an all-in-one Dungeon Master helper for D&D 5e with Discord bot support.
+
+Open windows from the Window menu and drag their tabs to dock them anywhere: beside another window, as a tab, floating, or pinned to a side bar. Save arrangements under Layout.","Dungeonomicon - an all-in-one Dungeon Master helper for D&D 5e with Discord bot support.
+
+Open windows from the Window menu and drag their tabs to dock them anywhere: beside another window, as a tab, floating, or pinned to a side bar. Save arrangements under Layout.",
+Sound quality,Sound quality,Ses kalitesi
+Picture quality,Picture quality,Görüntü kalitesi
+Potato,Potato,Patates
+High,High,Yüksek
+(over the DM's limit),(over the DM's limit),(DM'in sınırının üstünde)
+The DM limits you to {0}.,The DM limits you to {0}.,DM seni {0} ile sınırlıyor.
+A slow connection: pick Potato. Only your own token shows its picture.,A slow connection: pick Potato. Only your own token shows its picture.,Bağlantın yavaşsa Patates'i seç. Yalnızca kendi jetonunun resmi görünür.
+Most for this player:,Most for this player:,Bu oyuncuya en fazla:
+"The best sound quality this player may pick on their page (about 3, 6, 12 or 20 KB/s)","The best sound quality this player may pick on their page (about 3, 6, 12 or 20 KB/s)","Bu oyuncunun sayfasında seçebileceği en iyi ses kalitesi (yaklaşık 3, 6, 12 veya 20 KB/sn)"
+The best picture quality this player may pick: the size of maps and tokens sent to them. Potato shows only their own token's picture,The best picture quality this player may pick: the size of maps and tokens sent to them. Potato shows only their own token's picture,Bu oyuncunun seçebileceği en iyi görüntü kalitesi: ona gönderilen harita ve jetonların boyutu. Patates yalnızca kendi jetonunun resmini gösterir
+They picked {0}; your limit: {1},They picked {0}; your limit: {1},Seçtiği: {0}; senin sınırın: {1}
+Choose one,Choose one,Birini seç
+Then pick the target on the map,Then pick the target on the map,Sonra hedefi haritada seç
+Choose in the character panel,Choose in the character panel,Karakter panelinde seç

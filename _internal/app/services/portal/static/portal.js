@@ -188,7 +188,7 @@ async function api(path, body, more) {
 }
 function online() {
   if (NET.state === 'live') return;
-  NET.state = 'live'; NET.down = 0; conn(); refresh();
+  NET.state = 'live'; NET.down = 0; conn(); refresh(); tokenRetry(true);   // (pictures that failed while it was down)
 }
 function offline() {
   if (!NET.down) NET.down = Date.now();
@@ -566,6 +566,7 @@ function menu(rebuild) {
   const notifyOk = window.Notification && Notification.permission !== 'denied';
   pop.replaceChildren(...[                              // (no null: replaceChildren would print it)
     h('label', { class: 'f' }, S('Language')), lang,
+    ...qualityPickers(),
     h('button', { class: UI.mute ? '' : 'on', 'aria-pressed': String(!UI.mute), onclick: toggleMute }, (UI.mute ? '🔇 ' : '🔊 ') + S('Sound when it is your turn')),
     h('button', { class: UI.notify && notifyOk ? 'on' : '', 'aria-pressed': String(!!UI.notify), onclick: toggleNotify, disabled: !window.Notification },
       (UI.notify && notifyOk ? '🔔 ' : '🔕 ') + S('Notify me when the page is in the background')),
@@ -573,6 +574,28 @@ function menu(rebuild) {
     h('div', { class: 'small dim' }, h('a', { href: 'https://game-icons.net', target: '_blank', rel: 'noopener noreferrer', class: 'dim' },
       S('Icons: game-icons.net')), ' (CC BY 3.0)')].filter(Boolean));
 }
+/** How much the table sends this page (portal/quality.py): sound and pictures apart, Potato…High - the player's pick,
+ *  never above the DM's limit for them. A poor connection picks Potato: small pictures, no portraits but their own. */
+const TIERS = ['potato', 'low', 'normal', 'high'];
+const TIER_WORDS = { potato: 'Potato', low: 'Low', normal: 'Normal', high: 'High' };
+const quality = kind => (ST && ST.me && ST.me.quality && ST.me.quality[kind]) || { want: 'normal', max: 'high', use: 'normal' };
+const vq = () => quality('visual').use, aq = () => quality('audio').use;
+function qualityPickers() {
+  const out = [];
+  for (const [kind, words] of [['audio', S('Sound quality')], ['visual', S('Picture quality')]]) {
+    const q = quality(kind), top = TIERS.indexOf(q.max);
+    out.push(h('label', { class: 'f' }, words), h('select', { 'aria-label': words, onchange: e => setQuality(kind, e.target.value) },
+      ...TIERS.map((t, i) => h('option', { value: t, selected: t === q.want, disabled: i > top },
+        S(TIER_WORDS[t]) + (i > top ? ' ' + S("(over the DM's limit)") : '')))));
+    if (q.use !== q.want) out.push(h('div', { class: 'small dim' }, S('The DM limits you to {0}.', S(TIER_WORDS[q.use]))));
+  }
+  out.push(h('div', { class: 'small dim' }, S('A slow connection: pick Potato. Only your own token shows its picture.')));
+  return out;
+}
+async function setQuality(kind, tier) {
+  const r = await act('quality', { kind, tier }, true);
+  if (r && r.data && r.data.quality && ST) { ST.me.quality = r.data.quality; render(); renderMusic(); }   // (listening: the
+}                                                       // stream starts over at the new tier)
 $('menu').onclick = e => { e.stopPropagation(); $('musicpop').classList.add('hide'); menu(); };
 document.addEventListener('click', e => { if (!$('menupop').classList.contains('hide') && !$('menupop').contains(e.target) && e.target !== $('menu')) { $('menupop').classList.add('hide'); $('menu').setAttribute('aria-expanded', 'false'); } });
 /** Don't rebuild a part of the page while someone is typing or choosing in it; do it when they leave the field. */
@@ -597,7 +620,8 @@ function renderNow() {
   $('nowartist').textContent = n.artist;
   $('nowlink').href = n.url;
   $('nowlink').title = S('Open on Spotify');
-  if (artKey !== n.key + n.art) { artKey = n.key + n.art; $('nowart').src = n.art ? `/api/art?k=${encodeURIComponent(KEY)}&s=${encodeURIComponent(n.key)}` : ''; }
+  const art = n.art && vq() !== 'potato';                // (Potato: no cover)
+  if (artKey !== n.key + n.art + art) { artKey = n.key + n.art + art; $('nowart').src = art ? `/api/art?k=${encodeURIComponent(KEY)}&s=${encodeURIComponent(n.key)}` : ''; }
   const hb = $('nowheart');
   hb.textContent = n.hearted_by ? '♥' : '♡';
   hb.classList.toggle('on', !!n.hearted_by);
@@ -610,7 +634,7 @@ $('nowheart').onclick = () => act('heart', {}, false);
 // the header). Each player sets their own volume, and the slider is loudness, not amplitude, like the DM's own sliders
 // (app/bot/volume.py): loudness grows with about the 0.6th power of amplitude, so 50 % sounds half as loud as 100 % and
 // 3 % feels like 3 %, not like silence.
-const MUSIC = { el: null, gain: null, on: false, want: !!store('music'), vol: store('musicvol') ?? 50, retry: 0, timer: 0, tried: false };
+const MUSIC = { el: null, gain: null, on: false, live: false, want: !!store('music'), vol: store('musicvol') ?? 50, retry: 0, timer: 0, tried: false };
 const loudness = p => Math.pow(Math.max(0, Math.min(100, p)) / 100, 1 / 0.6);
 const canMusic = () => !!(window.Audio && new Audio().canPlayType('audio/ogg; codecs=opus'));
 function musicVolume() {
@@ -633,13 +657,17 @@ function musicPlay() {
   if (!MUSIC.el) {
     const a = MUSIC.el = new Audio();
     a.preload = 'none';
-    const lost = () => { if (MUSIC.on) MUSIC.timer = setTimeout(musicPlay, Math.min(30000, 2000 * 2 ** MUSIC.retry++)); };   // the app or the tunnel went away: try again
+    const live = on => { if (MUSIC.live !== on) { MUSIC.live = on; renderMusic(); } };   // sound comes out, or not yet / not any more
+    const lost = () => { live(false); if (MUSIC.on) MUSIC.timer = setTimeout(musicPlay, Math.min(30000, 2000 * 2 ** MUSIC.retry++)); };   // the app or the tunnel went away: try again
     a.addEventListener('error', lost);
     a.addEventListener('ended', lost);
-    a.addEventListener('playing', () => { MUSIC.retry = 0; });
+    a.addEventListener('playing', () => { MUSIC.retry = 0; live(MUSIC.on); });
+    a.addEventListener('waiting', () => live(false));
   }
   MUSIC.on = true;
-  MUSIC.el.src = `/api/music?k=${encodeURIComponent(KEY)}&t=${Date.now()}`;     // a fresh stream, never a cached one
+  MUSIC.live = false;                                  // "Connecting…" until the first sound plays
+  MUSIC.q = aq();                                      // the sound quality it is sent at (⚙; the DM may cap it)
+  MUSIC.el.src = `/api/music?k=${encodeURIComponent(KEY)}&q=${MUSIC.q}&t=${Date.now()}`;     // a fresh stream, never a cached one
   musicVolume();
   MUSIC.el.play().catch(e => {
     if (e.name !== 'NotAllowedError' || !MUSIC.on) return;                         // other failures retry through 'error'
@@ -653,7 +681,7 @@ function musicPlay() {
 function musicHangUp() {                               // drop the connection: the app stops sending
   if (MUSIC.el) { MUSIC.el.pause(); MUSIC.el.removeAttribute('src'); MUSIC.el.load(); }
 }
-function musicStop() { clearTimeout(MUSIC.timer); MUSIC.on = false; musicHangUp(); renderMusic(); }
+function musicStop() { clearTimeout(MUSIC.timer); MUSIC.on = MUSIC.live = false; musicHangUp(); renderMusic(); }
 function musicToggle() {
   MUSIC.want = !MUSIC.on;
   store('music', MUSIC.want);
@@ -663,6 +691,7 @@ function musicIcon() {
   const b = $('music');
   b.textContent = !MUSIC.on ? '🎧' : MUSIC.vol <= 0 ? '🔇' : MUSIC.vol < 50 ? '🔉' : '🔊';
   b.classList.toggle('on', MUSIC.on);
+  b.classList.toggle('connecting', MUSIC.on && !MUSIC.live);
 }
 /** 🎧 shows while the DM lets players listen; a player who listened last time hears it again as soon as the page may. */
 function renderMusic() {
@@ -674,6 +703,7 @@ function renderMusic() {
     return;
   }
   if (MUSIC.want && !MUSIC.on && !MUSIC.tried) { MUSIC.tried = true; musicPlay(); return; }
+  if (MUSIC.on && MUSIC.q !== aq()) { musicPlay(); return; }    // the DM changed the limit: start over at the new tier
   musicIcon();
   $('music').title = S('Music');
   $('music').setAttribute('aria-label', S('Music'));
@@ -689,10 +719,11 @@ function musicPop(rebuild) {
     $('menupop').classList.add('hide');
   }
   if (pop.contains(document.activeElement) && document.activeElement.type === 'range') return;    // not under a dragged slider
-  const ok = canMusic(), out = h('output', {}, MUSIC.vol + '%');
+  const ok = canMusic(), out = h('output', {}, MUSIC.vol + '%'), wait = MUSIC.on && !MUSIC.live;
   pop.replaceChildren(
-    h('button', { class: MUSIC.on ? 'on' : 'primary', disabled: !ok, 'aria-pressed': String(MUSIC.on), onclick: musicToggle },
-      MUSIC.on ? '⏸ ' + S('Stop listening') : '▶ ' + S("Listen to the table's music")),
+    h('button', { class: !MUSIC.on ? 'primary' : wait ? 'on wait' : 'on', disabled: !ok, 'aria-pressed': String(MUSIC.on),
+      'aria-busy': String(wait), title: wait ? S('Stop listening') : '', onclick: musicToggle },
+      !MUSIC.on ? '▶ ' + S("Listen to the table's music") : wait ? S('Connecting…') : '⏸ ' + S('Stop listening')),
     h('label', { class: 'vol' }, h('span', { 'aria-hidden': 'true' }, '🔈'),
       h('input', { type: 'range', min: 0, max: 100, step: 1, value: MUSIC.vol, 'aria-label': S('Music volume'),
         oninput: e => { MUSIC.vol = +e.target.value; out.textContent = MUSIC.vol + '%'; musicVolume(); musicIcon(); store('musicvol', MUSIC.vol); } }),
@@ -1899,7 +1930,7 @@ function hurt(at) {
 function tokenDisc(g, c, cx, cy, r) {                  // a token's picture (or initials) in its circle
   g.save(); g.beginPath(); g.arc(cx, cy, r, 0, Math.PI * 2); g.closePath();
   g.fillStyle = c.kind === 'pc' ? '#2f4a7a' : c.ally ? '#2f6a4a' : '#6a2f35'; g.fill();
-  const im = c.token ? image(c.id, c.token) : null;
+  const im = c.token && (c.mine || vq() !== 'potato') ? image(c.id, c.token) : null;   // (Potato: only their own picture)
   if (im && im.complete && im.naturalWidth) { g.clip(); g.drawImage(im, cx - r, cy - r, r * 2, r * 2); }
   else { g.fillStyle = '#fff'; g.font = `600 ${Math.max(8, r * .8)}px Segoe UI`; g.textAlign = 'center'; g.textBaseline = 'middle';
     g.fillText(c.name.split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase(), cx, cy); }
@@ -2717,8 +2748,9 @@ function drawImages(g, b, T, layer) {
 }
 const mapImgs = {};
 function drawImage(g, d, T) {
-  if (!mapImgs[d.img]) { const im = mapImgs[d.img] = new Image(); im.onload = () => renderMap(); im.src = `/mapimg/${d.img}?k=${encodeURIComponent(KEY)}`; }
-  const im = mapImgs[d.img];
+  const key = d.img + '|' + vq();                      // (another picture quality: fetched again at that size)
+  if (!mapImgs[key]) { const im = mapImgs[key] = new Image(); im.onload = () => renderMap(); im.src = `/mapimg/${d.img}?q=${vq()}&k=${encodeURIComponent(KEY)}`; }
+  const im = mapImgs[key];
   if (!im.complete || !im.naturalWidth) return false;
   g.save();
   g.translate((d.x + d.w / 2) * T, (d.y + d.h / 2) * T); g.rotate((d.rot || 0) * Math.PI / 180);
@@ -2734,16 +2766,40 @@ function propImage(key) {            // a map prop's (or symbol's) picture, fetc
 }
 function image(id, v) {             // kept by its version: a new portrait (or a new creature under this id) loads again
   const d = typeof bgTokenRoom === 'function' ? bgTokenRoom() : 0;   // (a token on a Battlegrounds lobby's map: battlegrounds.js)
-  const key = `${d}:${id}:${v}`;
-  if (!imgs[key]) {
-    const im = imgs[key] = new Image(), url = `/token/${id}?v=${v}${d ? '&duel=' + d : ''}&k=${encodeURIComponent(KEY)}`;
-    let tries = 0;                                   // a picture that didn't come (the tunnel dropped it, the table was busy):
-    im.onload = () => renderMap();                   // asked again a little later, so no token stays without its picture
-    im.onerror = () => { if (++tries <= 6) setTimeout(() => { im.src = `${url}&r=${tries}`; }, Math.min(8000, 600 * 2 ** tries)); };
-    im.src = url;
+  const q = vq(), key = `${d}:${id}:${v}:${q}`;
+  let im = imgs[key];
+  if (!im) {
+    im = imgs[key] = new Image();
+    im.url = `/token/${id}?v=${v}&q=${q}${d ? '&duel=' + d : ''}&k=${encodeURIComponent(KEY)}`;
+    im.tries = 0;
+    // a picture that didn't come (the tunnel dropped it, the table was busy, it came broken) is marked failed and
+    // asked again by tokenRetry(): never given up on while the token is drawn, so no one is left with initials
+    im.onload = () => { if (im.naturalWidth) { im.failed = false; renderMap(); } else tokenFailed(im); };
+    im.onerror = () => tokenFailed(im);
+    im.asked = Date.now(); im.src = im.url;
   }
-  return imgs[key];
+  im.seen = Date.now();
+  return im;
 }
+const TOKEN_STALL = 20000;                          // a picture still not here after this long: the request hung, asked again
+function tokenFailed(im) {
+  im.failed = true;
+  im.due = Date.now() + Math.min(15000, 600 * 2 ** Math.min(im.tries, 5));   // 0.6 s, 1.2 s ... then every 15 s
+}
+function tokenAsk(im) { im.tries++; im.failed = false; im.asked = Date.now(); im.src = `${im.url}&r=${im.tries}`; }
+/** Asks again for the token pictures that failed (when due; `now`: all of them at once) or hung; one no longer
+ *  drawn for a minute (an old version, a creature gone) is dropped, and fetched afresh if it shows up again. */
+function tokenRetry(now) {
+  const t = Date.now();
+  for (const [key, im] of Object.entries(imgs)) {
+    if (im.complete && im.naturalWidth && !im.failed) continue;
+    if (t - im.seen > 60000) { if (im.failed) delete imgs[key]; continue; }
+    if (im.failed ? now || t >= im.due : t - im.asked > TOKEN_STALL) tokenAsk(im);
+  }
+}
+setInterval(() => tokenRetry(false), 2000);
+window.addEventListener('online', () => tokenRetry(true));
+document.addEventListener('visibilitychange', () => { if (!document.hidden) tokenRetry(true); });
 
 // ---------------------------------------------------------------- moving around the map: drag to pan, wheel / pinch to zoom
 const camNow = () => ({ ...(UI.cam || UI.camFit) });
@@ -3179,6 +3235,61 @@ function aimCount(a) {
 function aimArea(a) { return a.item.area || (a.item.target || {}).area || null; }
 /** Throw / Use an Object: options that carry what the inventory picker shows (an older battle's are plain labels). */
 const richOptions = opts => !!(opts && opts.length && opts.every(o => 'group' in o));
+/** A long list of plain choices (Wild Shape's beasts, a summon's forms...): boxes in the character panel while aiming,
+ *  not a dropdown as tall as the screen. A short one stays a dropdown in the aim bar. */
+const longOptions = a => !!(a && a.options.length >= 7 && !richOptions(a.options));
+/** "Brown Bear (CR 1, 34 HP)" → ['Brown Bear', 'CR 1, 34 HP']. */
+function optionBits(o) {
+  const m = /^(.*?)\s*\(([^()]*)\)\s*$/.exec(o.label || '');
+  return m ? [m[1], m[2]] : [o.label || String(o.value), ''];
+}
+/** The aim's choices as a card of boxes over the sheet - only while aiming; the card is kept on the aim, so a search
+ *  and the list's scroll outlive the sheet's redraws. Grouped under a heading when the brackets start alike (CR 1...). */
+function optionCard(a) {
+  if (a.card) { syncOptionCard(a); return a.card; }
+  const bits = a.options.map(optionBits), heads = bits.map(([, m]) => m.split(',')[0].trim());
+  const kinds = new Set(heads), runs = heads.filter((x, i) => !i || x !== heads[i - 1]).length;
+  const grouped = heads.every(Boolean) && kinds.size > 1 && kinds.size <= a.options.length / 2 && runs === kinds.size;
+  const list = h('div', { class: 'optpick', role: 'listbox', 'aria-label': a.item.label || a.item.name });
+  const draw = () => {
+    const kids = [];
+    let last = null;
+    a.options.forEach((o, i) => {
+      if (a.needle && !(o.label || '').toLowerCase().includes(a.needle)) return;
+      if (grouped && heads[i] !== last) { last = heads[i]; kids.push(h('div', { class: 'title' }, heads[i])); }
+      const more = grouped ? bits[i][1].split(',').slice(1).join(',').trim() : bits[i][1];
+      kids.push(h('button', { class: 'opt', role: 'option', 'data-v': String(o.value), onclick: () => pickOption(a, o.value) },
+        h('b', null, bits[i][0]), more ? h('span', { class: 'dim small' }, more) : null));
+    });
+    list.replaceChildren(...(kids.length ? kids : [h('div', { class: 'dim' }, S('Nothing matches.'))]));
+    syncOptionCard(a);
+  };
+  a.card = h('div', { class: 'card optcard' },
+    h('div', { class: 'row' }, h('div', { class: 'title grow' }, `${a.item.label || a.item.name} · ${S('Choose one')}`),
+      a.options.length > 12 ? h('input', { type: 'search', placeholder: S('search…'), 'aria-label': S('Search'),
+        oninput: e => { a.needle = e.target.value.trim().toLowerCase(); draw(); } }) : null),
+    list,
+    h('div', { class: 'row' }, aimNeedsClick(a) ? h('span', { class: 'dim small' }, S('Then pick the target on the map')) : null, h('span', { class: 'grow' }),
+      aimNeedsClick(a) ? null : btn(S('Confirm'), commitAim, 'sm primary'), btn('✕ ' + S('Cancel'), cancelAim, 'sm')));
+  draw();
+  return a.card;
+}
+function syncOptionCard(a) {
+  if (a.card) a.card.querySelectorAll('.opt').forEach(b => {
+    const on = b.dataset.v === String(a.option);
+    b.classList.toggle('on', on); b.setAttribute('aria-selected', String(on));
+  });
+}
+function pickOption(a, v) {
+  if (UI.aim !== a) return;
+  a.option = v; syncOptionCard(a); renderAimbar();
+  if (NARROW.matches && aimNeedsClick(a)) showView('map');   // phones: on to the map for the target
+}
+/** The aim bar's word on the choice: a tap shows the boxes (phones: the character view). */
+function showOptions(a) {
+  if (NARROW.matches) showView('sheet');
+  requestAnimationFrame(() => { if (a.card && UI.aim === a) { a.card.scrollIntoView({ block: 'nearest' }); (a.card.querySelector('input') || a.card.querySelector('.opt.on') || a.card).focus(); } });
+}
 const PICK_GROUPS = { pack: 'In your pack', ground: 'On the ground within reach', prop: 'Within reach' };
 const PICK_COSTS = { action: 'Action', bonus: 'Bonus action', attack: 'One attack', object: 'Free object use' };
 /** The inventory picker of Throw and Use an Object: each thing with its picture and what it does - to hit, damage
@@ -3243,11 +3354,14 @@ function startAim(item, chosen) {
     UI.aim.pending = { key: tgt.pos.join(','), p: [tgt.pos[0] + .5, tgt.pos[1] + .5], token: tgt };                // one click (or Enter) on
   else if (tgt && tgt.pos && me && me.pos) say(S('{0} is out of reach ({1} ft): pick another creature', tgt.name, Geo.dist(me, tgt)));
   if (item.kind === 'spell') api('/api/act', { action: 'preview', character: ST.me.active, item: item.id, slot: UI.aim.slot }).then(r => {
-    if (UI.aim && UI.aim.item === item && r.data && r.data.options && r.data.options.length) { UI.aim.options = r.data.options; UI.aim.option = r.data.options[0].value; renderAimbar(); }
+    if (UI.aim && UI.aim.item === item && r.data && r.data.options && r.data.options.length) {
+      UI.aim.options = r.data.options; UI.aim.option = r.data.options[0].value; UI.aim.card = null; renderAimbar(); renderSheet();
+    }
   }).catch(() => {});
   renderAimbar(); renderMap(); renderActions();
+  if (longOptions(UI.aim)) { renderSheet(); showOptions(UI.aim); }
 }
-function cancelAim() { UI.aim = null; renderAimbar(); renderMap(); renderActions(); }
+function cancelAim() { const had = UI.aim && UI.aim.card; UI.aim = null; renderAimbar(); renderMap(); renderActions(); if (had) renderSheet(); }
 /** The levels a spell can be cast at now, lowest first: [{level, left, pact}] (a warlock's pact slots at their level). */
 function slotLevels(item) {
   return (item && item.slot_levels) || [];
@@ -3297,6 +3411,7 @@ async function commitAim() {
   const a = UI.aim;
   if (!a) return;
   UI.aim = null; UI.quietUntil = Date.now() + 350; renderAimbar(); renderMap();
+  if (a.card) renderSheet();                                 // the choice's boxes go
   const rolls = a.item.kind === 'spell' || ['creature', 'split', 'point', 'self_area'].includes((a.item.target || {}).type);
   await act('do', { item: a.item.id, targets: a.targets, point: a.point, slot: a.slot || null, dtype: a.dtype || null, option: a.option || null,
     metamagic: a.metamagic || null }, false, { adv: rolls });
@@ -3350,6 +3465,9 @@ function renderAimbar() {
     const o = a.options.find(x => x.value === a.option) || a.options[0];
     kids.push(btn('🎒 ' + (o.name || o.label) + (o.dmg ? ` (${o.dmg})` : o.effect ? ` (${S(o.effect)})` : ''),
       () => pickInventory(a.item, a.options, v => { if (UI.aim === a) { a.option = v; renderAimbar(); } }), 'sm', S('Pick something else')));
+  } else if (longOptions(a)) {                               // a long list: its boxes in the character panel
+    const o = a.options.find(x => String(x.value) === String(a.option)) || a.options[0];
+    kids.push(btn('▤ ' + optionBits(o)[0], () => showOptions(a), 'sm on', S('Choose in the character panel')));
   } else if (a.options.length) kids.push(h('select', { onchange: e => { a.option = e.target.value; } },
     ...a.options.map(o => h('option', { value: o.value, selected: o.value === a.option }, o.label))));
   if ((a.item.metamagic || []).length) kids.push(h('select', { onchange: e => { a.metamagic = e.target.value; }, tip: S('Metamagic (sorcery points)') },
@@ -3381,11 +3499,13 @@ function drawAim(g, b, T) {
       if (!tokenAt(tile) && tile[0] >= 0 && tile[1] >= 0 && tile[0] < b.map.w && tile[1] < b.map.h) {
         const pk = movePeek(me, tile[0], tile[1]);          // the table's answer: the real way, and opportunity attacks on it
         if (pk && pk.path && pk.path.length) return drawWay(g, T, me, { ...pk, x: tile[0], y: tile[1] });
+        const sp = me.span || 1, half = sp / 2;              // (its own size: a Large wild shape takes 2x2)
         const d = 5 * Math.max(Math.abs(tile[0] - me.pos[0]), Math.abs(tile[1] - me.pos[1])), left = moveLeft(b);
-        g.strokeStyle = left != null && d > left ? '#f87171aa' : '#4ade80aa'; g.setLineDash([4, 4]); g.lineWidth = 2;
-        g.beginPath(); g.moveTo((me.pos[0] + me.span / 2) * T, (me.pos[1] + me.span / 2) * T); g.lineTo((tile[0] + .5) * T, (tile[1] + .5) * T); g.stroke(); g.setLineDash([]);
-        g.strokeRect(tile[0] * T + 2, tile[1] * T + 2, T - 4, T - 4);
-        if (T >= 16) { g.fillStyle = '#e6e9ef'; g.font = '11px Segoe UI'; g.textAlign = 'center'; g.textBaseline = 'bottom'; g.fillText(`~${d} ft`, (tile[0] + .5) * T, tile[1] * T - 1); }
+        const no = (pk && pk.ok === false) || (left != null && d > left);    // the table said no (that space is taken): red
+        g.strokeStyle = no ? '#f87171aa' : '#4ade80aa'; g.setLineDash([4, 4]); g.lineWidth = 2;
+        g.beginPath(); g.moveTo((me.pos[0] + half) * T, (me.pos[1] + half) * T); g.lineTo((tile[0] + half) * T, (tile[1] + half) * T); g.stroke(); g.setLineDash([]);
+        g.strokeRect(tile[0] * T + 2, tile[1] * T + 2, sp * T - 4, sp * T - 4);
+        if (T >= 16) { g.fillStyle = '#e6e9ef'; g.font = '11px Segoe UI'; g.textAlign = 'center'; g.textBaseline = 'bottom'; g.fillText(pk && pk.why ? S(pk.why) : `~${d} ft`, (tile[0] + half) * T, tile[1] * T - 1); }
       }
     }
     return;
@@ -3676,6 +3796,7 @@ function renderSheet() {
         ...idf.options.map(o => btn('🔍 ' + o.label, () => act('identify', { item: o.name }), 'sm primary', S('Identify it'))),
         btn(S('Not an item'), () => act('identify_cancel', {}, true), 'sm', S('The spell looked at something else (a creature, an item the DM tells you about)')))));
   }
+  if (longOptions(UI.aim)) head.push(optionCard(UI.aim));  // aiming something with many choices: its boxes, until it is used
   if (c.current_hp <= 0) {
     const s = c.death_saves;
     head.push(h('div', { class: 'card warn' }, h('div', { class: 'title' }, S('Death saves')),
