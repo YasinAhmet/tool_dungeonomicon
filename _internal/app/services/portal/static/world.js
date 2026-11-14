@@ -824,8 +824,7 @@ function drawWorld() {
   const g = cv.getContext('2d');
   wLook();
   g.setTransform(dpr, 0, 0, dpr, 0, 0);
-  const bg = g.createLinearGradient(0, 0, 0, vh); bg.addColorStop(0, '#1e1813'); bg.addColorStop(1, '#100d0b');
-  g.fillStyle = bg; g.fillRect(0, 0, vw, vh);
+  g.fillStyle = LOOK.bg; g.fillRect(0, 0, vw, vh);       // the table under the map: the page's parchment (portal.js setLook)
   if (!W.map) return;
   const c = wCam(), [w, h_] = wSize(), k = 1 / c.z;
   g.translate(c.x, c.y); g.scale(c.z, c.z);

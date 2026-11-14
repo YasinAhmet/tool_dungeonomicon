@@ -18,6 +18,27 @@ const store = (k, v) => { try {   // dp_: what a browser kept before the rename,
   if (v === undefined) return JSON.parse(localStorage.getItem('dm_' + k) ?? localStorage.getItem('dp_' + k));
   localStorage.setItem('dm_' + k, JSON.stringify(v)); localStorage.removeItem('dp_' + k);
 } catch { return null; } };
+/** The page's look (portal.css): the editor's parchment, or the same less bright ('dim') - this device's pick in the ⚙
+ *  menu; until one is picked, a dark-mode device starts dim. LOOK: the colours the canvases take from it (the bare map). */
+const LOOK = {};
+function setLook(dim) {
+  if (dim != null) store('dim', !!dim);
+  const pick = store('dim'), on = pick == null ? !!(window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches) : !!pick;
+  document.documentElement.dataset.look = on ? 'dim' : 'parchment';
+  const cs = getComputedStyle(document.documentElement);
+  for (const k of ['bg', 'raised', 'text', 'dim']) LOOK[k] = cs.getPropertyValue('--' + k).trim() || { bg: '#b09c74', raised: '#c8b790', text: '#2f2317', dim: '#564530' }[k];
+  const meta = document.querySelector('meta[name=theme-color]');
+  if (meta) meta.content = LOOK.bg;
+  return on;
+}
+const lookDim = () => document.documentElement.dataset.look === 'dim';
+setLook();
+/** A badge's colour (made for the dark map) as ink on the parchment. */
+const inkc = c => !c || c.startsWith('var(') ? c : `color-mix(in srgb, ${c} 42%, var(--text))`;
+/** Words on the map with no plate behind them (a token's name, a zone's): in the map's pen, with its halo (drawBattle sets both). */
+function mapText(g, text, x, y) {
+  g.save(); g.lineJoin = 'round'; g.lineWidth = 2.5; g.strokeStyle = LOOK.halo; g.strokeText(text, x, y); g.fillStyle = LOOK.pen; g.fillText(text, x, y); g.restore();
+}
 const FOLDS = new Set(store('folds') || []);   // the categories folded away on this device: spell levels, feature sources, action groups
 const folded = k => FOLDS.has(k);
 const flipFold = (k, redraw) => { FOLDS.has(k) ? FOLDS.delete(k) : FOLDS.add(k); store('folds', [...FOLDS]); redraw(); };
@@ -510,7 +531,7 @@ function hpChip() {
   const pct = c.max_hp ? c.current_hp / c.max_hp : 0, look = badgeLook();
   el.className = 'flat ' + (c.current_hp <= 0 ? 'down' : pct <= .25 ? 'bad' : pct <= .5 ? 'warn' : 'good');
   el.replaceChildren(...[gi('heal'), h('b', null, `${c.current_hp}/${c.max_hp}`), c.temp_hp ? h('span', { class: 'tmp' }, `+${c.temp_hp}`) : null,
-    ...(c.condition_info || []).map(x => h('span', { class: 'cnd', style: `color:${(look[x.name] || [])[1] || 'var(--warn)'}` }, gi(x.name)))].filter(Boolean));
+    ...(c.condition_info || []).map(x => h('span', { class: 'cnd', style: `color:${inkc((look[x.name] || [])[1] || 'var(--warn)')}` }, gi(x.name)))].filter(Boolean));
   const words = [`${c.name}: ${S('HP')} ${c.current_hp}/${c.max_hp}` + (c.temp_hp ? ` (+${c.temp_hp})` : ''),
     ...(c.condition_info || []).map(x => x.label), c.exhaustion ? S('Exhaustion {0}', c.exhaustion) : '', S('Click: open your character')].filter(Boolean);
   el.setAttribute('aria-label', words.join(' · '));
@@ -567,6 +588,8 @@ function menu(rebuild) {
   pop.replaceChildren(...[                              // (no null: replaceChildren would print it)
     h('label', { class: 'f' }, S('Language')), lang,
     ...qualityPickers(),
+    h('button', { class: lookDim() ? 'on' : '', 'aria-pressed': String(lookDim()), onclick: () => { setLook(!lookDim()); menu(true); render(); } },
+      '🕯 ' + S('Dim parchment')),
     h('button', { class: UI.mute ? '' : 'on', 'aria-pressed': String(!UI.mute), onclick: toggleMute }, (UI.mute ? '🔇 ' : '🔊 ') + S('Sound when it is your turn')),
     h('button', { class: UI.notify && notifyOk ? 'on' : '', 'aria-pressed': String(!!UI.notify), onclick: toggleNotify, disabled: !window.Notification },
       (UI.notify && notifyOk ? '🔔 ' : '🔕 ') + S('Notify me when the page is in the background')),
@@ -846,7 +869,7 @@ function paintBadge(g, x, y, r, name, alpha = 1) {     // a dark disc ringed in 
   g.strokeStyle = col; g.lineWidth = Math.max(1.2, r * .16); g.stroke();
   const im = slug ? picture(slug) : null;
   if (im && im.complete && im.naturalWidth) g.drawImage(im, x - r * .68, y - r * .68, r * 1.36, r * 1.36);
-  else if (!slug) { g.fillStyle = '#e6e9ef'; g.font = `700 ${Math.max(8, Math.round(r * .95))}px Segoe UI, sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(name, x, y); }
+  else if (!slug) { g.fillStyle = '#e6e9ef'; g.font = `700 ${Math.max(8, Math.round(r * .95))}px Alegreya Sans, Segoe UI, sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(name, x, y); }
   g.restore();
 }
 const STEP = 0.085, REVEAL = 0.8;
@@ -1779,7 +1802,7 @@ const FX = {
         g.beginPath(); g.arc(i.at[0] * T, i.at[1] * T, Math.max(.5, r), 0, Math.PI * 2); g.stroke();
       } else if (i.kind === 'text') {
         const a = u < .6 ? 1 : (1 - u) / .4, x = i.at[0] * T, y = (i.at[1] - (i.rise ?? .7) * u) * T;
-        g.font = `700 ${Math.max(11, Math.round(T * i.size))}px Segoe UI, sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle';
+        g.font = `700 ${Math.max(11, Math.round(T * i.size))}px Alegreya Sans, Segoe UI, sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle';
         g.fillStyle = `rgba(11,13,18,${(a * .85).toFixed(3)})`; g.fillText(i.text, x + 1.2, y + 1.2);
         g.fillStyle = rgba(i.col, a); g.fillText(i.text, x, y);
       } else if (i.kind === 'num') this.num(g, i, u, now - i.t0, T);
@@ -1789,7 +1812,7 @@ const FX = {
   num(g, i, u, s, T) {                                 // a damage number, character by character (numGlyph), with its type's glow, rim or doubles
     const look = NUM_LOOK[i.dtype] || {}, rise = look.rise ?? .7, chars = [...i.text];
     const lift = i.dtype === 'piercing' ? rise * (1 - (1 - u) ** 3) : rise * u, fade = u < .6 ? 1 : (1 - u) / .4;
-    g.font = `700 ${Math.max(11, Math.round(T * i.size))}px Segoe UI, sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.font = `700 ${Math.max(11, Math.round(T * i.size))}px Alegreya Sans, Segoe UI, sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle';
     const widths = chars.map(ch => g.measureText(ch).width), y = (i.at[1] - lift) * T;
     let x = i.at[0] * T - widths.reduce((m, w) => m + w, 0) / 2;
     chars.forEach((ch, j) => {
@@ -1842,7 +1865,7 @@ function paintBanner(g, W, H, i, now) {
   g.save();
   g.fillStyle = lg; g.fillRect(0, y, W, h);
   g.fillStyle = rgba(col, .6 * a); g.fillRect(W * .25, y, W * .5, 1.5); g.fillRect(W * .25, y + h - 1.5, W * .5, 1.5);
-  g.font = `700 ${small ? 18 : 30}px Segoe UI, sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.font = `700 ${small ? 18 : 30}px Alegreya Sans, Segoe UI, sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle';
   g.fillStyle = rgba(col, a); g.fillText(i.text, W / 2 + slide, y + h / 2);
   g.restore();
 }
@@ -1850,7 +1873,7 @@ function paintDice(g, W, H, i, now) {
   const f = i.f, e = now - i.t0, prog = Math.min(1, e / i.roll), ease = 1 - (1 - prog) ** 3, done = prog >= 1;
   const dice = (f.dice && f.dice.length ? f.dice : [f.kept || 1]).map(Number), kept = +f.kept || dice[0], n = dice.length;
   const R = Math.max(30, Math.min(60, Math.min(W, H) * .085)), cx = W / 2, cy = H * .42;
-  g.font = '700 20px Segoe UI, sans-serif';
+  g.font = '700 20px Alegreya Sans, Segoe UI, sans-serif';
   const segs = rollMaths(f, kept), widths = segs.map(([text, , chip]) => g.measureText(text).width + (chip == null ? 0 : 12));
   const w = Math.min(W - 16, Math.max(280, n * R * 2.5 + 60, widths.reduce((a, b) => a + b, 0) + 40));
   const fade = e < i.dur - .25 ? 1 : Math.max(0, (i.dur - e) / .25);
@@ -1859,7 +1882,7 @@ function paintDice(g, W, H, i, now) {
   g.fillStyle = 'rgba(10,12,16,.73)';
   g.beginPath(); g.roundRect ? g.roundRect(cx - w / 2, cy - R - 36, w, 2 * R + 104, 14) : g.rect(cx - w / 2, cy - R - 36, w, 2 * R + 104); g.fill();
   g.textAlign = 'center'; g.textBaseline = 'middle';
-  g.font = '13px Segoe UI, sans-serif'; g.fillStyle = 'rgba(230,233,239,.82)';
+  g.font = '13px Alegreya Sans, Segoe UI, sans-serif'; g.fillStyle = 'rgba(230,233,239,.82)';
   g.fillText(`${f.who || ''} · ${f.label || ''}`, cx, cy - R - 21);
   const first = Math.max(0, dice.indexOf(kept));
   dice.forEach((d, k) => {
@@ -1871,7 +1894,7 @@ function paintDice(g, W, H, i, now) {
     d20(g, x, cy - hop, R * pop, spin, shown, done ? d : 0, done && n > 1 && k !== first);
   });
   if (done) {
-    g.font = '700 20px Segoe UI, sans-serif';
+    g.font = '700 20px Alegreya Sans, Segoe UI, sans-serif';
     let x = cx - widths.reduce((a, b) => a + b, 0) / 2;
     segs.forEach(([text, col, chip], j) => {
       const wd = widths[j], mid = x + wd / 2;
@@ -1886,7 +1909,7 @@ function paintDice(g, W, H, i, now) {
       }
       x += wd;
     });
-    g.font = '700 17px Segoe UI, sans-serif'; g.fillStyle = GOOD[f.res] || '#f87171';
+    g.font = '700 17px Alegreya Sans, Segoe UI, sans-serif'; g.fillStyle = GOOD[f.res] || '#f87171';
     g.fillText(outcomeWord(f.res), cx, cy + R + 50);
   }
   g.restore();
@@ -1914,7 +1937,7 @@ function d20(g, x, y, R, angle, shown, nat, dim) {
   g.lineWidth = 1.4;
   [[5, 0, 1], [1, 2, 3], [3, 4, 5]].forEach((js, t) => js.forEach(j => { g.beginPath(); g.moveTo(...tri[t]); g.lineTo(...rim[j]); g.stroke(); }));
   g.fillStyle = face; g.lineWidth = 1.6; poly(tri); g.fill(); g.stroke();
-  g.fillStyle = '#fff'; g.font = `700 ${Math.round(R * .42)}px Segoe UI, sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.fillStyle = '#fff'; g.font = `700 ${Math.round(R * .42)}px Alegreya Sans, Segoe UI, sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle';
   g.fillText(String(shown), 0, 0);
   g.restore();
 }
@@ -1932,7 +1955,7 @@ function tokenDisc(g, c, cx, cy, r) {                  // a token's picture (or 
   g.fillStyle = c.kind === 'pc' ? '#2f4a7a' : c.ally ? '#2f6a4a' : '#6a2f35'; g.fill();
   const im = c.token && (c.mine || vq() !== 'potato') ? image(c.id, c.token) : null;   // (Potato: only their own picture)
   if (im && im.complete && im.naturalWidth) { g.clip(); g.drawImage(im, cx - r, cy - r, r * 2, r * 2); }
-  else { g.fillStyle = '#fff'; g.font = `600 ${Math.max(8, r * .8)}px Segoe UI`; g.textAlign = 'center'; g.textBaseline = 'middle';
+  else { g.fillStyle = '#fff'; g.font = `600 ${Math.max(8, r * .8)}px Alegreya Sans, Segoe UI`; g.textAlign = 'center'; g.textBaseline = 'middle';
     g.fillText(c.name.split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase(), cx, cy); }
   g.restore();
 }
@@ -1996,12 +2019,12 @@ function renderMap() {
   UI.tile = T;
   const g = cv.getContext('2d');
   g.setTransform(dpr, 0, 0, dpr, 0, 0);
-  g.fillStyle = '#0f1115'; g.fillRect(0, 0, vw, vh);
+  g.fillStyle = LOOK.bg; g.fillRect(0, 0, vw, vh);       // the bare map is the page's parchment, like the editor's (battle/map.py)
   g.translate(cam.x, cam.y);
   const [shx, shy] = FX.offset();
   g.translate(shx, shy);
   const FW = b.map.fw || W, floors = floorsOf(b.map);   // the floors of a building, side by side (gaps between them)
-  g.fillStyle = b.map.light === 'dark' ? '#0c0e12' : b.map.light === 'dim' ? '#12151c' : '#161a22';
+  g.fillStyle = LOOK.raised;                           // (a dim or dark map: drawLight lays the dark over it)
   for (const [, x0] of floors) g.fillRect(x0 * T, 0, FW * T, H * T);
   const view = [(-cam.x - shx) / T, (-cam.y - shy) / T, (vw - cam.x - shx) / T, (vh - cam.y - shy) / T];   // the tiles in sight
   UI.view = view;
@@ -2009,7 +2032,9 @@ function renderMap() {
   drawTerrain(g, b, T, view);                          // painted mud, water, undergrowth...
   drawRoads(g, b, T, view);
   drawHighGround(g, b, T, view);
-  g.strokeStyle = ground ? 'rgba(170,180,200,.22)' : '#232a37'; g.lineWidth = 1;
+  const inked = !ground && !LIGHT[b.map.light];        // bare, lit parchment: written on in ink; else pale words, dark halo
+  LOOK.pen = inked ? LOOK.text : '#e6e9ef'; LOOK.halo = inked ? rgba(LOOK.raised, .85) : 'rgba(0,0,0,.6)';
+  g.strokeStyle = ground ? 'rgba(170,180,200,.22)' : rgba(LOOK.text, .2); g.lineWidth = 1;
   if (T >= 6) {                                        // (zoomed far out the lines would only grey the map)
     g.beginPath();                                     // only the lines in sight, in one go
     const j0 = Math.max(0, Math.floor(view[1])), j1 = Math.min(H, Math.ceil(view[3]));
@@ -2022,8 +2047,8 @@ function renderMap() {
     g.stroke();
   }
   if (floors.length > 1) {                             // each floor's name over it
-    g.font = `600 ${Math.max(10, Math.min(14, T * .45))}px Segoe UI`; g.textAlign = 'center'; g.textBaseline = 'bottom';
-    for (const [f, x0] of floors) { g.fillStyle = f === 0 ? '#e6e9ef' : '#9aa3b5'; g.fillText(floorName(f), (x0 + FW / 2) * T, -4); }
+    g.font = `600 ${Math.max(10, Math.min(14, T * .45))}px Alegreya Sans, Segoe UI`; g.textAlign = 'center'; g.textBaseline = 'bottom';
+    for (const [f, x0] of floors) { g.fillStyle = f === 0 ? LOOK.text : LOOK.dim; g.fillText(floorName(f), (x0 + FW / 2) * T, -4); }
   }
   drawRooms(g, b, T, dpr);
   drawCliffs(g, b, T, view);
@@ -2078,9 +2103,9 @@ function renderMap() {
       g.fill(); g.lineWidth = 1; g.strokeStyle = '#0b0d12'; g.stroke();
     }
     const n = UI.aim ? UI.aim.targets.filter(x => x === c.id).length : 0;
-    if (n > 1) { g.fillStyle = '#ff8c28'; g.font = `700 ${Math.max(9, r * .7)}px Segoe UI`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('×' + n, cx + r * .7, cy - r * .7); }
+    if (n > 1) { g.fillStyle = '#ff8c28'; g.font = `700 ${Math.max(9, r * .7)}px Alegreya Sans, Segoe UI`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('×' + n, cx + r * .7, cy - r * .7); }
     if (c.out) { g.strokeStyle = '#f87171'; g.beginPath(); g.moveTo(cx - r * .6, cy - r * .6); g.lineTo(cx + r * .6, cy + r * .6); g.stroke(); }
-    if (T >= 40) { g.fillStyle = '#e6e9efcc'; g.font = '11px Segoe UI'; g.textAlign = 'center'; g.textBaseline = 'alphabetic'; g.fillText(c.name.slice(0, Math.floor(s / 6.5)), cx, y * T + s + 11); }
+    if (T >= 40) { g.font = '11px Alegreya Sans, Segoe UI'; g.textAlign = 'center'; g.textBaseline = 'alphabetic'; mapText(g, c.name.slice(0, Math.floor(s / 6.5)), cx, y * T + s + 11); }
     if (!c.out) FX.badges(g, c, cx, cy - r - 2, T);    // its conditions, over its top edge
     g.globalAlpha = 1;
     paintPips(g, c, cx - r - 2, cy - r - 2, 2 * r + 4);    // dying: its death saves, on its bottom edge
@@ -2118,7 +2143,7 @@ function renderMap() {
  *  coloured green (Stable) to red (Extremely Wounded). */
 function hpWords(c) {
   if (c.hp != null) return h('span', null, `${c.hp}/${c.max_hp}`);
-  return h('span', { class: 'hpword', style: c.health_color ? `color:${c.health_color}` : '' }, c.health || '');
+  return h('span', { class: 'hpword', style: c.health_color ? `color:${inkc(c.health_color)}` : '' }, c.health || '');
 }
 /** The target line above the map: the creature you target (or last tapped) - name, health, conditions, distance. */
 function targetInfo(b) {
@@ -2128,7 +2153,7 @@ function targetInfo(b) {
   const far = me && me.pos && c.pos && me.id !== c.id ? Geo.dist(me, c) : null;
   return [h('span', { class: 'tgt', tip: () => tokenCard(c), 'aria-label': (c.id === UI.target ? S('Target') : S('Selected')) + ': ' + c.name },
     c.id === UI.target ? '🎯 ' : '👁 ', h('b', null, c.name), ' · ', c.form ? `${c.form.name} ${c.form.hp}/${c.form.max_hp} · ` : '', hpWords(c),   // the rest on hover
-    ...(c.badges || []).slice(0, 3).map(k => h('span', { class: 'bdg', style: `color:${(look[k] || [])[1] || 'var(--warn)'}` }, gi(k, 'sm'))),
+    ...(c.badges || []).slice(0, 3).map(k => h('span', { class: 'bdg', style: `color:${inkc((look[k] || [])[1] || 'var(--warn)')}` }, gi(k, 'sm'))),
     far != null ? ' · ' + S('{0} ft', far) : null),
     ' ', h('button', { class: 'sm flat', onclick: () => { UI.target = null; UI.inspect = null; renderMap(); }, 'aria-label': S('Clear the target') }, '✕')];
 }
@@ -2136,14 +2161,14 @@ function targetInfo(b) {
 function renderOrder(b) {
   $('inittitle').textContent = S('Initiative');
   const side = c => c.mine ? 'us' : c.ally ? 'ally' : 'foe';
-  const dot = { us: '#4ade80', ally: '#fbbf24', foe: '#f87171' };
+  const dot = { us: 'var(--good)', ally: 'var(--warn)', foe: 'var(--bad)' };
   $('order').replaceChildren(...b.combatants.map(c => h('div', {
     class: `oc ${side(c)}` + (c.turn ? ' turn' : '') + (c.mine ? ' mine' : '') + (c.id === UI.target ? ' tgt' : '') + (c.out ? ' out' : ''),
     tip: () => tokenCard(c),                            // the map's hover card
     onclick: () => { if (c.pos) centerOn(c); tapToken(c); } },
     h('i', null, c.init ?? '–'), h('span', { class: 'dot', style: `background:${dot[side(c)]}` }),
     h('span', { class: 'n' }, (c.turn ? '▶ ' : '') + c.name),
-    ...(c.badges || []).slice(0, 3).map(k => h('span', { class: 'bdg', style: `color:${(badgeLook()[k] || [])[1] || 'var(--warn)'}` }, gi(k))),
+    ...(c.badges || []).slice(0, 3).map(k => h('span', { class: 'bdg', style: `color:${inkc((badgeLook()[k] || [])[1] || 'var(--warn)')}` }, gi(k))),
     h('span', { class: 'hpw' }, hpWords(c)))));
   const cur = b.combatants.findIndex(c => c.turn);
   if (cur >= 0 && b.status === 'active' && $('order').children[cur]) $('order').children[cur].scrollIntoView({ block: 'nearest', inline: 'nearest' });
@@ -2735,7 +2760,7 @@ function groundLabel(g, b, T) {
   const spot = UI.item && UI.item.moved ? [(b.ground || []).find(it => it.id === UI.item.id), ...UI.item.at] : groundSpots(b).find(([it]) => it.id === UI.groundHover);
   if (!spot || !spot[0]) return;
   const [it, cx, cy] = spot, lines = (it.qty > 1 ? [[`(${it.qty}×)`, '#7fd8ff']] : []).concat([[it.label, '#f2f2f2']]);
-  g.font = '600 11px Segoe UI'; g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.font = '600 11px Alegreya Sans, Segoe UI'; g.textAlign = 'center'; g.textBaseline = 'middle';
   const w = Math.max(...lines.map(([t]) => g.measureText(t).width)) + 10, lh = 14, hh = lines.length * lh + 4, x = cx * T, y = (cy - .3) * T - hh - 2;
   g.fillStyle = '#00000096'; g.fillRect(x - w / 2, y, w, hh);
   lines.forEach(([t, col], i) => { g.fillStyle = '#000c'; g.fillText(t, x + 1, y + 2 + lh * (i + .5) + 1); g.fillStyle = col; g.fillText(t, x, y + 2 + lh * (i + .5)); });
@@ -2941,8 +2966,8 @@ function tokenCard(c) {
     h('div', { class: 'tc-head' }, h('b', null, c.name), h('span', { class: 'grow' }), hpWords(c)),
     c.sub ? h('div', { class: 'dim small' }, c.sub) : null,                // a character's race and class
     fpct != null ? h('div', { class: 'dim small' }, `${f.name} ${f.hp}/${f.max_hp}`) : null,
-    fpct != null ? h('div', { class: 'hpbar' }, h('div', { style: `width:${fpct}%;background:#d6a35c` })) : null,
-    pct != null ? h('div', { class: 'hpbar' }, h('div', { style: `width:${pct}%;background:${pct > 50 ? '#4ade80' : pct > 25 ? '#fbbf24' : '#f87171'}` })) : null,
+    fpct != null ? h('div', { class: 'hpbar' }, h('div', { style: `width:${fpct}%;background:var(--gold)` })) : null,
+    pct != null ? h('div', { class: 'hpbar' }, h('div', { style: `width:${pct}%;background:${pct > 50 ? 'var(--good)' : pct > 25 ? 'var(--warn)' : 'var(--bad)'}` })) : null,
     ...effectLines(c, look),
     me && me.pos && c.pos && me.id !== c.id ? h('div', { class: 'dim small' }, S('{0} ft away', Geo.dist(me, c))) : null,
     c.untargetable && !c.mine ? h('div', { class: 'small warn' }, S("Can't be targeted now (banished, ethereal or sealed away)")) : null,
@@ -2954,7 +2979,7 @@ function tokenCard(c) {
 function effectLines(c, look) {
   return (c.effects || []).map(e => {
     const note = [e.rounds ? S('{0} rds', e.rounds) : '', e.save || '', e.from ? S('from {0}', e.from) : ''].filter(Boolean).join(', ');
-    const colour = (look[e.key] || [])[1] || 'var(--warn)';
+    const colour = inkc((look[e.key] || [])[1] || 'var(--warn)');
     return h('div', { class: 'conds small', style: 'gap:4px' }, look[e.key] ? h('span', { style: `color:${colour}` }, gi(e.key)) : null,
       h('span', { style: `color:${colour}` }, e.name), note ? h('span', { class: 'dim' }, ` (${note})`) : null);
   });
@@ -2980,7 +3005,7 @@ function renderKnown(b) {
       h('button', { class: 'sm flat', onclick: () => { UI.target = null; UI.inspect = null; renderMap(); }, 'aria-label': S('Close') }, '✕')),
     h('div', { class: 'small' }, h('span', { class: 'dim' }, S('Looks:') + ' '), c.out ? S('Down') : c.health,
       c.form ? h('span', { class: 'dim' }, ' · ' + S('in the shape of {0}', c.form.name)) : null),
-    pct != null ? h('div', { class: 'hpbar' }, h('div', { style: `width:${pct}%;background:${pct > 50 ? '#4ade80' : pct > 25 ? '#fbbf24' : '#f87171'}` })) : null,
+    pct != null ? h('div', { class: 'hpbar' }, h('div', { style: `width:${pct}%;background:${pct > 50 ? 'var(--good)' : pct > 25 ? 'var(--warn)' : 'var(--bad)'}` })) : null,
     line(S('Wears:'), seen.wears), line(S('Holds:'), seen.holds),
     c.conc ? h('div', { class: 'small' }, S('Concentrating on {0}', c.conc.spell)) : null,
     ...effectLines(c, look),
@@ -3217,7 +3242,7 @@ function drawZones(g, b, T) {
     paintZone(g, z, z.tiles.map(([x, y]) => [x + off[0], y + off[1]]), T);
     if (z.tiles.length && T >= 18) {
       const [x, y] = z.tiles[0];
-      g.fillStyle = '#e6e9efaa'; g.font = '10px Segoe UI'; g.textAlign = 'left'; g.textBaseline = 'top'; g.fillText(z.name, x * T + 2, y * T + 2);
+      g.font = '10px Alegreya Sans, Segoe UI'; g.textAlign = 'left'; g.textBaseline = 'top'; mapText(g, z.name, x * T + 2, y * T + 2);
     }
   }
 }
@@ -3505,7 +3530,7 @@ function drawAim(g, b, T) {
         g.strokeStyle = no ? '#f87171aa' : '#4ade80aa'; g.setLineDash([4, 4]); g.lineWidth = 2;
         g.beginPath(); g.moveTo((me.pos[0] + half) * T, (me.pos[1] + half) * T); g.lineTo((tile[0] + half) * T, (tile[1] + half) * T); g.stroke(); g.setLineDash([]);
         g.strokeRect(tile[0] * T + 2, tile[1] * T + 2, sp * T - 4, sp * T - 4);
-        if (T >= 16) { g.fillStyle = '#e6e9ef'; g.font = '11px Segoe UI'; g.textAlign = 'center'; g.textBaseline = 'bottom'; g.fillText(pk && pk.why ? S(pk.why) : `~${d} ft`, (tile[0] + half) * T, tile[1] * T - 1); }
+        if (T >= 16) { g.font = '11px Alegreya Sans, Segoe UI'; g.textAlign = 'center'; g.textBaseline = 'bottom'; mapText(g, pk && pk.why ? S(pk.why) : `~${d} ft`, (tile[0] + half) * T, tile[1] * T - 1); }
       }
     }
     return;
@@ -3522,12 +3547,12 @@ function drawWay(g, T, c, m, lift = 0) {
   g.lineWidth = 2; g.strokeRect(m.x * T + 2, m.y * T + 2, c.span * T - 4, c.span * T - 4);
   if (m.cost != null && T >= 14) {
     const text = `${m.cost} ${S('ft')}`, x = (m.x + half) * T, y = m.y * T - 4;
-    g.font = '600 12px Segoe UI'; g.textAlign = 'center'; g.textBaseline = 'bottom';
+    g.font = '600 12px Alegreya Sans, Segoe UI'; g.textAlign = 'center'; g.textBaseline = 'bottom';
     const w = g.measureText(text).width + 8;
     g.fillStyle = '#0b0d12d0'; g.fillRect(x - w / 2, y - 16, w, 17); g.fillStyle = bad ? '#f87171' : '#e6e9ef'; g.fillText(text, x, y);
   }
   const spots = new Set((m.threats || []).map(t => t.at.join(',')));   // where the way leaves an enemy's reach
-  g.lineWidth = 2; g.font = `700 ${Math.max(10, T * .3)}px Segoe UI`; g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.lineWidth = 2; g.font = `700 ${Math.max(10, T * .3)}px Alegreya Sans, Segoe UI`; g.textAlign = 'center'; g.textBaseline = 'middle';
   for (const s of spots) {
     const [x, y] = s.split(',').map(Number), r = Math.max(7, T * .22);
     g.fillStyle = '#fb923c'; g.strokeStyle = '#0f1115'; g.beginPath(); g.arc((x + half) * T, (y + half) * T, r, 0, Math.PI * 2); g.fill(); g.stroke();
@@ -3536,7 +3561,7 @@ function drawWay(g, T, c, m, lift = 0) {
   if (spots.size) {                                          // who: over the box (and over its cost)
     const text = '⚔ ' + S('Opportunity attack: {0}', m.threats.map(t => t.name).join(', '));
     const x = (m.x + half) * T, y = m.y * T - 4 - lift - (m.cost != null && T >= 14 ? 18 : 0);
-    g.font = '600 12px Segoe UI'; g.textAlign = 'center'; g.textBaseline = 'bottom';
+    g.font = '600 12px Alegreya Sans, Segoe UI'; g.textAlign = 'center'; g.textBaseline = 'bottom';
     const w = g.measureText(text).width + 8;
     g.fillStyle = '#0b0d12d0'; g.fillRect(x - w / 2, y - 16, w, 17); g.fillStyle = '#fb923c'; g.fillText(text, x, y);
   }
@@ -3683,8 +3708,8 @@ function renderActions() {
 
 /** The hover card of an action: icon, name and cost, then the generic facts, the roll, a short summary, why not. */
 const COST_LOOK = () => ({ action: [S('Action'), 'var(--good)'], attack: [S('Action'), 'var(--good)'], multi: [S('Action'), 'var(--good)'],
-  bonus: [S('Bonus action'), 'var(--warn)'], reaction: [S('Reaction'), '#c084fc'], free: [S('Free'), 'var(--dim)'],
-  legendary: [S('Legendary action'), '#f472b6'], long: [S('Takes longer than a turn'), 'var(--bad)'], on_hit: [S('On hit'), '#c084fc'] });
+  bonus: [S('Bonus action'), 'var(--warn)'], reaction: [S('Reaction'), 'var(--spell)'], free: [S('Free'), 'var(--dim)'],
+  legendary: [S('Legendary action'), 'var(--pink)'], long: [S('Takes longer than a turn'), 'var(--bad)'], on_hit: [S('On hit'), 'var(--spell)'] });
 function actionCard(it) {
   const info = it.info || {}, kind = (it.cost || '').split(':')[0], [cost, color] = COST_LOOK()[kind] || [it.cost, 'var(--dim)'];
   return h('div', null,
@@ -3786,7 +3811,7 @@ function renderSheet() {
         () => ask(S('Take a short rest? (Agree it with your DM first.)'), S('Short rest'), () => act('rest', { kind: 'short' })), 'warn')),
       needs('rest', ibtn('long_rest', `${S('Long rest')}\n${S('Restore HP, spell slots, hit dice and features.')}`,
         () => longRest(), 'acc'))),
-    h('div', { class: 'hpbar' }, h('div', { style: `width:${pct}%;background:${pct > 50 ? '#4ade80' : pct > 25 ? '#fbbf24' : '#f87171'}` })),
+    h('div', { class: 'hpbar' }, h('div', { style: `width:${pct}%;background:${pct > 50 ? 'var(--good)' : pct > 25 ? 'var(--warn)' : 'var(--bad)'}` })),
   ];
   const idf = c.identify || {};
   if (idf.pending > 0) {                             // an Identify spell was cast: which item does it look at?
@@ -3815,7 +3840,7 @@ function overviewTab(c) {
   const out = [];
   out.push(h('div', { class: 'tiles' }, ...c.vitals.map(v => h('div', { class: 'tile', tip: v.tip }, h('b', null, v.value), h('span', null, v.label)))));
   const look = badgeLook();                          // conditions as their pictures and names, the rules on hover
-  const flags = [...(c.condition_info || []).map(x => h('span', { class: 'cond', style: `color:${(look[x.name] || [])[1] || 'var(--warn)'}`, tip: `${x.label}\n${x.text}` },
+  const flags = [...(c.condition_info || []).map(x => h('span', { class: 'cond', style: `color:${inkc((look[x.name] || [])[1] || 'var(--warn)')}`, tip: `${x.label}\n${x.text}` },
       gi(x.name), x.label)),
     c.exhaustion ? h('span', { class: 'cond warn', tip: S('Exhaustion {0}', c.exhaustion) }, gi('exhaustion'), S('Exhaustion {0}', c.exhaustion)) : null,
     c.inspiration ? h('span', { class: 'cond warn', tip: S('Inspiration') }, gi('inspiration'), S('Inspiration')) : null,
