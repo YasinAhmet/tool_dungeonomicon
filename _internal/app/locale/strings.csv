@@ -5942,3 +5942,35 @@ They picked {0}; your limit: {1},They picked {0}; your limit: {1},Seçtiği: {0}
 Choose one,Choose one,Birini seç
 Then pick the target on the map,Then pick the target on the map,Sonra hedefi haritada seç
 Choose in the character panel,Choose in the character panel,Karakter panelinde seç
++ Category…,+ Category…,+ Kategori…
+"Your own category (""Stash in Phandalin"", ""On the cart""): drag items onto it to keep track of where they are","Your own category (""Stash in Phandalin"", ""On the cart""): drag items onto it to keep track of where they are","Kendi kategorin (""Phandalin'deki zula"", ""Arabada""): nerede olduklarını takip etmek için eşyaları üzerine sürükle"
+Empty: drag items here.,Empty: drag items here.,Boş: eşyaları buraya sürükle.
+"Drag a row onto another category, or back onto a group, to move it","Drag a row onto another category, or back onto a group, to move it",Taşımak için bir satırı başka bir kategoriye ya da geri bir gruba sürükle
+Move the category up,Move the category up,Kategoriyi yukarı taşı
+Move the category down,Move the category down,Kategoriyi aşağı taşı
+Rename the category,Rename the category,Kategoriyi yeniden adlandır
+Remove the category (its items stay in the pack),Remove the category (its items stay in the pack),Kategoriyi kaldır (eşyaları çantada kalır)
+New category,New category,Yeni kategori
+"Where the items are, e.g. ""Stash in Phandalin""","Where the items are, e.g. ""Stash in Phandalin""","Eşyaların nerede olduğu, ör. ""Phandalin'deki zula"""
+Rename category,Rename category,Kategoriyi yeniden adlandır
+"Remove the category ""{0}""? Its items stay in the team inventory, back with the rest.","Remove the category ""{0}""? Its items stay in the team inventory, back with the rest.","""{0}"" kategorisi kaldırılsın mı? Eşyaları takım envanterinde, diğerlerinin yanında kalır."
+Remove category,Remove category,Kategoriyi kaldır
+Add a ready-made profile,Add a ready-made profile,Hazır profil ekle
+"{0}
+Your file: {1}
+Right-click to rename or delete it","{0}
+Your file: {1}
+Right-click to rename or delete it","{0}
+Kendi dosyanız: {1}
+Yeniden adlandırmak ya da silmek için sağ tıklayın"
+Your own sound files,Your own sound files,Kendi ses dosyalarınız
+Rename sound,Rename sound,Sesi yeniden adlandır
+"Delete your sound {0}? Its file is removed, and it leaves every profile and the timed events.","Delete your sound {0}? Its file is removed, and it leaves every profile and the timed events.",{0} sesiniz silinsin mi? Dosyası kaldırılır; her profilden ve zamanlı olaylardan çıkar.
+Delete this sound file,Delete this sound file,Bu ses dosyasını sil
+Your own files…,Your own files…,Kendi dosyalarınız…
+Sound files,Sound files,Ses dosyaları
+Added {0} sound(s) under My sounds.,Added {0} sound(s) under My sounds.,{0} ses Seslerim altına eklendi.
+"Add sound files from this computer (WAV, OGG, FLAC, MP3…). They are copied in and listed under My sounds.","Add sound files from this computer (WAV, OGG, FLAC, MP3…). They are copied in and listed under My sounds.","Bu bilgisayardan ses dosyaları ekleyin (WAV, OGG, FLAC, MP3…). Kopyalanır ve Seslerim altında listelenir."
+"Add your own sound files as effects (WAV, OGG, FLAC, MP3…)","Add your own sound files as effects (WAV, OGG, FLAC, MP3…)","Kendi ses dosyalarınızı efekt olarak ekleyin (WAV, OGG, FLAC, MP3…)"
+My sounds,My sounds,Seslerim
+PP,PP,PA

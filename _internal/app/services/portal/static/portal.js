@@ -4208,9 +4208,13 @@ function inventoryTab(c) {
     const food = sup ? h('span', { class: 'sup' + (low ? ' bad' : ''), tip: S('The group\'s food on the World map is the food in here: a day\'s meals are eaten from it, rations first.') },
       '🍖 ' + S('{0} meals', sup.meals) + (sup.days_left != null ? ' · ' + S('lasts about {0} days', sup.days_left) : '')) : null;
     const shared = [...team.items].sort((a, b) => (b.food - a.food) || a.label.localeCompare(b.label));     // the supplies first
+    const cards = list => h('div', { class: 'icards' }, ...list.map(it => itemCard(it, 'team', teamMenu(it),
+      trade ? mini('↓', () => moveItem(card(it, 'team'), 'mine'), '', S('Take it')) : null)));
+    const places = (team.places || []).filter(p => shared.some(it => it.place === p));      // the DM's categories ("Stash in…"), after the rest
+    const loose = shared.filter(it => !places.includes(it.place));
     out.push(dropZone(h('div', { class: 'card dz team' }, h('div', { class: 'title' }, '🎒 ' + S('Team inventory'), h('span', { class: 'grow' }), food),
-      shared.length ? h('div', { class: 'icards' }, ...shared.map(it => itemCard(it, 'team', teamMenu(it),
-        trade ? mini('↓', () => moveItem(card(it, 'team'), 'mine'), '', S('Take it')) : null)))
+      shared.length ? h('div', {}, loose.length ? cards(loose) : null,
+        ...places.flatMap(p => [h('div', { class: 'dim small' }, '📦 ' + p), cards(shared.filter(it => it.place === p))]))
         : h('div', { class: 'empty dim small' }, touch() ? S('Empty. Tap an item of yours to put it here.') : S('Empty. Drag an item of yours here to share it.')),
       needs('write_items', quickAdd('team'))), ['mine'], 'team'));
   }
