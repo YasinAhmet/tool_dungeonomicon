@@ -3502,7 +3502,7 @@ Elder,Elder,
 Thorn,Thorn,
 Mist,Mist,
 Frost,Frost,
-Low,Low,
+Low,Low,Düşük
 Brine,Brine,
 Willow,Willow,
 Dun,Dun,
@@ -5977,3 +5977,6 @@ Added {0} sound(s) under My sounds.,Added {0} sound(s) under My sounds.,{0} ses 
 "Add your own sound files as effects (WAV, OGG, FLAC, MP3…)","Add your own sound files as effects (WAV, OGG, FLAC, MP3…)","Kendi ses dosyalarınızı efekt olarak ekleyin (WAV, OGG, FLAC, MP3…)"
 My sounds,My sounds,Seslerim
 PP,PP,PA
+"Music quality: the best sound any player is sent - about 6 (Low), 12 (Medium) or 20 KB/s (High) for each listener. A player may still pick less on their page, and each player's own limit (the Player portal window) holds too. Lower it when the music breaks up for everyone.","Music quality: the best sound any player is sent - about 6 (Low), 12 (Medium) or 20 KB/s (High) for each listener. A player may still pick less on their page, and each player's own limit (the Player portal window) holds too. Lower it when the music breaks up for everyone.","Müzik kalitesi: bir oyuncuya gönderilen en iyi ses - her dinleyici için yaklaşık 6 (Düşük), 12 (Orta) veya 20 KB/sn (Yüksek). Oyuncu kendi sayfasında daha azını seçebilir; her oyuncunun kendi sınırı (Oyuncu portalı penceresi) da geçerlidir. Müzik herkeste kesiliyorsa düşürün."
+"Picture quality: the largest maps, tokens and portraits any player is sent. A player may still pick less on their page, and each player's own limit (the Player portal window) holds too.","Picture quality: the largest maps, tokens and portraits any player is sent. A player may still pick less on their page, and each player's own limit (the Player portal window) holds too.","Görüntü kalitesi: bir oyuncuya gönderilen en büyük haritalar, jetonlar ve portreler. Oyuncu kendi sayfasında daha azını seçebilir; her oyuncunun kendi sınırı (Oyuncu portalı penceresi) da geçerlidir."
+Quality,Quality,Kalite

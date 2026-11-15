@@ -684,9 +684,15 @@ function musicPlay() {
     const lost = () => { live(false); if (MUSIC.on) MUSIC.timer = setTimeout(musicPlay, Math.min(30000, 2000 * 2 ** MUSIC.retry++)); };   // the app or the tunnel went away: try again
     a.addEventListener('error', lost);
     a.addEventListener('ended', lost);
-    a.addEventListener('playing', () => { MUSIC.retry = 0; live(MUSIC.on); });
-    a.addEventListener('waiting', () => live(false));
+    a.addEventListener('playing', () => { clearTimeout(MUSIC.stuck); MUSIC.retry = 0; live(MUSIC.on); });
+    a.addEventListener('waiting', () => {                // it played and ran out: a connection that stays open but
+      const was = MUSIC.live;                            // sends nothing would leave it silent, so start a new one
+      live(false);                                       // (not while it first connects: a slow line would never start)
+      clearTimeout(MUSIC.stuck);
+      if (was) MUSIC.stuck = setTimeout(() => { if (MUSIC.on && !MUSIC.live) musicPlay(); }, 8000);
+    });
   }
+  clearTimeout(MUSIC.stuck);
   MUSIC.on = true;
   MUSIC.live = false;                                  // "Connecting…" until the first sound plays
   MUSIC.q = aq();                                      // the sound quality it is sent at (⚙; the DM may cap it)
@@ -704,7 +710,7 @@ function musicPlay() {
 function musicHangUp() {                               // drop the connection: the app stops sending
   if (MUSIC.el) { MUSIC.el.pause(); MUSIC.el.removeAttribute('src'); MUSIC.el.load(); }
 }
-function musicStop() { clearTimeout(MUSIC.timer); MUSIC.on = MUSIC.live = false; musicHangUp(); renderMusic(); }
+function musicStop() { clearTimeout(MUSIC.timer); clearTimeout(MUSIC.stuck); MUSIC.on = MUSIC.live = false; musicHangUp(); renderMusic(); }
 function musicToggle() {
   MUSIC.want = !MUSIC.on;
   store('music', MUSIC.want);
