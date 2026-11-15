@@ -473,7 +473,7 @@ function wStampName(m) {
 const W_SHAPES = {};                                   // an ink stamp's paper and ink as Path2D, made once
 function wInkStamp(g, m, look) {                       // [h, anchor, w, paper, ink]: two fills, turned and sized
   let sh = W_SHAPES[m.art];
-  if (!sh) sh = W_SHAPES[m.art] = [new Path2D(look[3] || ''), new Path2D(look[4] || '')];
+  if (!sh) sh = W_SHAPES[m.art] = [new Path2D(look[3] || ''), new Path2D(look[4] || ''), (look[5] || []).map(([rgb, d]) => [rgb.split(',').map(Number), new Path2D(d)])];
   const s = +m.s || 1, turn = +m.r || 0;
   if (W_NAMES !== 'only') {
   g.save(); g.translate(m.x, m.y);
@@ -487,6 +487,10 @@ function wInkStamp(g, m, look) {                       // [h, anchor, w, paper, 
   const tint = painted && W_INK_TINTS[fam];
   if ((ST.world.map || {}).look === 'antique' && 'filter' in g) g.filter = 'sepia(0.55) saturate(0.85)';   // (art.py grade)
   g.fillStyle = tint ? `rgb(${tint})` : W_PAL.stamp[0]; g.fill(sh[0], 'evenodd');
+  for (const [c, path] of sh[2]) {                       // its colours (the city set's roofs): greys on the ink look (art.py stamp_fills)
+    const v = Math.round(c[0] * 0.3 + c[1] * 0.59 + c[2] * 0.11);
+    g.fillStyle = wInked() ? `rgb(${v},${v},${v})` : `rgb(${c[0]},${c[1]},${c[2]})`; g.fill(path, 'evenodd');
+  }
   if ('filter' in g) g.filter = 'none';
   g.fillStyle = painted && W_INK_PALE.has(fam) ? 'rgba(214,228,224,.86)' : W_PAL.stamp[1]; g.fill(sh[1], 'evenodd');
   g.restore();
