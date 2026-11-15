@@ -18,20 +18,23 @@ const store = (k, v) => { try {   // dp_: what a browser kept before the rename,
   if (v === undefined) return JSON.parse(localStorage.getItem('dm_' + k) ?? localStorage.getItem('dp_' + k));
   localStorage.setItem('dm_' + k, JSON.stringify(v)); localStorage.removeItem('dp_' + k);
 } catch { return null; } };
-/** The page's look (portal.css): the editor's parchment, or the same less bright ('dim') - this device's pick in the ⚙
- *  menu; until one is picked, a dark-mode device starts dim. LOOK: the colours the canvases take from it (the bare map). */
-const LOOK = {};
-function setLook(dim) {
-  if (dim != null) store('dim', !!dim);
-  const pick = store('dim'), on = pick == null ? !!(window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches) : !!pick;
-  document.documentElement.dataset.look = on ? 'dim' : 'parchment';
+/** The page's look (portal.css): the editor's parchment, the same less bright ('dim') or deep brown ('dark') - this
+ *  device's pick in the ⚙ menu; until one is picked, a dark-mode device starts dim. (What an older page kept: 'dim',
+ *  true or false.) LOOK: the colours the canvases take from it (the bare map). */
+const LOOK = {}, LOOKS = ['parchment', 'dim', 'dark'];
+function setLook(name) {
+  if (name != null) store('look', name);
+  let pick = store('look');
+  if (!LOOKS.includes(pick)) { const old = store('dim'); pick = old == null ? null : old ? 'dim' : 'parchment'; }
+  const on = pick || (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dim' : 'parchment');
+  document.documentElement.dataset.look = on;
   const cs = getComputedStyle(document.documentElement);
   for (const k of ['bg', 'raised', 'text', 'dim']) LOOK[k] = cs.getPropertyValue('--' + k).trim() || { bg: '#b09c74', raised: '#c8b790', text: '#2f2317', dim: '#564530' }[k];
   const meta = document.querySelector('meta[name=theme-color]');
   if (meta) meta.content = LOOK.bg;
   return on;
 }
-const lookDim = () => document.documentElement.dataset.look === 'dim';
+const lookNow = () => document.documentElement.dataset.look;
 setLook();
 /** A badge's colour (made for the dark map) as ink on the parchment. */
 const inkc = c => !c || c.startsWith('var(') ? c : `color-mix(in srgb, ${c} 42%, var(--text))`;
@@ -588,8 +591,10 @@ function menu(rebuild) {
   pop.replaceChildren(...[                              // (no null: replaceChildren would print it)
     h('label', { class: 'f' }, S('Language')), lang,
     ...qualityPickers(),
-    h('button', { class: lookDim() ? 'on' : '', 'aria-pressed': String(lookDim()), onclick: () => { setLook(!lookDim()); menu(true); render(); } },
-      '🕯 ' + S('Dim parchment')),
+    h('label', { class: 'f' }, S('Look')),
+    h('select', { 'aria-label': S('Look'), onchange: e => { setLook(e.target.value); menu(true); render(); } },
+      ...[['parchment', 'Bright parchment'], ['dim', 'Dim parchment'], ['dark', 'Dark parchment']].map(([v, w]) =>
+        h('option', { value: v, selected: v === lookNow() }, S(w)))),
     h('button', { class: UI.mute ? '' : 'on', 'aria-pressed': String(!UI.mute), onclick: toggleMute }, (UI.mute ? '🔇 ' : '🔊 ') + S('Sound when it is your turn')),
     h('button', { class: UI.notify && notifyOk ? 'on' : '', 'aria-pressed': String(!!UI.notify), onclick: toggleNotify, disabled: !window.Notification },
       (UI.notify && notifyOk ? '🔔 ' : '🔕 ') + S('Notify me when the page is in the background')),

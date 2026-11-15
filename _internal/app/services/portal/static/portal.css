@@ -1,5 +1,6 @@
 /* The editor's look (app/ui/theme.py) on the player page: three close tones of parchment written on in ink, square, compact.
-   :root is theme.py's LIGHT; data-look=dim (the menu's Dim parchment; a dark-mode device starts there) is its DARK - keep them alike.
+   :root is theme.py's LIGHT; data-look=dim (the menu's Dim parchment; a dark-mode device starts there) is its DARK, data-look=dark
+   its DEEP - keep them alike.
    The fonts are the editor's (app/ui/fonts, sent by the server as /fonts/...). */
 @font-face{font-family:'Alegreya Sans';src:url(/fonts/AlegreyaSans-Regular.ttf);font-weight:400;font-display:swap}
 @font-face{font-family:'Alegreya Sans';src:url(/fonts/AlegreyaSans-Bold.ttf);font-weight:700;font-display:swap}
@@ -13,6 +14,11 @@
   --input:#a79b7e;--paper:#a79b7e;--paper-alt:#a09375;--paper-hover:#afa589;--paper-down:#918262;--ink-dim:#403525;--edge:#493b28;--spell:#3a2560;
   --accent:#4a2c0c;--accent-dim:#6e331b;--accent-hover:#84401f;--gold:#785a25;--good:#264916;--bad:#6b1b10;--warn:#5a3507;--blue:#133d50;--pink:#5e193d;
   --on-accent:#e4d8b8;--glass:#9c8f70f2}
+/* data-look=dark (the menu's Dark parchment): theme.py's DEEP - deep brown, written on in cream */
+:root[data-look=dark]{--bg:#2a1f15;--panel:#34271b;--raised:#3d2e20;--hover:#463628;--border:#5c4830;--text:#e2d3ae;--dim:#b09c78;--handle:#6e5b40;
+  --input:#453524;--paper:#453524;--paper-alt:#3e2f20;--paper-hover:#52402b;--paper-down:#30241a;--ink-dim:#a8956f;--edge:#7a6444;--spell:#b79be6;
+  --accent:#d9a253;--accent-dim:#8a3d22;--accent-hover:#a04a2b;--gold:#c09a4a;--good:#86b85c;--bad:#e0705c;--warn:#dba24a;--blue:#6bb0cf;--pink:#d67aa8;
+  --on-accent:#f0e4c4;--glass:#3d2e20f2;color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font:14px/1.3 var(--font);overflow:hidden}
 button,input,select,textarea{font:inherit;color:var(--text);background:var(--paper);border:1px solid var(--edge);border-radius:0;padding:3px 8px}
