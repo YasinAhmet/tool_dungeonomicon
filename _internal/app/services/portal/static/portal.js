@@ -4022,7 +4022,8 @@ async function spellPicker(title, text, send, none) {
   return null;
 }
 function spellsTab(c) {
-  if (!c.spells.length && !c.prepares) return [h('div', { class: 'dim' }, S('No spells.'))];
+  const bg = typeof bgMember === 'function' && bgMember() && bgMine();   // a Battlegrounds hero: its spells change in the lobby (bgSpellPicker)
+  if (!c.spells.length && !c.prepares && !bg) return [h('div', { class: 'dim' }, S('No spells.'))];
   const out = [];                                    // (nothing prepared yet: the header with Change Spells still shows)
   const slot = c.slots.length ? h('select', { onchange: e => { UI.slot = e.target.value; }, tip: S('Which slot a levelled spell uses') },
     h('option', { value: '' }, S('Lowest slot that works')),
@@ -4032,7 +4033,9 @@ function spellsTab(c) {
   out.push(h('div', { class: 'row casting' }, h('span', { class: 'small dim' }, (c.casting || []).map(k =>
     `${k.label}: ${S('save DC {0}', k.dc)} · ${S('attack {0}', sign(k.attack))}`).join('   ')),
     h('span', { class: 'small dim info', tip: how, 'aria-label': how, onclick: () => detail(how) }, 'ⓘ'), h('span', { class: 'grow' }),
-    c.prepares ? needs('rest', ibtn('spell-book', `${S('Change spells')}\n${S('Pick your prepared spells again, without a rest.')}`, () => changeSpells(), 'acc')) : null,
+    bg ? ibtn('spell-book', `${S('Change spells')}\n${S('Between battles you may change your spells at will')}`,
+      () => bg.phase === 'lobby' ? bgSpellPicker(bg) : say(S('Spells are changed in the lobby, between battles.'), true), bg.phase === 'lobby' ? 'acc' : 'off')
+    : c.prepares ? needs('rest', ibtn('spell-book', `${S('Change spells')}\n${S('Pick your prepared spells again, without a rest.')}`, () => changeSpells(), 'acc')) : null,
     slot));   // the how-to on hover (hold)
   const pipsOf = s => [...Array.from({ length: s.total }, (_, i) => h('button', { class: 'pip' + (i < s.left ? ' on' : ''),   // a full pip spends a slot, an empty one gets it back
       onclick: go(() => act('slot', { key: s.key, use: i < s.left }, true)), 'aria-label': i < s.left ? S('Spend a slot') : S('Get a slot back'),

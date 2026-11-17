@@ -20,7 +20,8 @@ const BG = { last: null, shown: null, draft: store('bgpick') || null, build: sto
   asking: new Set(), mons: null, monsKey: '', mq: store('bgmq') || {}, mtimer: 0, tab: store('bgtab') || 'hero',
   logOpen: store('bglog') === true, feature: null, flog: false, teamSeen: null,
   view: store('bgview') || 'room', lq: '', lf: '', about: {}, dd: null, ddOpen: {}, more: false, pbOpen: false,
-  ctab: store('bgctab') || 'fighter', shop: null, shopKey: null, sq: '', cheap: store('bgcheap') === true };
+  ctab: store('bgctab') || 'fighter', shop: null, shopKey: null, sq: '', cheap: store('bgcheap') === true,
+  sr: '', sg: '', sopen: new Set(store('bgsopen') || []), sshut: new Set() };   // the shop: rarity and kind chips, open / folded categories
 const BG_PLAY = new Set(['do', 'preview', 'reaction_mode', 'react', 'end_turn', 'move', 'death_save', 'toggle']);
 const TEAM_COL = { 1: '#4ade80', 2: '#f87171', 3: '#60a5fa', 4: '#fbbf24', 5: '#c084fc', 6: '#f472b6', 7: '#2dd4bf', 8: '#fb923c', 9: '#a3e635', 0: '#9aa3b2' };
 const POINT_COSTS = { 8: 0, 9: 1, 10: 2, 11: 3, 12: 4, 13: 5, 14: 7, 15: 9 };
@@ -818,38 +819,55 @@ function shopPane(g, l) {
     h('div', { class: 'drow' }, h('span', { class: 'title' }, '🛒 ' + S('Cart')), h('span', { class: 'grow' }),
       h('span', { class: 'small', tip: S('Your gold for each round: {0}', gp(c.gold * 100)) }, S('Spent {0}', gp(c.spent)) + ' · ', h('b', null, S('{0} left', gp(c.left)))),
       c.items.length ? btn(S('Empty'), () => bgAct('bg_cart_remove', { all: 1 }), 'sm flat', S('Take everything out of your cart')) : null),
-    c.items.length ? h('div', { class: 'srows' }, ...[...counts.values()].map(x => shopRow(x, -1, me)))
+    c.items.length ? h('div', { class: 'srows' }, ...[...counts.values()].map(x => shopRow(x, -1, me, ((BG.shopBy || {})[x.name] || {}).kind)))
       : h('div', { class: 'dim small' }, S('Nothing in your cart yet.')),
     h('div', { class: 'dim small' }, S('What you buy is yours for the coming battle: worn, wielded and attuned when it begins.')));
-  const find = h('div', { class: 'drow sfind' },
+  const o = BG.shopKey === l.id + ':' + wordsLang ? BG.shop : null;
+  const narrow = fn => v => { fn(v); BG.sshut.clear(); shopList(l); };     // (a new filter: every category with a match opens again)
+  const find = h('div', { class: 'schips' }, h('div', { class: 'drow sfind' },
     h('input', { type: 'search', value: BG.sq, placeholder: S('Find an item'), 'aria-label': S('Find an item'),
-      oninput: e => { BG.sq = e.target.value; shopList(l); } }),
-    toggleChip(S('Only what I can afford'), BG.cheap, on => { BG.cheap = on; store('bgcheap', on); shopList(l); }));
-  return [cart, find, h('div', { class: 'srows slist' }, ...shopRows(l, me))];
+      oninput: e => narrow(v => { BG.sq = v; })(e.target.value) }),
+    toggleChip(S('Only what I can afford'), BG.cheap, on => { BG.cheap = on; store('bgcheap', on); shopList(l); })),
+    o && o.rarities && o.rarities.length > 1 ? chipsOf(BG.sr, o.rarities, narrow(v => { BG.sr = v; }), S('Any rarity')) : null,
+    o && o.groups && o.groups.length > 1 ? chipsOf(BG.sg, o.groups.map(x => [x.key, x.label]), narrow(v => { BG.sg = v; }), S('Every kind')) : null);
+  return [cart, find, h('div', { class: 'slist' }, ...shopRows(l, me))];
 }
-const SHOP_MAX = 120;
+/** Words typed or a chip picked: then every category with a match is open (unless folded meanwhile). */
+const shopNarrowed = () => !!(BG.sq.trim() || BG.sr || BG.sg);
+/** The items for sale, a fold per category (its count in the title), narrowed by the find box, the chips and "Only what
+ *  I can afford". Unfiltered, the categories open only when clicked (remembered on this device). */
 function shopRows(l, me) {
   const o = BG.shopKey === l.id + ':' + wordsLang ? BG.shop : null;
   if (!o || !me || !me.cart) return [h('div', { class: 'dim small' }, S('Loading…'))];
   const words = BG.sq.trim().toLowerCase().split(/\s+/).filter(Boolean);
-  const hit = o.rows.filter(r => (!BG.cheap || r.cp <= me.cart.left)
+  const hit = o.rows.filter(r => (!BG.cheap || r.cp <= me.cart.left) && (!BG.sr || r.rarity === BG.sr) && (!BG.sg || r.group === BG.sg)
     && words.every(w => (r.label + ' ' + r.name + ' ' + r.kind).toLowerCase().includes(w)));
   if (!hit.length) return [h('div', { class: 'empty dim small' }, S('No item matches.'))];
-  const out = hit.slice(0, SHOP_MAX).map(r => shopRow(r, 1, me));
-  if (hit.length > SHOP_MAX) out.push(h('div', { class: 'dim small' }, S('{0} more: type to narrow the list', hit.length - SHOP_MAX)));
-  return out;
+  const by = new Map(), narrowed = shopNarrowed(), rl = Object.fromEntries(o.rarities || []);
+  for (const r of hit) { if (!by.has(r.group)) by.set(r.group, []); by.get(r.group).push(r); }
+  return (o.groups || []).filter(x => by.has(x.key)).map(x => {
+    const rows = by.get(x.key), open = narrowed ? !BG.sshut.has(x.key) : BG.sopen.has(x.key);
+    const flip = () => { const s = narrowed ? BG.sshut : BG.sopen; if (s.has(x.key)) s.delete(x.key); else s.add(x.key);
+      if (!narrowed) store('bgsopen', [...BG.sopen]); shopList(l); };
+    const head = h('span', { class: 'fold', role: 'button', tabindex: 0, 'aria-expanded': String(open), onclick: flip,
+      onkeydown: e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); flip(); } } },
+      h('span', { class: 'arw' }, open ? '▾' : '▸'), x.label, h('span', { class: 'cnt' }, `(${rows.length})`));
+    return h('div', { class: 'card sgroup' + (open ? '' : ' shut') }, h('div', { class: 'title' }, head),
+      open ? h('div', { class: 'srows' }, ...rows.map(r => shopRow(r, 1, me, r.rarity !== 'none' ? rl[r.rarity] || r.rarity : ''))) : null);
+  });
 }
 /** The list alone, redrawn as you type (the search box keeps its focus). */
 function shopList(l) { const el = $('bgbody').querySelector('.slist'); if (el) el.replaceChildren(...shopRows(l, ST.bg && ST.bg.me)); }
-/** An item: picture, name, kind, price, and + (for sale: one into the cart) or − (in the cart: one out). Detail on hover. */
-function shopRow(r, sign, me) {
+/** An item: picture, name, `sub` (its kind in the cart, its rarity in a category), price, and + (for sale: one into the
+ *  cart) or − (in the cart: one out). Detail on hover. */
+function shopRow(r, sign, me, sub) {
   const info = (BG.shopBy && BG.shopBy[r.name]) || r, dear = sign > 0 && r.cp > me.cart.left;
   const add = mini(sign < 0 ? '−' : '+', () => sign < 0 ? bgAct('bg_cart_remove', { item: r.name }) : bgAct('bg_cart_add', { item: r.name }), '',
     sign < 0 ? S('Take one out of your cart') : dear ? S('Costs more than you have left') : S('Add one to your cart'));
   add.disabled = dear;
   return h('div', { class: 'srow' + (dear ? ' dear' : ''), tip: info.tip || r.label },
     h('span', { class: 'si' }, iconOr(info.icon, 20, '')), h('b', null, (info.label || r.label) + (r.n > 1 ? ' ×' + r.n : '')),
-    h('span', { class: 'dim small' }, info.kind || ''), h('span', { class: 'small sp' }, gp(r.cp * (r.n || 1))), add);
+    h('span', { class: 'dim small' }, sub || ''), h('span', { class: 'small sp' }, gp(r.cp * (r.n || 1))), add);
 }
 
 // ---------------------------------------------------------------- the arena: build a hero, then level it up

@@ -389,7 +389,10 @@ body.bgmode [data-need~="edit_hp"],body.bgmode [data-need~="rest"],body.bgmode [
 .mrow{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1.3fr) auto auto;gap:4px 10px;align-items:center;padding:3px 8px;border:1px solid var(--edge);border-left:3px solid transparent;border-radius:0;background:var(--paper);cursor:pointer}
 .mrow:hover{background:var(--paper-hover)}.mrow.me{border-left-color:var(--accent)}.mrow b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 /* the Battlegrounds shop (battlegrounds.js shopPane): item rows - picture, name, kind, price, + or − */
-.srows{display:flex;flex-direction:column;gap:2px}.slist{max-height:46vh;overflow:auto}
+.srows{display:flex;flex-direction:column;gap:2px}.slist{display:flex;flex-direction:column;gap:4px}
+.sgroup{padding:4px 8px}.sgroup>.title{display:flex;align-items:center;gap:6px}.sgroup .srows{margin-top:4px}
+.sgroup.shut>.title{margin-bottom:0}.schips{display:flex;flex-direction:column;gap:4px}
+.schips .chips{gap:3px}.schips .chip{padding:1px 8px;font-size:12.5px}
 .srow{display:grid;grid-template-columns:20px minmax(0,1.5fr) minmax(0,1fr) auto auto;gap:2px 8px;align-items:center;padding:2px 6px;border:1px solid var(--edge);background:var(--paper)}
 .srow:hover{background:var(--paper-hover)}.srow b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
 .srow .si{display:flex;width:20px;height:20px}.srow .si img{width:20px;height:20px}.srow .sp{white-space:nowrap;text-align:right}.srow.dear{opacity:.55}
@@ -475,7 +478,7 @@ details.more summary .sup{flex:1;min-width:0;overflow:hidden;text-overflow:ellip
 .bgmid{flex:1;min-height:0;display:grid;grid-template-columns:230px minmax(0,1fr);gap:10px;padding-top:6px}
 .bgmid.withlog{grid-template-columns:230px minmax(0,1fr) 290px}
 .bgroster,.bgcenter,.bglogpane{min-height:0;overflow:auto;display:flex;flex-direction:column}
-.bgroster{gap:5px}.bgcenter{gap:8px;max-width:760px;padding-right:2px}.bglogpane{border-left:1px solid var(--border);padding-left:8px}
+.bgroster{gap:5px}.bgcenter{gap:8px;max-width:760px;padding-right:2px}.bgcenter>*{flex-shrink:0}   /* (the pane scrolls: a tall shop or monster list never squeezes the tabs away) */.bglogpane{border-left:1px solid var(--border);padding-left:8px}
 .bglogpane #bglog{margin:0}.bglogpane .lbody{max-height:none}
 .rteam{display:flex;flex-direction:column;gap:1px;padding:3px 6px 4px;background:var(--raised);border:1px solid var(--border);border-left:3px solid var(--tc,var(--border))}
 .rteam.on{background:color-mix(in srgb,var(--tc) 12%,var(--raised))}.rteam.ffa{border-left-color:var(--border)}
