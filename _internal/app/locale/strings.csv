@@ -5982,3 +5982,54 @@ PP,PP,PA
 "Music quality: the best sound any player is sent - about 6 (Low), 12 (Medium) or 20 KB/s (High) for each listener. A player may still pick less on their page, and each player's own limit (the Player portal window) holds too. Lower it when the music breaks up for everyone.","Music quality: the best sound any player is sent - about 6 (Low), 12 (Medium) or 20 KB/s (High) for each listener. A player may still pick less on their page, and each player's own limit (the Player portal window) holds too. Lower it when the music breaks up for everyone.","Müzik kalitesi: bir oyuncuya gönderilen en iyi ses - her dinleyici için yaklaşık 6 (Düşük), 12 (Orta) veya 20 KB/sn (Yüksek). Oyuncu kendi sayfasında daha azını seçebilir; her oyuncunun kendi sınırı (Oyuncu portalı penceresi) da geçerlidir. Müzik herkeste kesiliyorsa düşürün."
 "Picture quality: the largest maps, tokens and portraits any player is sent. A player may still pick less on their page, and each player's own limit (the Player portal window) holds too.","Picture quality: the largest maps, tokens and portraits any player is sent. A player may still pick less on their page, and each player's own limit (the Player portal window) holds too.","Görüntü kalitesi: bir oyuncuya gönderilen en büyük haritalar, jetonlar ve portreler. Oyuncu kendi sayfasında daha azını seçebilir; her oyuncunun kendi sınırı (Oyuncu portalı penceresi) da geçerlidir."
 Quality,Quality,Kalite
+"Pick the spells you have prepared. Nothing else changes: no hit points, slots or resources come back.","Pick the spells you have prepared. Nothing else changes: no hit points, slots or resources come back.","Hazırladığın büyüleri seç. Başka hiçbir şey değişmez: can puanı, yuvalar ve kaynaklar geri gelmez."
+Your spells change when you level up.,Your spells change when you level up.,Büyülerin seviye atladığında değişir.
+"Pick your prepared spells again, without a rest.","Pick your prepared spells again, without a rest.","Hazırladığın büyüleri dinlenmeden yeniden seç."
+Creatures within reach,Creatures within reach,Uzanabileceğin yaratıklar
+advantage,advantage,avantaj
+disadvantage,disadvantage,dezavantaj
+Your fighter,Your fighter,Savaşçın
+Shop,Shop,Dükkân
+{0} left,{0} left,{0} kaldı
+Spend the round's gold on gear: it is yours for the coming battle,Spend the round's gold on gear: it is yours for the coming battle,Turun altınını teçhizata harca: gelecek savaşta senindir
+{0} gp,{0} gp,{0} altın
+{0} sp,{0} sp,{0} gümüş
+{0} cp,{0} cp,{0} bakır
+Cart,Cart,Sepet
+Your gold for each round: {0},Your gold for each round: {0},Her tur için altının: {0}
+Spent {0},Spent {0},Harcanan {0}
+Empty,Empty,Boşalt
+Take everything out of your cart,Take everything out of your cart,Sepetindeki her şeyi çıkar
+Nothing in your cart yet.,Nothing in your cart yet.,Sepetin henüz boş.
+"What you buy is yours for the coming battle: worn, wielded and attuned when it begins.","What you buy is yours for the coming battle: worn, wielded and attuned when it begins.","Aldıkların gelecek savaş için senindir: savaş başlarken giyilir, kuşanılır ve uyumlanır."
+Find an item,Find an item,Eşya ara
+Only what I can afford,Only what I can afford,Yalnızca alabildiklerim
+No item matches.,No item matches.,Eşleşen eşya yok.
+{0} more: type to narrow the list,{0} more: type to narrow the list,{0} tane daha: listeyi daraltmak için yaz
+Take one out of your cart,Take one out of your cart,Sepetinden bir tane çıkar
+Costs more than you have left,Costs more than you have left,Kalan altınından pahalı
+Add one to your cart,Add one to your cart,Sepetine bir tane ekle
+{0} to shop with each round,{0} to shop with each round,Her tur alışveriş için {0}
+"gp for each fighter to shop with, every round (0: no shop)","gp for each fighter to shop with, every round (0: no shop)",her tur her savaşçının alışveriş altını (0: dükkân yok)
+"Each fighter's gold to shop with in the lobby, every round (0: no shop)","Each fighter's gold to shop with in the lobby, every round (0: no shop)",Her savaşçının lobide her tur alışveriş yapacağı altın (0: dükkân yok)
+gp a round for each fighter (0: no shop),gp a round for each fighter (0: no shop),her savaşçıya tur başına altın (0: dükkân yok)
+That isn't for sale here.,That isn't for sale here.,Bu burada satılmıyor.
+This lobby has no shop.,This lobby has no shop.,Bu lobide dükkân yok.
+"You shop in the lobby, between battles.","You shop in the lobby, between battles.","Alışveriş lobide, savaşlar arasında yapılır."
+That isn't in your cart.,That isn't in your cart.,Bu sepetinde yok.
+Miscellaneous,Miscellaneous,Çeşitli
+Common,Common,Yaygın
+Uncommon,Uncommon,Az bulunur
+Very rare,Very rare,Çok nadir
+Ammunition,Ammunition,Mühimmat
+Light armor,Light armor,Hafif zırh
+Medium armor,Medium armor,Orta zırh
+Heavy armor,Heavy armor,Ağır zırh
+Spellcasting focus,Spellcasting focus,Büyü odağı
+Wand,Wand,Asa
+Rod,Rod,Değnek
+Artisan's tools,Artisan's tools,Zanaatkâr aletleri
+Gaming set,Gaming set,Oyun takımı
+Instrument,Instrument,Çalgı
+Food & drink,Food & drink,Yiyecek ve içecek
+Explosive,Explosive,Patlayıcı

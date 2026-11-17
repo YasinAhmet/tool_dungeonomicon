@@ -388,6 +388,14 @@ body.bgmode [data-need~="edit_hp"],body.bgmode [data-need~="rest"],body.bgmode [
 .mlist{display:flex;flex-direction:column;gap:3px;max-height:46vh;overflow:auto}
 .mrow{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1.3fr) auto auto;gap:4px 10px;align-items:center;padding:3px 8px;border:1px solid var(--edge);border-left:3px solid transparent;border-radius:0;background:var(--paper);cursor:pointer}
 .mrow:hover{background:var(--paper-hover)}.mrow.me{border-left-color:var(--accent)}.mrow b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* the Battlegrounds shop (battlegrounds.js shopPane): item rows - picture, name, kind, price, + or − */
+.srows{display:flex;flex-direction:column;gap:2px}.slist{max-height:46vh;overflow:auto}
+.srow{display:grid;grid-template-columns:20px minmax(0,1.5fr) minmax(0,1fr) auto auto;gap:2px 8px;align-items:center;padding:2px 6px;border:1px solid var(--edge);background:var(--paper)}
+.srow:hover{background:var(--paper-hover)}.srow b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+.srow .si{display:flex;width:20px;height:20px}.srow .si img{width:20px;height:20px}.srow .sp{white-space:nowrap;text-align:right}.srow.dear{opacity:.55}
+.sfind{display:flex;gap:6px;align-items:center}.sfind input{flex:1;min-width:0}.goldin{width:110px}
+.card.cart .srows{margin:4px 0}
+@media (max-width:480px){.srow{grid-template-columns:20px minmax(0,1fr) auto auto}.srow>.dim{display:none}}
 .card.hero .nm{font-size:15px}.card.hero .lvl{color:var(--accent);font-weight:600}
 .spcls{border-top:1px solid var(--border);padding-top:6px}
 #bglog summary{display:flex;gap:6px;align-items:center;cursor:pointer;list-style:none;padding:3px 0}#bglog summary::-webkit-details-marker{display:none}
@@ -557,6 +565,7 @@ details.more summary .sup{flex:1;min-width:0;overflow:hidden;text-overflow:ellip
 .invpick .ipr{display:flex;gap:10px;align-items:center;text-align:left;white-space:normal;padding:6px 8px;background:var(--raised);border:1px solid var(--border);border-radius:0}
 .invpick .ipr:hover,.invpick .ipr:focus-visible{background:var(--hover);border-color:var(--accent-dim)}
 .invpick .ipi{width:34px;height:34px;image-rendering:pixelated;flex:none;object-fit:contain}
+.invpick .ipi.round{border-radius:50%;object-fit:cover;image-rendering:auto}
 .invpick .ipt{display:flex;flex-direction:column;gap:2px;min-width:0}.invpick .ipn{display:flex;gap:6px;align-items:baseline;flex-wrap:wrap}
 .optcard{border-color:var(--accent-dim)}.optcard .row{display:flex;gap:6px;align-items:center}.optcard input[type=search]{width:140px}
 .optpick{display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:4px;max-height:min(46vh,420px);overflow:auto;margin:6px 0}

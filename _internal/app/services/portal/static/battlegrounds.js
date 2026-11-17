@@ -19,7 +19,8 @@
 const BG = { last: null, shown: null, draft: store('bgpick') || null, build: store('bgbuild') || null, opts: null, optsKey: null,
   asking: new Set(), mons: null, monsKey: '', mq: store('bgmq') || {}, mtimer: 0, tab: store('bgtab') || 'hero',
   logOpen: store('bglog') === true, feature: null, flog: false, teamSeen: null,
-  view: store('bgview') || 'room', lq: '', lf: '', about: {}, dd: null, ddOpen: {}, more: false, pbOpen: false };
+  view: store('bgview') || 'room', lq: '', lf: '', about: {}, dd: null, ddOpen: {}, more: false, pbOpen: false,
+  ctab: store('bgctab') || 'fighter', shop: null, shopKey: null, sq: '', cheap: store('bgcheap') === true };
 const BG_PLAY = new Set(['do', 'preview', 'reaction_mode', 'react', 'end_turn', 'move', 'death_save', 'toggle']);
 const TEAM_COL = { 1: '#4ade80', 2: '#f87171', 3: '#60a5fa', 4: '#fbbf24', 5: '#c084fc', 6: '#f472b6', 7: '#2dd4bf', 8: '#fb923c', 9: '#a3e635', 0: '#9aa3b2' };
 const POINT_COSTS = { 8: 0, 9: 1, 10: 2, 11: 3, 12: 4, 13: 5, 14: 7, 15: 9 };
@@ -266,7 +267,8 @@ function rulesWords(g, l) {
   return [l.mode === 'arena' ? S('Start at level 1, up to {0}', st.max_level) : st.free_level ? S('Any level up to {0}', st.max_level) : S('Level {0}', st.level),
     st.ffa ? S('Free-for-all') : S('Teams'), l.mode !== 'duel' && st.difficulty ? S(st.difficulty[0].toUpperCase() + st.difficulty.slice(1)) : null,
     l.mode !== 'arena' ? (st.kinds || []).map(k => kinds[k]).filter(Boolean).join(' · ') : null, map ? '🗺 ' + map : null,
-    st.spectators === false ? S('No spectators') : null, l.mode === 'arena' ? S('{0} battles won', l.stage) : null].filter(Boolean);
+    st.spectators === false ? S('No spectators') : null, l.mode === 'arena' ? S('{0} battles won', l.stage) : null,
+    st.gold ? '🪙 ' + S('{0} to shop with each round', gp(st.gold * 100)) : null].filter(Boolean);
 }
 /** Top: left - back to the list, which lobby, how it stands; right - its rules, the log, the host's settings. */
 function roomTop(g, l) {
@@ -318,9 +320,17 @@ function centerParts(g, l) {
     : l.phase === 'battle' ? S('The battle is on.') : l.host ? S('The duel is over - {0} takes everyone back to the lobby.', l.host)
       : S('The battle is over - the lobby opens again when the DM finishes it.'),
     bgBoard() ? ' ' : null, bgBoard() ? btn('🗺 ' + S('Show the map'), () => { BG.shown = null; bgSwap(); render(); return null; }, 'sm') : null));
-  else if (l.mode === 'arena') parts.push(...arenaPane(g, l));
-  else parts.push(...fighterPane(g, l));
+  else if (me && me.cart && BG.ctab === 'shop') parts.push(centerTabs(me), ...shopPane(g, l));   // (the lobby has a shop: settings.gold)
+  else parts.push(me && me.cart ? centerTabs(me) : null, ...(l.mode === 'arena' ? arenaPane(g, l) : fighterPane(g, l)));
   return parts.filter(Boolean);
+}
+/** My fighter | the shop (a lobby with gold to spend each round). */
+function centerTabs(me) {
+  const tab = (k, words, tipText) => h('button', { class: BG.ctab === k ? 'on' : '', role: 'tab', 'aria-selected': String(BG.ctab === k), tip: tipText,
+    onclick: () => { BG.ctab = k; store('bgctab', k); bgRedo(); } }, words);
+  if (BG.ctab !== 'shop') BG.ctab = 'fighter';
+  return h('div', { class: 'seg ktabs ctabs', role: 'tablist' }, tab('fighter', '⚔ ' + S('Fighter'), S('Your fighter')),
+    tab('shop', '🪙 ' + S('Shop') + ' · ' + S('{0} left', gp(me.cart.left)), S("Spend the round's gold on gear: it is yours for the coming battle")));
 }
 /** What a host's duel still waits for before it may start ('' = nothing). */
 function hostWhy(l) {
@@ -780,6 +790,68 @@ async function monsterFind(l) {
   finally { BG.asking.delete('mons'); if (BG.monsAgain && BG.monsAgain !== key) { BG.monsAgain = null; monsterFind(l); } }
 }
 
+// ---------------------------------------------------------------- the shop: the round's gold, a cart (battlegrounds/shop.py)
+/** Copper pieces in words: 1500 -> '15 gp', 30 -> '3 sp', 5 -> '5 cp'. */
+function gp(cp) {
+  cp = Math.max(0, Math.round(+cp || 0));
+  if (cp >= 100) return S('{0} gp', (cp / 100).toLocaleString(undefined, { maximumFractionDigits: 2 }));
+  return cp >= 10 && cp % 10 === 0 ? S('{0} sp', cp / 10) : S('{0} cp', cp);
+}
+/** What the lobby's shop sells (asked once per lobby and language; the page filters it as you type). */
+function bgShop(l) {
+  const key = l.id + ':' + wordsLang;
+  if (BG.shopKey === key) return BG.shop;
+  if (!BG.asking.has('shop:' + key)) {
+    BG.asking.add('shop:' + key);
+    api('/api/act', { action: 'bg_shop', room: l.id }).then(r => {
+      BG.shop = r.data; BG.shopKey = key; BG.shopBy = Object.fromEntries(r.data.rows.map(x => [x.name, x])); bgRedo();
+    }).catch(e => { if (e.message !== 'login') say(e.message, true); }).finally(() => BG.asking.delete('shop:' + key));
+  }
+  return null;
+}
+/** The Shop tab: the cart on top (always: what is in it, gold spent and left), then the items for sale under a filter. */
+function shopPane(g, l) {
+  const me = g.me, c = me.cart, counts = new Map();
+  bgShop(l);
+  for (const x of c.items) { const k = counts.get(x.name); if (k) k.n++; else counts.set(x.name, { ...x, n: 1 }); }
+  const cart = h('div', { class: 'card cart' },
+    h('div', { class: 'drow' }, h('span', { class: 'title' }, '🛒 ' + S('Cart')), h('span', { class: 'grow' }),
+      h('span', { class: 'small', tip: S('Your gold for each round: {0}', gp(c.gold * 100)) }, S('Spent {0}', gp(c.spent)) + ' · ', h('b', null, S('{0} left', gp(c.left)))),
+      c.items.length ? btn(S('Empty'), () => bgAct('bg_cart_remove', { all: 1 }), 'sm flat', S('Take everything out of your cart')) : null),
+    c.items.length ? h('div', { class: 'srows' }, ...[...counts.values()].map(x => shopRow(x, -1, me)))
+      : h('div', { class: 'dim small' }, S('Nothing in your cart yet.')),
+    h('div', { class: 'dim small' }, S('What you buy is yours for the coming battle: worn, wielded and attuned when it begins.')));
+  const find = h('div', { class: 'drow sfind' },
+    h('input', { type: 'search', value: BG.sq, placeholder: S('Find an item'), 'aria-label': S('Find an item'),
+      oninput: e => { BG.sq = e.target.value; shopList(l); } }),
+    toggleChip(S('Only what I can afford'), BG.cheap, on => { BG.cheap = on; store('bgcheap', on); shopList(l); }));
+  return [cart, find, h('div', { class: 'srows slist' }, ...shopRows(l, me))];
+}
+const SHOP_MAX = 120;
+function shopRows(l, me) {
+  const o = BG.shopKey === l.id + ':' + wordsLang ? BG.shop : null;
+  if (!o || !me || !me.cart) return [h('div', { class: 'dim small' }, S('Loading…'))];
+  const words = BG.sq.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  const hit = o.rows.filter(r => (!BG.cheap || r.cp <= me.cart.left)
+    && words.every(w => (r.label + ' ' + r.name + ' ' + r.kind).toLowerCase().includes(w)));
+  if (!hit.length) return [h('div', { class: 'empty dim small' }, S('No item matches.'))];
+  const out = hit.slice(0, SHOP_MAX).map(r => shopRow(r, 1, me));
+  if (hit.length > SHOP_MAX) out.push(h('div', { class: 'dim small' }, S('{0} more: type to narrow the list', hit.length - SHOP_MAX)));
+  return out;
+}
+/** The list alone, redrawn as you type (the search box keeps its focus). */
+function shopList(l) { const el = $('bgbody').querySelector('.slist'); if (el) el.replaceChildren(...shopRows(l, ST.bg && ST.bg.me)); }
+/** An item: picture, name, kind, price, and + (for sale: one into the cart) or − (in the cart: one out). Detail on hover. */
+function shopRow(r, sign, me) {
+  const info = (BG.shopBy && BG.shopBy[r.name]) || r, dear = sign > 0 && r.cp > me.cart.left;
+  const add = mini(sign < 0 ? '−' : '+', () => sign < 0 ? bgAct('bg_cart_remove', { item: r.name }) : bgAct('bg_cart_add', { item: r.name }), '',
+    sign < 0 ? S('Take one out of your cart') : dear ? S('Costs more than you have left') : S('Add one to your cart'));
+  add.disabled = dear;
+  return h('div', { class: 'srow' + (dear ? ' dear' : ''), tip: info.tip || r.label },
+    h('span', { class: 'si' }, iconOr(info.icon, 20, '')), h('b', null, (info.label || r.label) + (r.n > 1 ? ' ×' + r.n : '')),
+    h('span', { class: 'dim small' }, info.kind || ''), h('span', { class: 'small sp' }, gp(r.cp * (r.n || 1))), add);
+}
+
 // ---------------------------------------------------------------- the arena: build a hero, then level it up
 function arenaPane(g, l) {
   const me = g.me, o = bgOptions(l), parts = [];
@@ -1023,7 +1095,8 @@ async function bgLevelUp(l, cls, sub) {
 function duelForm(l) {
   const g = bgState(), st = l ? l.settings : { level: 3, free_level: true, max_level: 20, ffa: true, kinds: ['hero', 'monster'], map: 'arena', spectators: true };
   const v = { name: l ? l.name : '', level: st.level || 3, free_level: !!st.free_level, max_level: st.max_level || 20, ffa: !!st.ffa,
-    kinds: new Set((st.kinds || []).filter(k => k === 'hero' || k === 'monster')), map: st.map || 'arena', spectators: st.spectators !== false };
+    kinds: new Set((st.kinds || []).filter(k => k === 'hero' || k === 'monster')), map: st.map || 'arena', spectators: st.spectators !== false,
+    gold: Math.max(0, +st.gold || 0) };
   const kind = (k, label) => toggleChip(label, v.kinds.has(k), on => { if (on) v.kinds.add(k); else v.kinds.delete(k); });
   const maps = ((g && g.maps) || []).map(m => [m.key, m.name, m.blurb]);
   if (!maps.some(([k]) => k === v.map)) maps.push([v.map, v.map]);
@@ -1041,10 +1114,13 @@ function duelForm(l) {
       x => { v.free_level = x === 'own'; drawLvl(); }), lvl)),
     sect(S('Fight as'), h('div', { class: 'chips pick' }, kind('hero', '🛡 ' + S('A hero')), kind('monster', '🐉 ' + S('A monster')))),
     sect(S('Map'), chipsOf(v.map, maps, x => { v.map = x; })),
+    sect(S('Shop'), h('div', { class: 'drow' }, h('input', { type: 'number', min: 0, max: 1000000, step: 10, value: v.gold, class: 'goldin', 'aria-label': S('Gold'),
+      oninput: e => { v.gold = Math.max(0, Math.min(1000000, parseInt(e.target.value, 10) || 0)); } }),
+      h('span', { class: 'dim small' }, S('gp for each fighter to shop with, every round (0: no shop)')))),
     sect(S('Audience'), h('div', { class: 'chips pick' }, toggleChip('👁 ' + S('Others may watch'), v.spectators, x => { v.spectators = x; })))),
   () => [[l ? S('Save') : S('Open the duel'), () => {
     const settings = { level: v.free_level ? Math.min(v.level, v.max_level) : v.level, free_level: v.free_level, max_level: v.free_level ? v.max_level : Math.max(v.level, v.max_level), ffa: v.ffa, kinds: [...v.kinds], map: v.map,
-      spectators: v.spectators };
+      spectators: v.spectators, gold: v.gold };
     const name = v.name.trim();
     if (!l) return act('bg_create', { mode: 'duel', name, settings });
     return act('bg_settings', { room: l.id, settings }, true).then(() => name && name !== l.name ? act('bg_rename', { room: l.id, name }, true) : null);

@@ -3326,7 +3326,12 @@ function showOptions(a) {
   if (NARROW.matches) showView('sheet');
   requestAnimationFrame(() => { if (a.card && UI.aim === a) { a.card.scrollIntoView({ block: 'nearest' }); (a.card.querySelector('input') || a.card.querySelector('.opt.on') || a.card).focus(); } });
 }
-const PICK_GROUPS = { pack: 'In your pack', ground: 'On the ground within reach', prop: 'Within reach' };
+const PICK_GROUPS = { pack: 'In your pack', ground: 'On the ground within reach', prop: 'Within reach', creature: 'Creatures within reach' };
+function pickPicture(o) {             // a row's picture: a prop, an item's sprite, or the token of a creature to throw
+  if (o.creature == null) return o.prop ? `/prop/${o.prop}.webp` : `/itemsprite/${o.sprite || 'sack'}.png`;
+  const c = ((ST.battle && ST.battle.combatants) || []).find(x => x.id === o.creature);
+  return c && c.token && (c.mine || vq() !== 'potato') ? image(c.id, c.token).url : `/itemsprite/sack.png`;
+}
 const PICK_COSTS = { action: 'Action', bonus: 'Bonus action', attack: 'One attack', object: 'Free object use' };
 /** The inventory picker of Throw and Use an Object: each thing with its picture and what it does - to hit, damage
  *  (its average) and range for a throw; the effect and the action it takes for a use - and how long a goodberry lasts. */
@@ -3341,13 +3346,14 @@ function pickInventory(item, opts, done) {
       if (o.hit != null) bits.push(h('span', { class: 'acc' }, S('{0} to hit', (o.hit >= 0 ? '+' : '') + o.hit)));
       if (o.dmg) bits.push(h('span', null, h('span', { class: 'warn' }, o.dmg), o.avg != null ? h('span', { class: 'dim' }, ` (${S('avg {0}', num(o.avg))})`) : null));
       if (o.range) bits.push(h('span', null, o.range));
+      if (o.mode === 'adv' || o.mode === 'dis') bits.push(h('span', { class: o.mode === 'adv' ? 'good' : 'warn' }, S(o.mode === 'adv' ? 'advantage' : 'disadvantage')));
       if (o.cost === 'action') bits.push(h('span', { class: 'dim' }, S('takes the action')));
     } else if (o.effect) bits.push(h('span', { class: 'good' }, S(o.effect)));
     if (o.expires) bits.push(h('span', { class: 'warn' }, '⏳ ' + o.expires));
     const sep = []; bits.forEach((b, i) => { if (i) sep.push(h('span', { class: 'dim' }, ' · ')); sep.push(b); });
     const chip = throwing ? S((o.kind || 'improvised').charAt(0).toUpperCase() + (o.kind || 'improvised').slice(1)) : S(PICK_COSTS[o.cost] || 'Action');
     return h('button', { class: 'ipr', role: 'option', onclick: () => { detailGone = null; closeDetail(); done(o.value); } },
-      h('img', { class: 'ipi', alt: '', src: o.prop ? `/prop/${o.prop}.webp` : `/itemsprite/${o.sprite || 'sack'}.png` }),
+      h('img', { class: 'ipi' + (o.creature != null ? ' round' : ''), alt: '', src: pickPicture(o) }),
       h('span', { class: 'ipt' },
         h('span', { class: 'ipn' }, h('b', null, o.name || o.label), o.qty > 1 ? h('span', { class: 'dim' }, ` ×${o.qty}`) : null,
           h('span', { class: 'chip' + (o.kind === 'thrown weapon' || o.cost === 'bonus' ? ' on' : '') }, chip)),
@@ -3922,14 +3928,26 @@ function toggleChips(list, bar) {            // bar: the action bar's (on a lobb
 }
 
 /** The long rest: a class that prepares its spells (Cleric, Druid, Paladin, Artificer, Wizard from the spellbook) picks
- *  them for the new day, in a fold per spell level, counting what is chosen against what it may prepare. */
+ *  them for the new day in the spell picker; without one it only asks. */
 async function longRest() {
   const plain = () => ask(S('Take a long rest? Hit points, slots and resources come back. (Agree it with your DM first.)'), S('Long rest'), () => act('rest', { kind: 'long' }));
+  return spellPicker(S('Long rest'), S('Hit points, slots and resources come back, and you prepare your spells for the new day. (Agree it with your DM first.)'),
+    prepare => act('rest', { kind: 'long', prepare }), plain);
+}
+/** Change Spells on the Spells tab: the same picker at any time, and nothing comes back. */
+function changeSpells() {
+  return spellPicker(S('Change spells'), S('Pick the spells you have prepared. Nothing else changes: no hit points, slots or resources come back.'),
+    prepare => act('prepare', { prepare }), () => say(S('Your spells change when you level up.')));
+}
+/** The spell picker (the long rest's, and Change Spells): per class that prepares, its spells in a fold per spell level,
+ *  counting what is chosen against what it may prepare. `send({class: [spells]})` on the button titled `title`;
+ *  `none()` when no class prepares. */
+async function spellPicker(title, text, send, none) {
   let r;
   try { r = await api('/api/act', { action: 'prepare_options', character: ST.me.active }); }
   catch (e) { if (e.message !== 'login') say(e.message, true); return null; }
   const classes = (r.data && r.data.classes) || [];
-  if (!classes.some(k => k.prepares)) return plain();
+  if (!classes.some(k => k.prepares)) return none();
   const picks = Object.fromEntries(classes.filter(k => k.prepares).map(k => [k.class, new Set(k.prepared)]));
   const counters = [];                                       // run after every change: the counts and the rest button
   const recount = () => {
@@ -3995,17 +4013,17 @@ async function longRest() {
   };
   const many = classes.reduce((n, k) => n + (k.levels || []).reduce((m, g) => m + g.spells.length, 0), 0);
   detail(() => h('div', { class: 'prep' },
-    h('div', { class: 'txt' }, h('b', null, S('Long rest')), '\n' + S('Hit points, slots and resources come back, and you prepare your spells for the new day. (Agree it with your DM first.)')),
+    h('div', { class: 'txt' }, h('b', null, title), '\n' + text),
     many > 12 ? query : null, ...classes.map(block)),
-  () => [[S('Long rest'), () => act('rest', { kind: 'long', prepare: Object.fromEntries(Object.entries(picks).map(([cls, set]) => [cls, [...set]])) })],
+  () => [[title, () => send(Object.fromEntries(Object.entries(picks).map(([cls, set]) => [cls, [...set]])))],
     [S('Cancel'), () => null, 'flat']]);
   $('detail').querySelector('.box').classList.add('wide');
   recount();
   return null;
 }
 function spellsTab(c) {
-  if (!c.spells.length) return [h('div', { class: 'dim' }, S('No spells.'))];
-  const out = [];
+  if (!c.spells.length && !c.prepares) return [h('div', { class: 'dim' }, S('No spells.'))];
+  const out = [];                                    // (nothing prepared yet: the header with Change Spells still shows)
   const slot = c.slots.length ? h('select', { onchange: e => { UI.slot = e.target.value; }, tip: S('Which slot a levelled spell uses') },
     h('option', { value: '' }, S('Lowest slot that works')),
     ...c.slots.map(s => h('option', { value: s.key, selected: UI.slot === s.key }, `${s.label} (${s.left}/${s.total})`))) : null;
@@ -4013,7 +4031,9 @@ function spellsTab(c) {
     : S('Click a spell to cast it (a levelled spell asks first, and offers the ritual ®); right-click casts a ritual without a slot.');
   out.push(h('div', { class: 'row casting' }, h('span', { class: 'small dim' }, (c.casting || []).map(k =>
     `${k.label}: ${S('save DC {0}', k.dc)} · ${S('attack {0}', sign(k.attack))}`).join('   ')),
-    h('span', { class: 'small dim info', tip: how, 'aria-label': how, onclick: () => detail(how) }, 'ⓘ'), h('span', { class: 'grow' }), slot));   // the how-to on hover (hold)
+    h('span', { class: 'small dim info', tip: how, 'aria-label': how, onclick: () => detail(how) }, 'ⓘ'), h('span', { class: 'grow' }),
+    c.prepares ? needs('rest', ibtn('spell-book', `${S('Change spells')}\n${S('Pick your prepared spells again, without a rest.')}`, () => changeSpells(), 'acc')) : null,
+    slot));   // the how-to on hover (hold)
   const pipsOf = s => [...Array.from({ length: s.total }, (_, i) => h('button', { class: 'pip' + (i < s.left ? ' on' : ''),   // a full pip spends a slot, an empty one gets it back
       onclick: go(() => act('slot', { key: s.key, use: i < s.left }, true)), 'aria-label': i < s.left ? S('Spend a slot') : S('Get a slot back'),
       tip: `${s.label}: ${S('{0} of {1} left', s.left, s.total)}\n${i < s.left ? S('Click to use one') : S('Click to get one back')}` }, i < s.left ? '●' : '○')),
@@ -4032,6 +4052,7 @@ function spellsTab(c) {
         oncontextmenu: e => { if (sp.ritual && lastPointer === 'mouse') { e.preventDefault(); act('cast', { spell: sp.name, ritual: true }); } } },
         sp.icon ? gi(sp.icon, 'sm spi') : null, sp.label + (sp.ritual ? ' ®' : ''))))));
   }
+  if (!c.spells.length) out.push(h('div', { class: 'dim' }, S('No spells.')));
   return out;
 }
 /** A spell chip: in a battle, aim it on the map (BG3 style); a cantrip at once; a levelled spell asks before the slot goes. */
