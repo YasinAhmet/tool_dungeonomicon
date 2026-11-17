@@ -462,7 +462,7 @@ function alerts(was) {
   if (!was || !ST.battle) return;
   if (ST.battle.my_turn && !(was.battle && was.battle.my_turn)) alertMe('turn');
   const p = ST.battle.pending, q = was.battle && was.battle.pending;
-  if (p && p.mine && (!q || q.rid !== p.rid)) alertMe('react');
+  if (p && p.mine && askedId(q) !== askedId(p)) alertMe('react');
 }
 async function toggleNotify() {
   if (!window.Notification) return say(S("This browser can't show notifications."), true);
@@ -3748,12 +3748,14 @@ function rulesOf(o) {
     return { tip: `${s.label}\n${s.time} · ${s.range}\n\n${s.text}`, icon: s.icon };
   return {};
 }
+/** Which question this is: one action (rid) can ask several in a row, and a new battle counts its rids from 1 again. */
+function askedId(p) { return p ? `${p.rid}|${p.since}|${p.reactor}|${p.window}` : null; }
 /** A reaction the battle is waiting on: mine to answer (Shield? Counterspell? an opportunity attack?). */
 function renderPending() {
   const p = ST.battle && ST.battle.pending, el = $('react');
-  if (!p || !p.mine) { el.classList.add('hide'); UI.reactKey = null; return; }
-  const fresh = UI.reactShown !== p.rid;
-  if (fresh) { UI.reactShown = p.rid; UI.reactRemember = false; UI.reactBusy = false; }
+  if (!p || !p.mine) { el.classList.add('hide'); UI.reactKey = null; UI.reactShown = null; UI.reactBusy = false; return; }
+  const asked = askedId(p), fresh = UI.reactShown !== asked;
+  if (fresh) { UI.reactShown = asked; UI.reactRemember = false; UI.reactBusy = false; }
   const key = JSON.stringify([p, UI.reactBusy, wordsLang]);
   if (!fresh && key === UI.reactKey && !el.classList.contains('hide')) return;     // unchanged: keep focus and the tick
   UI.reactKey = key;
@@ -4393,7 +4395,7 @@ function renderFeed() {
   $('feedfilter').replaceChildren(...FILTERS().map(([k, l]) => h('button', { class: UI.feed === k ? 'on' : '', onclick: () => { UI.feed = k; store('feed', k); renderFeed(); } }, l)));
   const box = $('feed'), atEnd = box.scrollHeight - box.scrollTop - box.clientHeight < 30;
   const entries = [...ST.feed.map(e => ({ ...e, sort: e.id })), ...UI.local].sort((a, b) => a.sort - b.sort)
-    .filter(e => UI.feed === 'all' || (UI.feed === 'roll' ? e.kind === 'roll' || e.kind === 'xp' : e.kind === 'chat' || e.kind === 'private'));
+    .filter(e => UI.feed === 'all' || (UI.feed === 'roll' ? e.kind === 'roll' || e.kind === 'xp' || e.kind === 'action' :e.kind === 'chat' || e.kind === 'private'));
   box.replaceChildren(...entries.slice(-120).map(e => h('div', { class: `e ${e.kind}${e.dm ? ' dm' : ''}${e.uid === ST.me.id ? ' me' : ''}` },
     h('span', { class: 't' }, e.time), e.who ? h('span', { class: 'w' }, (e.dm ? '👑 ' : '') + e.who) : null, rich(e.text))));
   if (atEnd) box.scrollTop = box.scrollHeight;
@@ -4405,7 +4407,7 @@ function unread() {
   const last = ST.feed.length ? ST.feed[ST.feed.length - 1].id : 0;
   const shown = NARROW.matches ? UI.view === 'feed' : !document.body.classList.contains('folded');
   if (UI.seenFeed === null || shown || UI.seenFeed > last) UI.seenFeed = last;
-  const n = ST.feed.filter(e => e.id > UI.seenFeed && e.uid !== ST.me.id).length;
+  const n = ST.feed.filter(e => e.id > UI.seenFeed && e.uid !== ST.me.id && !e.only).length;   // (only: what I just did myself)
   $('unread').textContent = n > 99 ? '99+' : String(n);
   $('unread').classList.toggle('hide', !n);
   $('unread').setAttribute('aria-label', S('{0} new', n));
