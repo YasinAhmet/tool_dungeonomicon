@@ -74,6 +74,8 @@ function wSmoothPts(pts) {                             // the points of wLinePat
 // ---------------------------------------------------------------- which map the pane shows
 /** Battle or World: what the player picked, or (not picked) the battle while one is running, else the world. */
 function mapMode() {
+  if (ST && ST.edition === 'adventurers') return ST.battle && ST.battle.bg && ST.battle.phase !== 'over' ? 'battle' : 'adv';   // (the
+  // group's fight while it lasts, else the Adventure: its spoils, the map, the towns)
   const bg = typeof bgMode === 'function' ? bgMode() : 'gone';   // Battlegrounds (battlegrounds.js): a member's map stays there;
   if (bg === 'member') return 'bg';                                 // the lobby I watch starts fighting: show it; the mode closes: away
   if (WM.mode === 'duel') WM.mode = 'bg';                           // (the old name, kept by a browser)

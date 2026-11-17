@@ -231,6 +231,7 @@ function conn() {
     h('span', { class: 'dim' }, S('This page keeps trying to reconnect.')));
 }
 function gate(text) {
+  if (typeof advGate === 'function' && advGate(text)) return;      // (the Adventurers app: its login instead: adventurers.js)
   $('gatetext').textContent = text;
   $('gatemore').textContent = S("The table's address changes every session, so old links stop working. Ask your DM for today's link.");
   $('gate').classList.remove('hide');
@@ -353,10 +354,12 @@ function pushed(st) {
   if (!merge(st, false)) load().catch(() => {});
 }
 /** What a change of each topic touches on the page (an unknown one: everything). */
-const TOUCHES = { battle: ['battle', 'character', 'team'], characters: ['battle', 'character', 'team', 'world'], dice: ['feed'],
+const TOUCHES = { battle: ['battle', 'character', 'team'], characters: ['battle', 'character', 'team', 'world', 'adv'], dice: ['feed'],
   feed: ['feed'], nowplaying: ['now'], team: ['team', 'world'], world: ['world', 'team'], notes: ['notes'],     // (the team's view shows the food's days)
-  duel: ['bg', 'bgbattle'] };                        // (Battlegrounds; a member's battle, character and team parts are their lobby's too)
-const touchesOf = t => TOUCHES[t] === undefined ? ['all'] : t === 'duel' && typeof bgMember === 'function' && bgMember() ? ['bg', 'bgbattle', 'battle', 'character', 'team'] : TOUCHES[t];
+  duel: ['bg', 'bgbattle', 'adv'], adventurers: ['adv', 'character'] };   // (Battlegrounds; a member's battle, character and team
+                                                     // parts are their lobby's too - and an Adventurers group's while it fights)
+const touchesOf = t => TOUCHES[t] === undefined ? ['all'] : t === 'duel' && ((typeof bgMember === 'function' && bgMember()) ||
+  (ST && ST.edition === 'adventurers')) ? ['bg', 'bgbattle', 'battle', 'character', 'team', 'adv'] : TOUCHES[t];
 let soon = null, seenV = 0;              // seenV: the newest change the live stream told of
 const WANT = new Set();
 /** A change at the table (topics, v: its number): reload what it touched, unless the page already has it all (it
@@ -517,6 +520,7 @@ function render() {
   FX.feed(b);
   renderMap();
   if (typeof renderWorld === 'function') renderWorld();   // the world map (world.js): the other face of the map pane
+  if (typeof renderAdv === 'function') renderAdv();       // the Adventurers app's world, group and towns (adventurers.js)
   renderAimbar();
   renderActions();
   renderPending();
@@ -546,7 +550,7 @@ function header() {
   if (document.querySelector('.brand .name').textContent !== title) {
     document.querySelector('.brand .name').textContent = title;
     document.querySelector('.brand').title = title;
-    document.querySelector('.brand .mark').textContent = ST.edition === 'battlegrounds' ? 'BG' : 'DM';
+    document.querySelector('.brand .mark').textContent = ST.edition === 'battlegrounds' ? 'BG' : ST.edition === 'adventurers' ? 'AV' : 'DM';
     if (!ALERT.timer) document.title = title;
     ALERT.base = title;
   }
@@ -4483,5 +4487,5 @@ document.addEventListener('scroll', () => tip(), true);
 window.addEventListener('online', () => setTimeout(() => load().catch(() => {}), 500));
 conn();
 
-if (!KEY) gate(S('This page needs your personal link from the DM.'));
+if (!KEY) addEventListener('DOMContentLoaded', () => gate(S('This page needs your personal link from the DM.')));   // (after every script)
 else load().then(listen).catch(e => { if (e.message !== 'login') { say(e.message, true); listen(); } });

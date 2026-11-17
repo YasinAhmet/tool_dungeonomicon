@@ -1,8 +1,8 @@
 Drop content modules (.dmmod files) into this folder.
 
 Dungeonomicon reads them when it starts - and at once while it runs - and their books show up in the Sourcebooks
-window. A file taken out of this folder takes its module with it. Both apps of this folder read them: App.exe (the
-campaign editor) and Battlegrounds.exe (duels, skirmishes and the arena).
+window. A file taken out of this folder takes its module with it. Every app of this folder reads them: App.exe (the
+campaign editor), Battlegrounds.exe (duels, skirmishes and the arena) and Adventurers.exe (one shared world).
 
 This folder travels with the program: copy or zip the whole Dungeonomicon folder and give it to someone, and both
 exes start on their computer with the same modules. (Characters, settings and the bot token stay in your own

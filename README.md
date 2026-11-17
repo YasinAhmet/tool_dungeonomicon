@@ -26,12 +26,13 @@ player portal in the browser, and a Discord bot. It all runs on your own PC.
 1. Download **Dungeonomicon-vX.zip** from [Releases](../../releases) (Windows, 64-bit): the one marked *Latest* is
    the LTS (stable) release, the newest *Pre-release* is Cutting Edge.
 2. Unzip it anywhere, for example to your desktop.
-3. Open the `Dungeonomicon` folder and double-click **`App.exe`** (the campaign editor) or **`Battlegrounds.exe`**
-   (duels, skirmishes and arenas). Nothing needs installing.
+3. Open the `Dungeonomicon` folder and double-click **`App.exe`** (the campaign editor), **`Battlegrounds.exe`**
+   (duels, skirmishes and arenas) or **`Adventurers.exe`** (one shared world for many groups - Cutting Edge only for
+   now). Nothing needs installing.
 
 To get the newest build later, double-click **`Update.exe`** in the same folder (no need to close the apps first) and pick
 **LTS** (the stable release) or **Cutting Edge** (the newest build); you can switch between them any time. It downloads only
-the files that changed, closes App.exe and Battlegrounds.exe if they are running, and starts them again. Your
+the files that changed, closes the apps if they are running, and starts them again. Your
 modules and everything you saved are left alone.
 
 A loading window shows while the rules library loads, then the editor opens. **Help ▸ Getting started** walks you
