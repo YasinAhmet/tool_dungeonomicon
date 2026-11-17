@@ -242,6 +242,12 @@ function renderAdv() {
     AM.flash = { at: [g.x, g.y], t0: performance.now() };
   }
   AVN.encSeen = enc;
+  const fid = g && g.fight ? g.fight.room : null;
+  if (AVN.fightSeen && !fid && g && g.log.length) {        // a fight just ended: what came of it, said once
+    const last = g.log.slice(-3).map(l => l.text).filter(t => /^(Victory|Defeat|The group gets away)/.test(t));
+    if (last.length) say(last[last.length - 1]);
+  }
+  AVN.fightSeen = fid;
   if (AVN.route && (!g || !g.lead)) AVN.route = null;     // (a fight only pauses the way: the rest waits for after it)
   if (AVN.route && g && !g.encounter && !g.fight) {       // the group stands elsewhere now (a lost fight's retreat): planned again
     const f = AVN.route.path[0];
@@ -277,7 +283,7 @@ function renderAdv() {
   if (AVN.tab === 'quests') part($('avp-quests'), JSON.stringify([g && [g.quests, g.lead, g.here.settlement && g.here.settlement.id], A.max_quests, L]),
     () => advQuestPage(A, g));
   if (AVN.tab === 'log') part($('avp-log'), JSON.stringify([g && g.log, L]), () => advLogPage(g));
-  if (AVN.newChar || (A.characters.length === 0 && !$('avnew'))) advNewChar(A);
+  if ((AVN.newChar || A.characters.length === 0) && !$('avnew')) advNewChar(A);   // (built once: its own picks redraw it)
 }
 function advRail(A, g, town) {
   const ready = g ? g.quests.filter(q => q.stage === 'ready').length : 0;
@@ -324,7 +330,8 @@ function advTop(A, c, g) {
       h('span', { class: 'avstat', tip: S("{0}'s purse", c.name) }, ai('two-coins'), avMoney(c.purse)),
       h('span', { class: 'avstat', tip: S('Experience: {0} of {1} for the next level', c.xp, c.next_xp || '—') }, ai('upgrade'),
         h('span', { class: 'avxp' }, h('i', { style: `width:${Math.round(pct * 100)}%` }))),
-      c.level_up ? aib('upgrade', S('Level up {0}', c.name), () => aact('adv_level_up'), 'acc') : null);
+      c.level_up ? aib('upgrade', S('Level up {0}: choose what the level brings', c.name), () => advLevelUp(c.name), 'acc') : null,
+      c.caster ? aib('spell-book', S("{0}'s first spells: pick them now (later ones come with levels and from the towers)", c.name), () => advSpells(c.name), 'acc') : null);
   }
   out.push(h('span', { style: 'flex:1' }));
   if (g) out.push(h('span', { class: 'avstat', tip: S('Your group') + (g.admin ? ' · ' + S('you are admin') : '') + '\n' + S('Purse: {0}', g.purse) },
@@ -364,7 +371,7 @@ function advNext(A, g, c) {
   if (!c) return { icon: 'person', text: S('Make your first character'), go: () => { AVN.newChar = true; renderAdv(); } };
   if (g && g.fight) return { icon: 'crossed-swords', text: g.fight.phase === 'over' ? S('The fight is over: the spoils are counted') : S('Your group is fighting'), go: null };
   if (g && g.encounter) return { icon: 'crossed-swords', text: S('In the way: {0} - fight or flee', g.encounter.label), go: () => setTab('map') };
-  if (c.level_up) return { icon: 'upgrade', text: S('{0} can level up', c.name), go: () => aact('adv_level_up') };
+  if (c.level_up) return { icon: 'upgrade', text: S('{0} can level up', c.name), go: () => advLevelUp(c.name) };
   if (A.invites.length) return { icon: 'envelope', text: S('{0} invites you', A.invites[0].name), go: () => setTab('map') };
   if (!g) return { icon: 'flying-flag', text: S('Found a group, or ask to join one: quests and fights are for groups'), go: () => setTab('group') };
   if (g.admin && g.requests.length) return { icon: 'shaking-hands', text: S('{0} asks to join', g.requests[0].char), go: () => setTab('group') };
@@ -463,9 +470,11 @@ function advSidecards(A, g, c) {
   }
   if (g.fight) {
     const f = g.fight;
-    out.push(card('fight', 'crossed-swords', f.phase === 'over' ? (f.result ? S('Victory!') : S('Defeat')) : S('Fighting - round {0}', f.round),
-      g.lead ? h('div', { class: 'avrow' }, aib('checkered-flag', f.phase === 'over' ? S('Collect the spoils') : S('End the fight'),
-        () => act('adv_finish', { group: g.id }), 'acc')) : h('div', { class: 'small dim' }, S('The leader collects the spoils.')), 'enc'));
+    out.push(card('fight', 'crossed-swords', f.phase === 'over' ? (f.result ? S('Victory!') : S('The fight is over')) : S('Fighting - round {0}', f.round),
+      f.phase === 'over' ? h('div', { class: 'small dim' }, S('Counting the spoils…'))
+        : g.lead ? h('div', { class: 'avrow' }, aib('checkered-flag', S('End the fight now (whoever stands wins; not yet won is lost)'),
+          e => avConfirm(e, S('End the fight now? If it isn\'t won, it is lost.'), () => act('adv_finish', { group: g.id })), 'bad'))
+          : h('div', { class: 'small dim' }, S('The fight is on.')), 'enc'));
   } else if (g.encounter) {
     const e = g.encounter;
     out.push(card('enc', 'crossed-swords', e.label, [
@@ -766,41 +775,63 @@ function advNoGroup(A, c) {
     h('div', { class: 'avadd avrow', onclick: e => advFound(e, c), tip: S('Found a group with {0}: you are its admin', c.name) }, '+ ' + S('Found a group'))))];
 }
 
-// ---------------------------------------------------------------- a new character
+// ---------------------------------------------------------------- a new character, level ups, first spells
+// The same pieces as Battlegrounds (battlegrounds.js): its class and race pick lists with their rules text, its point
+// buy, its level-up panel and its spell picker - on Adventurers' own actions.
+async function advOptions() {
+  if (AVN.opts && AVN.optsKey === wordsLang) return AVN.opts;
+  const r = await act('adv_options', {}, true);
+  if (r && r.data) { AVN.opts = r.data; AVN.optsKey = wordsLang; }
+  return AVN.opts;
+}
+const advIO = name => ({
+  plan: (cls, sub) => act('adv_level_plan', { char: name, class: cls, subclass: sub }, true).then(r => { if (!r) throw new Error('login'); return r.data; }),
+  apply: (cls, choices) => act('adv_level_up', { char: name, class: cls, choices }),
+  info: () => act('adv_spells_info', { char: name }, true).then(r => { if (!r) throw new Error('login'); return r.data; }),
+  set: picks => act('adv_spells_set', { char: name, picks }) });
+function advLevelUp(name) { return bgLevelUp(null, '', '', advIO(name || AVN.char)); }
+function advSpells(name) { return bgSpellPicker(null, advIO(name || AVN.char)); }
 function advNewChar(A) {
   const old = $('avnew');
-  const o = A.create || {}, f = AVN.form;
+  const o = AVN.opts && AVN.optsKey === wordsLang ? AVN.opts : null;
   const close = A.characters.length ? () => { AVN.newChar = false; const n = $('avnew'); if (n) n.remove(); } : null;
-  const redo = () => advNewChar(A);
-  const pick = (k, list, label) => h('select', { 'aria-label': label, onchange: e => { f[k] = e.target.value; if (k === 'race') f.subrace = ''; redo(); } },
-    h('option', { value: '' }, label), ...(list || []).map(n => h('option', { value: n, selected: f[k] === n }, n)));
-  const race = (o.races || []).find(r => r.name === f.race);
-  const costs = (o.point_buy && o.point_buy.costs) || { 8: 0, 9: 1, 10: 2, 11: 3, 12: 4, 13: 5, 14: 7, 15: 9 };
-  const budget = (o.point_buy && o.point_buy.budget) || 27;
-  f.scores = f.scores || { str: 13, dex: 13, con: 13, int: 12, wis: 12, cha: 12 };
-  const spent = Object.values(f.scores).reduce((a, v) => a + (costs[v] ?? 99), 0);
-  const box = h('div', { id: 'avnew' }, h('div', { class: 'avcard' },
-    h('div', { class: 'hd' }, ai('person'), h('span', { class: 'grow' }, S('New character')), close ? aib('cancel', S('Close'), close) : null),
-    h('div', { class: 'bd' },
-      h('div', { class: 'avrow' }, h('input', { placeholder: S('Name (empty: one is made up)'), value: f.name || '', maxlength: 40, style: 'flex:1',
-        oninput: e => { f.name = e.target.value; } })),
-      h('div', { class: 'avrow', style: 'margin-top:6px' }, pick('race', (o.races || []).map(r => r.name), S('Race')),
-        race && race.subraces && race.subraces.length ? pick('subrace', race.subraces, S('Subrace')) : null,
-        pick('class', (o.classes || []).map(c => c.name), S('Class')),
-        pick('background', (o.backgrounds || []).map(b => b.name || b), S('Background (random)'))),
-      h('div', { class: 'avrow small', style: 'margin-top:6px' }, h('label', null, h('input', { type: 'checkbox', checked: !!f.pb,
-        onchange: e => { f.pb = e.target.checked; redo(); } }), ' ' + S("Point buy (else the class's standard array)"))),
-      f.pb ? h('div', { class: 'avrow small' }, ...['str', 'dex', 'con', 'int', 'wis', 'cha'].map(k =>
-        h('label', null, k.toUpperCase() + ' ', h('select', { onchange: e => { f.scores[k] = +e.target.value; redo(); } },
-          ...Object.keys(costs).map(v => h('option', { value: v, selected: +v === f.scores[k] }, v))))),
-      h('b', { class: spent > budget ? 'bad' : 'good' }, S('{0} of {1} points', spent, budget))) : null,
-      h('div', { class: 'avrow', style: 'margin-top:8px' }, h('span', { class: 'small dim grow' }, S("Level 1, the class's kit and the background's purse; you start in a village.")),
-        h('button', { class: 'primary', onclick: go(async () => {
-          const spec = { name: f.name || '', race: f.race || '', subrace: f.subrace || '', class: f.class || '', background: f.background || '' };
-          if (f.pb) spec.scores = f.scores;
-          const r = await act('adv_create_char', { spec });
-          if (r) { AVN.newChar = false; AVN.form = {}; const n = $('avnew'); if (n) n.remove(); }
-        }) }, S('Create'))))));
+  const head = h('div', { class: 'hd' }, ai('person'), h('span', { class: 'grow' }, S('New character')), close ? aib('cancel', S('Close'), close) : null);
+  let body;
+  if (!o) {
+    body = h('div', { class: 'bd small dim' }, S('Loading…'));
+    if (!AVN.optsAsked) { AVN.optsAsked = true; advOptions().then(() => { AVN.optsAsked = false; if ($('avnew')) advNewChar(advS()); }); }
+  } else {
+    const H = o.heroes;
+    let b = AVN.form;
+    if (!b || !b.scores) b = AVN.form = { race: '', subrace: '', class: '', background: '', scores: freshScores(), name: '' };
+    if (b.race && !H.races.find(r => r.name === b.race)) b.race = '';
+    if (b.class && !H.classes.find(c => c.name === b.class)) b.class = '';
+    const redo = () => advNewChar(advS());
+    const budget = o.point_buy || 27, costs = (H.point_buy && H.point_buy.costs) || POINT_COSTS;
+    const ok = b.race && b.class;
+    body = h('div', { class: 'bd' },
+      h('div', { class: 'ddrow' },
+        ddPick({ key: 'avclass', label: S('Class'), value: b.class, rows: classRows(o, false), onpick: v => { b.class = v; redo(); } }),
+        ddPick({ key: 'avrace', label: S('Race'), value: b.race, sub: b.subrace, rows: raceRows(o), onpick: (v, sr) => { b.race = v; b.subrace = sr || ''; redo(); } }),
+        ddPick({ key: 'avbg', label: S('Background'), value: b.background, any: S('Random'),
+          rows: H.backgrounds.map(x => ({ v: x, label: lbl(o, x), facts: (o.facts || {})['background:' + x], about: ['background', x] })),
+          onpick: v => { b.background = v; redo(); } }),
+        h('label', { class: 'ddbtn namef' }, h('span', { class: 'ddl' }, S('Name')),
+          h('input', { value: b.name || '', maxlength: 40, placeholder: S('Random'), oninput: e => { b.name = e.target.value; } }))),
+      pointBuy(b.scores, budget, costs, () => {}, o.abilities),
+      h('div', { class: 'drow go' }, h('span', { class: 'dim small' }, ok ? S("Level 1: the class's kit and the background's purse; you start in a village. Spells next.")
+        : S('Pick a class and a race.')), h('span', { class: 'grow' }),
+      Object.assign(h('button', { class: 'primary', onclick: go(async () => {
+        const before = new Set((advS().characters || []).map(c => c.name));
+        const r = await act('adv_create_char', { spec: { race: b.race, subrace: b.subrace, class: b.class, background: b.background || '', scores: b.scores, name: b.name || '' } });
+        if (!r) return;
+        AVN.newChar = false; AVN.form = null;
+        const n = $('avnew'); if (n) n.remove();
+        const made = (advS().characters || []).find(c => !before.has(c.name));
+        if (made) { AVN.char = made.name; store('advchar', made.name); renderAdv(); if (made.caster) advSpells(made.name); }
+      }) }, S('Create')), { disabled: !ok })));
+  }
+  const box = h('div', { id: 'avnew' }, h('div', { class: 'avcard' }, head, body));
   if (old) old.replaceWith(box); else $('avpanes').append(box);
 }
 

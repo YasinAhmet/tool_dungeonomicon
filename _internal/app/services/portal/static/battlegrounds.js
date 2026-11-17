@@ -1023,9 +1023,9 @@ const spellFind = root => h('input', { type: 'search', placeholder: S('Find a sp
 } });
 
 /** The hero's spells (bg_spells_info): a block per spellcasting class - cantrips, then known or prepared spells by level. */
-async function bgSpellPicker(l) {
+async function bgSpellPicker(l, io) {               // io: {info(), set(picks)} - another app's own (adventurers.js)
   let info;
-  try { info = (await api('/api/act', { action: 'bg_spells_info', room: l.id })).data; }
+  try { info = io ? await io.info() : (await api('/api/act', { action: 'bg_spells_info', room: l.id })).data; }
   catch (e) { if (e.message !== 'login') say(e.message, true); return; }
   if (!info.classes.length) { say(S('Your hero has no spells to pick.')); return; }
   const picks = {};
@@ -1046,7 +1046,8 @@ async function bgSpellPicker(l) {
   });
   const root = h('div', { class: 'prep' }, h('div', { class: 'txt' }, h('b', null, S('Your spells')), '\n' + info.summary));
   root.append(spellFind(root), ...blocks);
-  detail(() => root, () => [[S('Use these spells'), () => bgAct('bg_spells_set', { picks: Object.fromEntries(Object.entries(picks).map(([k, [a, b]]) => [k, [...a, ...b]])) }, false)],
+  const chosen = () => Object.fromEntries(Object.entries(picks).map(([k, [a, b]]) => [k, [...a, ...b]]));
+  detail(() => root, () => [[S('Use these spells'), () => io ? io.set(chosen()) : bgAct('bg_spells_set', { picks: chosen() }, false)],
     [S('Cancel'), () => null, 'flat']]);
   $('detail').querySelector('.box').classList.add('wide');
 }
@@ -1054,9 +1055,9 @@ async function bgSpellPicker(l) {
 /** The level-up panel (bg_levelup_plan): class (multiclass options with their notes), hit points, subclass with its
  *  blurb, ASI or feat, skills, tools, expertise, class options, spells - everything prefilled with sensible picks - and
  *  the features gained; bg_levelup applies it. */
-async function bgLevelUp(l, cls, sub) {
+async function bgLevelUp(l, cls, sub, io) {          // io: {plan(cls, sub), apply(cls, choices)} - another app's (adventurers.js)
   let plan;
-  try { plan = (await api('/api/act', { action: 'bg_levelup_plan', room: l.id, class: cls || '', subclass: sub || '' })).data; }
+  try { plan = io ? await io.plan(cls || '', sub || '') : (await api('/api/act', { action: 'bg_levelup_plan', room: l.id, class: cls || '', subclass: sub || '' })).data; }
   catch (e) { if (e.message !== 'login') say(e.message, true); return; }
   const sg = plan.suggested || {}, L = n => (plan.labels || {})[n] || n, sp = plan.spells || {};
   const ch = { hp: sg.hp === 'roll' ? 'roll' : 'average', subclass: sg.subclass, skills: new Set(sg.skills || []), tools: new Set(sg.tools || []),
@@ -1065,7 +1066,7 @@ async function bgLevelUp(l, cls, sub) {
     grants: Object.fromEntries(Object.keys(plan.subclass_grants || {}).map(k => [k, new Set(((sg.subclass_choices || {})[k]) || [])])),
     asi: sg.asi && sg.asi.feat ? { kind: 'feat', feat: sg.asi.feat } : { kind: '+2', a: Object.keys((sg.asi || {}).abilities || {})[0] || 'str', b: 'dex' } };
   if (sg.asi && sg.asi.abilities && Object.keys(sg.asi.abilities).length === 2) { const [a, b] = Object.keys(sg.asi.abilities); ch.asi = { kind: '+1+1', a, b }; }
-  const again = (c, s) => { closeDetail(); return bgLevelUp(l, c, s); };
+  const again = (c, s) => { closeDetail(); return bgLevelUp(l, c, s, io); };
   const parts = [];
   const classes = (plan.classes || []).length ? plan.classes : [{ class: plan.class, ok: true }];
   parts.push(h('div', { class: 'txt' }, h('b', null, S('Level {0}', plan.total_level)), '\n' + S('{0} level {1}', L(plan.class), plan.level)));
@@ -1124,7 +1125,8 @@ async function bgLevelUp(l, cls, sub) {
     for (const k of ['skills', 'tools', 'expertise', 'cantrips', 'spells', 'spellbook']) if (!out[k].length) delete out[k];
     return out;
   };
-  detail(() => root, () => [['⬆ ' + S('Gain the level'), () => bgAct('bg_levelup', { class: plan.class, choices: choices() }, false)], [S('Cancel'), () => null, 'flat']]);
+  detail(() => root, () => [['⬆ ' + S('Gain the level'), () => io ? io.apply(plan.class, choices()) : bgAct('bg_levelup', { class: plan.class, choices: choices() }, false)],
+    [S('Cancel'), () => null, 'flat']]);
   $('detail').querySelector('.box').classList.add('wide');
 }
 
