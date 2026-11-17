@@ -192,12 +192,15 @@ function replayWords(l) {
 function phaseText(g, l) {
   const me = g.me, r = l.result;
   if (l.mode === 'replay') return ['dim', '🎞 ' + replayWords(l)];
-  if (l.phase === 'lobby' && l.hosting) return ['dim', me && me.ready ? '✔ ' + S('Ready - start the duel once everyone is') : '🕓 ' + S('Lobby - get ready, then start the duel')];
-  if (l.phase === 'lobby' && l.host) return ['dim', me ? (me.ready ? '✔ ' + S('Ready - waiting for {0} to start the duel', l.host) : '🕓 ' + S('Lobby - waiting for {0} to start the duel', l.host))
+  const duel = l.mode === 'duel';
+  if (l.phase === 'lobby' && l.hosting) return ['dim', me && me.ready ? '✔ ' + (duel ? S('Ready - start the duel once everyone is') : S('Ready - start the battle once everyone is'))
+    : '🕓 ' + (duel ? S('Lobby - get ready, then start the duel') : S('Lobby - get ready, then start the battle'))];
+  if (l.phase === 'lobby' && l.host) return ['dim', me ? (me.ready ? '✔ ' + (duel ? S('Ready - waiting for {0} to start the duel', l.host) : S('Ready - waiting for {0} to start the battle', l.host))
+    : '🕓 ' + (duel ? S('Lobby - waiting for {0} to start the duel', l.host) : S('Lobby - waiting for {0} to start the battle', l.host)))
     : '🕓 ' + S('Lobby - the players get ready')];
   if (l.phase === 'lobby') return ['dim', me ? (me.ready ? '✔ ' + S('Ready - waiting for the DM to start the battle') : '🕓 ' + S('Lobby - waiting for the DM to start the battle'))
     : '🕓 ' + S('Lobby - the players get ready')];
-  if (l.phase === 'setup') return ['warn', '⏳ ' + S('The DM is preparing the battle')];
+  if (l.phase === 'setup') return ['warn', '⏳ ' + (l.host ? S('The battle is being prepared') : S('The DM is preparing the battle'))];
   if (l.phase === 'battle' && !r) return [me && me.fighting ? 'acc' : 'dim', me && me.fighting ? '🤺 ' + S('You fight as {0}', me.char || me.summary) + ' · ' + S('round {0}', l.round || 1)
     : '⚔ ' + S('Battle · round {0}', l.round || 1)];
   if (r) return [r.players_won && me ? 'good' : r.draw ? 'dim' : me ? 'bad' : 'acc', '🏁 ' + (me ? (r.players_won ? S('Victory!') : r.draw ? S('A draw.') : S('Defeat.')) + ' ' : '') + r.text];
@@ -228,9 +231,10 @@ function browseScreen(g) {
       g.lobbies.length > 1 ? h('input', { type: 'search', class: 'lfind', value: BG.lq, placeholder: S('Find a lobby'), 'aria-label': S('Find a lobby'),
         oninput: e => { BG.lq = e.target.value.trim(); sift(); } }) : null,
       modes.length > 1 ? segOf(BG.lf, [['', S('All')], ...modes.map(m => [m, modeIcon(m), modeWord(m)])], v => { BG.lf = v; sift(); }) : null),
-    h('div', { class: 'side r' }, g.can_create ? btn('🤺 ' + S('Open a duel'), () => duelForm(null), 'primary', S('Your own duel: players against each other. You set it up and start it.')) : null));
+    h('div', { class: 'side r' }, g.can_create ? btn('＋ ' + S('Open a lobby'), () => duelForm(null), 'primary',
+      S('Your own lobby: a duel (players against each other), a skirmish or an arena run against random opposition. You set it up and start it.')) : null));
   sift();
-  const empty = g.lobbies.length ? null : h('div', { class: 'empty dim' }, g.open ? (g.can_create ? S('No lobbies yet: open a duel of your own, or wait for the DM.') : S('No lobbies yet: the DM opens them.'))
+  const empty = g.lobbies.length ? null : h('div', { class: 'empty dim' }, g.open ? (g.can_create ? S('No lobbies yet: open one of your own, or wait for the DM.') : S('No lobbies yet: the DM opens them.'))
     : S("The DM hasn't opened Battlegrounds yet. This page follows along once a lobby is up."));
   return h('div', { class: 'bgscreen browse' }, top,
     mine ? h('div', { class: 'mineband' }, h('span', null, '★ ' + S('You fight in {0}.', mine.name)), h('span', { class: 'grow' }),
@@ -267,9 +271,19 @@ function rulesWords(g, l) {
   const kinds = { hero: S('Heroes'), pool: S("The DM's heroes"), monster: S('Monsters') };
   return [l.mode === 'arena' ? S('Start at level 1, up to {0}', st.max_level) : st.free_level ? S('Any level up to {0}', st.max_level) : S('Level {0}', st.level),
     st.ffa ? S('Free-for-all') : S('Teams'), l.mode !== 'duel' && st.difficulty ? S(st.difficulty[0].toUpperCase() + st.difficulty.slice(1)) : null,
+    l.mode !== 'duel' && st.enemy_style ? S('Opposition: {0}', S(st.enemy_style[0].toUpperCase() + st.enemy_style.slice(1))) : null,
+    l.mode !== 'duel' ? foesWords(st.enemy_filters) : null,
     l.mode !== 'arena' ? (st.kinds || []).map(k => kinds[k]).filter(Boolean).join(' · ') : null, map ? '🗺 ' + map : null,
     st.spectators === false ? S('No spectators') : null, l.mode === 'arena' ? S('{0} battles won', l.stage) : null,
     st.gold ? '🪙 ' + S('{0} to shop with each round', gp(st.gold * 100)) : null].filter(Boolean);
+}
+/** The opposition's monster filters in a line ('' for none): categories, books, places, sizes, the CR range. */
+function foesWords(f) {
+  f = f || {};
+  const bits = [...(f.types || []), ...(f.envs || []), ...(f.sizes || [])].map(x => S(x));
+  if ((f.books || []).length) bits.push(S('{0} books', f.books.length));
+  if (f.cr_min || f.cr_max) bits.push(S('CR {0}', (f.cr_min || '0') + '–' + (f.cr_max || '30')));
+  return bits.length ? '🐉 ' + bits.join(' · ') : '';
 }
 /** Top: left - back to the list, which lobby, how it stands; right - its rules, the log, the host's settings. */
 function roomTop(g, l) {
@@ -284,7 +298,8 @@ function roomTop(g, l) {
         S('The rules of this lobby') + '\n' + rules.join('\n')) : null,
       btn('📜' + (n ? ' ' + n : ''), () => { BG.logOpen = !BG.logOpen; store('bglog', BG.logOpen); bgRedo(); return null; }, 'sm' + (BG.logOpen ? ' on' : ''),
         BG.logOpen ? S('Hide the battle log') : S('Show the battle log')),
-      l.hosting && l.mode !== 'replay' && l.phase === 'lobby' ? btn('⚙', () => duelForm(l), 'sm', S('Duel settings') + '\n' + S('The name, level, teams, fighters and map of your duel')) : null));
+      l.hosting && l.mode !== 'replay' && l.phase === 'lobby' ? btn('⚙', () => duelForm(l), 'sm', l.mode === 'duel' ? S('Duel settings') + '\n' + S('The name, level, teams, fighters and map of your duel')
+        : S('Lobby settings') + '\n' + S('The name, level, difficulty, opposition and map of your lobby')) : null));
 }
 /** Left: the people - each team with its fighters (ready marks; the rest on hover), moving team, the spectators. */
 function rosterPane(g, l) {
@@ -318,7 +333,8 @@ function centerParts(g, l) {
   if (l.mode === 'replay') parts.push(h('div', { class: 'card' }, h('div', null, S('A recorded battle plays here, for everyone: the DM plays, pauses and steps it.')),
     l.replay ? h('div', { class: 'dim small' }, replayWords(l)) : null));
   else if (l.phase !== 'lobby') parts.push(h('div', { class: 'card' }, l.phase === 'setup' ? S('The DM is placing everyone and the opposition. The map shows once the DM confirms.')
-    : l.phase === 'battle' ? S('The battle is on.') : l.host ? S('The duel is over - {0} takes everyone back to the lobby.', l.host)
+    : l.phase === 'battle' ? S('The battle is on.') : l.host ? (l.mode === 'duel' ? S('The duel is over - {0} takes everyone back to the lobby.', l.host)
+      : S('The battle is over - {0} takes everyone back to the lobby.', l.host))
       : S('The battle is over - the lobby opens again when the DM finishes it.'),
     bgBoard() ? ' ' : null, bgBoard() ? btn('🗺 ' + S('Show the map'), () => { BG.shown = null; bgSwap(); render(); return null; }, 'sm') : null));
   else if (me && me.cart && BG.ctab === 'shop') parts.push(centerTabs(me), ...shopPane(g, l));   // (the lobby has a shop: settings.gold)
@@ -336,6 +352,7 @@ function centerTabs(me) {
 /** What a host's duel still waits for before it may start ('' = nothing). */
 function hostWhy(l) {
   const ms = l.members, teams = l.settings.ffa || new Set(ms.map(m => m.team)).size > 1;
+  if (l.mode !== 'duel') return !ms.length ? S('Waiting for a fighter.') : !ms.every(m => m.ready) ? S('Waiting for everyone to be ready.') : '';
   return ms.length < 2 ? S('Waiting for a second fighter.') : !ms.every(m => m.ready) ? S('Waiting for everyone to be ready.')
     : !teams ? S('Everyone is on the same team: someone has to pick another.') : '';
 }
@@ -345,24 +362,28 @@ function roomFoot(g, l) {
   const me = g.me, live = l.mode !== 'replay', lobby = l.phase === 'lobby' && live;
   const [cls, text] = phaseText(g, l), left = [], right = [];
   let why = '';
-  if (me && lobby) left.push(btn('⏏ ' + S('Leave'), () => ask(l.hosting ? S('Leave your duel? Your fighter is dropped; the next fighter runs it (nobody left: it closes).')
+  if (me && lobby) left.push(btn('⏏ ' + S('Leave'), () => ask(l.hosting ? (l.mode === 'duel' ? S('Leave your duel? Your fighter is dropped; the next fighter runs it (nobody left: it closes).')
+    : S('Leave your lobby? Your fighter is dropped; the next fighter runs it (nobody left: it closes).'))
     : S('Leave this lobby? Your fighter here is dropped.'), S('Leave'), () => { BG.view = 'browse'; store('bgview', 'browse'); return act('bg_leave', {}, true); }, 'danger'),
   'sm flat danger', S('Leave the lobby')));
   if (l.hosting && lobby) left.push(btn('✖ ' + S('Close'), () => ask(S('Close {0}? Everyone in it is sent back.', l.name), S('Close'), () => bgAct('bg_close', {}, true), 'danger'),
-    'sm flat', S('Close your duel: everyone in it is sent back')));
+    'sm flat', l.mode === 'duel' ? S('Close your duel: everyone in it is sent back') : S('Close your lobby: everyone in it is sent back')));
   if (me && lobby) {
     const has = me.char || me.kind === 'monster';
     const need = l.mode === 'arena' ? (me.pending ? S('Take your level-up first.') : !me.char ? S('Build your hero first.') : '') : !has ? S('Pick a fighter first.') : '';
     why = need;
     right.push(Object.assign(btn(me.ready ? '✔ ' + S('Ready') : S("I'm ready"), () => bgAct('bg_ready', { on: !me.ready }), me.ready ? 'on' : 'primary',
-      need || (me.ready ? S('Not ready after all? Click again.') : l.host ? S('Tell the others you are ready: the duel starts once everyone is')
+      need || (me.ready ? S('Not ready after all? Click again.') : l.host ? (l.mode === 'duel' ? S('Tell the others you are ready: the duel starts once everyone is')
+        : S('Tell the others you are ready: the battle starts once everyone is'))
         : S('Tell the DM you are ready; the DM starts the battle'))), { disabled: !!need }));
   }
   if (l.hosting && live) {
     if (l.phase === 'lobby') {
       const hw = hostWhy(l);
       if (!why) why = hw;
-      right.push(Object.assign(btn('▶ ' + S('Start the duel'), () => bgAct('bg_start', {}, false), 'primary', hw || S('Everyone is placed and initiative is rolled: the fight begins')), { disabled: !!hw }));
+      right.push(Object.assign(l.mode === 'duel' ? btn('▶ ' + S('Start the duel'), () => bgAct('bg_start', {}, false), 'primary', hw || S('Everyone is placed and initiative is rolled: the fight begins'))
+        : btn('▶ ' + S('Start the battle'), () => bgAct('bg_start', {}, false), 'primary', hw || S('Random opposition is made for your levels, everyone is placed and initiative is rolled: the fight begins')),
+      { disabled: !!hw }));
     } else if (l.phase === 'battle') right.push(btn('⏹ ' + S('End the fight'), () => endDuel(l), 'sm'));
     else if (l.phase === 'over') right.push(btn('✔ ' + S('Back to the lobby'), () => bgAct('bg_finish', {}, true), 'primary', S('Everyone rested, back in the lobby for another round')));
   }
@@ -1107,42 +1128,111 @@ async function bgLevelUp(l, cls, sub) {
   $('detail').querySelector('.box').classList.add('wide');
 }
 
-// ---------------------------------------------------------------- a duel of your own: open it, set it up, run it
-/** The duel form: a name and the room's rules - the hero level (or each picks theirs), teams or free-for-all, what
- *  the fighters may be, the map, whether others may watch. `l`: my duel, to change; null: a new one. */
-function duelForm(l) {
-  const g = bgState(), st = l ? l.settings : { level: 3, free_level: true, max_level: 20, ffa: true, kinds: ['hero', 'monster'], map: 'arena', spectators: true };
-  const v = { name: l ? l.name : '', level: st.level || 3, free_level: !!st.free_level, max_level: st.max_level || 20, ffa: !!st.ffa,
-    kinds: new Set((st.kinds || []).filter(k => k === 'hero' || k === 'monster')), map: st.map || 'arena', spectators: st.spectators !== false,
-    gold: Math.max(0, +st.gold || 0) };
+// ---------------------------------------------------------------- a lobby of your own: open it, set it up, run it
+const MODE_BLURB = {
+  duel: () => S('Players against each other. You run it: you start the fight once everyone is ready.'),
+  skirmish: () => S('One battle against random opposition made for your levels. You run it: you start the fight once everyone is ready.'),
+  arena: () => S('A run of battles: build a level 1 hero, each win is a level. The opposition is random, made for your levels.') };
+const DIFFS = () => [['easy', S('Easy')], ['normal', S('Normal')], ['hard', S('Hard')], ['deadly', S('Deadly')]];
+const STYLES = () => [['monsters', '🐉 ' + S('Monsters'), S('Monsters only')], ['heroes', '🛡 ' + S('Heroes'), S('A party of NPC heroes')],
+  ['mixed', '⚔ ' + S('Mixed'), S('A hero or two with monsters')]];
+/** The monster filters' choices (bg_filters: the lobby's books, or every ticked book for a new lobby), asked once. */
+async function bgFilters(l) {
+  const key = (l ? l.id : '') + ':' + wordsLang;
+  if (BG.filtKey === key && BG.filt) return BG.filt;
+  const r = await api('/api/act', l ? { action: 'bg_filters', room: l.id } : { action: 'bg_filters' });
+  BG.filt = r.data; BG.filtKey = key;
+  return BG.filt;
+}
+/** Several of many as chips (a Set of values): rows [[value, words]]. */
+function multiChips(set, rows, onchange) {
+  return h('div', { class: 'chips pick' + (rows.length > 16 ? ' many' : '') }, ...rows.map(([val, words]) =>
+    toggleChip(words, set.has(val), on => { if (on) set.add(val); else set.delete(val); if (onchange) onchange(); })));
+}
+/** The opposition's monster filters (advanced, folded): categories (types), books, places, sizes, a CR range. The
+ *  books the DM ticked are all there is; these narrow them further. */
+function enemyFilters(v, F) {
+  const lab = x => (F.labels && F.labels[x]) || x, crs = (F.crs || []).map(c => [c, c]);
+  const count = () => ['types', 'books', 'envs', 'sizes'].filter(k => v.f[k].size).length + (v.f.cr_min ? 1 : 0) + (v.f.cr_max ? 1 : 0);
+  const sum = h('span', { class: 'sup' });
+  const said = () => { const n = count(); sum.textContent = ' ' + (n ? S('{0} set', n) : S('any monster of the books in use')); };
+  said();
+  return h('details', { class: 'more', open: count() ? true : null },
+    h('summary', null, S('Advanced: which monsters'), sum),
+    h('div', { class: 'bgstack' },
+      h('div', { class: 'dim small' }, S('Only monsters of what you tick here (nothing ticked: any). The books the DM allows are always the limit.')),
+      sect(S('Categories'), multiChips(v.f.types, (F.types || []).map(x => [x, lab(x)]), said)),
+      sect(S('Books'), multiChips(v.f.books, (F.books || []).map(([id, name]) => [id, name]), said)),
+      sect(S('Places'), multiChips(v.f.envs, (F.envs || []).map(x => [x, lab(x)]), said)),
+      sect(S('Sizes'), multiChips(v.f.sizes, (F.sizes || []).map(x => [x, lab(x)]), said)),
+      sect(S('Challenge'), h('div', { class: 'drow' }, selectOf(v.f.cr_min, crs, x => { v.f.cr_min = x; said(); }, S('any')),
+        h('span', { class: 'dim' }, ' – '), selectOf(v.f.cr_max, crs, x => { v.f.cr_max = x; said(); }, S('any'))))));
+}
+/** The lobby form: a name and the room's rules - the mode (a new lobby), the hero level (or each picks theirs), teams
+ *  or free-for-all, what the fighters may be, a skirmish's / an arena's opposition (difficulty, style, which monsters),
+ *  the map, the shop, whether others may watch. `l`: my lobby, to change; null: a new one. */
+async function duelForm(l) {
+  const g = bgState();
+  let F;
+  try { F = await bgFilters(l); } catch (e) { if (e.message !== 'login') say(e.message, true); return null; }
+  const st = l ? l.settings : { level: 3, free_level: true, max_level: 20, ffa: true, kinds: ['hero', 'monster'], map: 'arena', spectators: true,
+    difficulty: 'normal', enemy_style: 'monsters', enemy_filters: {}, trophies: true };
+  const ef = st.enemy_filters || {};
+  const v = { mode: l ? l.mode : (BG.newMode || 'duel'), name: l ? l.name : '', level: st.level || 3, free_level: !!st.free_level, max_level: st.max_level || 20,
+    ffa: !!st.ffa, kinds: new Set((st.kinds || []).filter(k => k === 'hero' || k === 'monster')), map: st.map || 'arena', spectators: st.spectators !== false,
+    gold: Math.max(0, +st.gold || 0), difficulty: st.difficulty || 'normal', style: st.enemy_style || 'monsters', trophies: st.trophies !== false,
+    f: { types: new Set(ef.types || []), books: new Set(ef.books || []), envs: new Set(ef.envs || []), sizes: new Set(ef.sizes || []),
+      cr_min: ef.cr_min || '', cr_max: ef.cr_max || '' } };
+  if (!l && v.mode !== 'duel') v.ffa = false;
   const kind = (k, label) => toggleChip(label, v.kinds.has(k), on => { if (on) v.kinds.add(k); else v.kinds.delete(k); });
   const maps = ((g && g.maps) || []).map(m => [m.key, m.name, m.blurb]);
   if (!maps.some(([k]) => k === v.map)) maps.push([v.map, v.map]);
-  // the level: one for all (a stepper), or each their own up to a highest (the same stepper, read as the cap)
+  // the level: one for all (a stepper), or each their own up to a highest (the same stepper, read as the cap); an arena: the run's highest
   const lvl = h('span');
-  const drawLvl = () => lvl.replaceChildren(v.free_level ? stepper(v.max_level, 1, 20, x => { v.max_level = x; }, S('Highest level')) : stepper(v.level, 1, 20, x => { v.level = x; }, S('Hero level')),
-    h('span', { class: 'dim small' }, ' ' + (v.free_level ? S('the highest level anyone may pick') : S('everyone fights at this level'))));
-  drawLvl();
-  detail(() => h('div', { class: 'iform duelform bgstack' },
-    h('b', null, l ? '⚙ ' + S('Duel settings') : '🤺 ' + S('Open a duel')),
-    h('div', { class: 'dim small' }, S('Players against each other. You run it: you start the fight once everyone is ready.')),
+  const drawLvl = () => lvl.replaceChildren(v.free_level || v.mode === 'arena' ? stepper(v.max_level, 1, 20, x => { v.max_level = x; }, S('Highest level'))
+    : stepper(v.level, 1, 20, x => { v.level = x; }, S('Hero level')),
+  h('span', { class: 'dim small' }, ' ' + (v.mode === 'arena' ? S('the run ends at this level') : v.free_level ? S('the highest level anyone may pick') : S('everyone fights at this level'))));
+  const modes = (g && g.modes) || ['duel'];
+  const head = h('b'), blurb = h('div', { class: 'dim small' }), parts = h('div', { class: 'bgstack' });
+  const draw = () => {
+    const m = v.mode, fights = m !== 'duel';
+    head.textContent = l ? '⚙ ' + (m === 'duel' ? S('Duel settings') : S('Lobby settings')) : modeIcon(m) + ' ' + (m === 'duel' ? S('Open a duel') : S('Open a lobby'));
+    blurb.textContent = MODE_BLURB[m] ? MODE_BLURB[m]() : '';
+    drawLvl();
+    parts.replaceChildren(...[
+      m !== 'arena' ? sect(S('Sides'), segOf(v.ffa ? 'ffa' : 'teams', [['ffa', S('Free-for-all'), S('Free-for-all: everyone on a team of their own')], ['teams', S('Teams'), S('Everyone picks a team')]], x => { v.ffa = x === 'ffa'; })) : null,
+      m === 'arena' ? sect(S('Level'), lvl) : sect(S('Level'), h('div', { class: 'drow' }, segOf(v.free_level ? 'own' : 'same', [['own', S('Each their own'), S('Everyone picks their own level (up to the highest)')], ['same', S('Same for all')]],
+        x => { v.free_level = x === 'own'; drawLvl(); }), lvl)),
+      m !== 'arena' ? sect(S('Fight as'), h('div', { class: 'chips pick' }, kind('hero', '🛡 ' + S('A hero')), kind('monster', '🐉 ' + S('A monster')))) : null,
+      fights ? sect(S('Difficulty'), segOf(v.difficulty, DIFFS(), x => { v.difficulty = x; })) : null,
+      fights ? sect(S('Opposition'), segOf(v.style, STYLES(), x => { v.style = x; })) : null,
+      fights ? enemyFilters(v, F) : null,
+      m === 'arena' ? sect(S('Trophies'), h('div', { class: 'chips pick' }, toggleChip('🏆 ' + S('A trophy into the stash after each win'), v.trophies, x => { v.trophies = x; }))) : null,
+      sect(S('Map'), chipsOf(v.map, maps, x => { v.map = x; })),
+      sect(S('Shop'), h('div', { class: 'drow' }, h('input', { type: 'number', min: 0, max: 1000000, step: 10, value: v.gold, class: 'goldin', 'aria-label': S('Gold'),
+        oninput: e => { v.gold = Math.max(0, Math.min(1000000, parseInt(e.target.value, 10) || 0)); } }),
+        h('span', { class: 'dim small' }, S('gp for each fighter to shop with, every round (0: no shop)')))),
+      sect(S('Audience'), h('div', { class: 'chips pick' }, toggleChip('👁 ' + S('Others may watch'), v.spectators, x => { v.spectators = x; })))].filter(Boolean));
+    const ok = $('detail').querySelector('.row button');
+    if (ok && !l) ok.textContent = v.mode === 'duel' ? S('Open the duel') : S('Open the lobby');
+  };
+  detail(() => { draw(); return h('div', { class: 'iform duelform bgstack' }, head, blurb,
+    !l && modes.length > 1 ? sect(S('Mode'), segOf(v.mode, modes.map(m => [m, modeIcon(m) + ' ' + modeWord(m), MODE_BLURB[m] ? MODE_BLURB[m]() : '']),
+      x => { v.mode = BG.newMode = x; if (x !== 'duel') v.ffa = false; draw(); })) : null,
     field(S('Name'), h('input', { type: 'text', maxlength: 40, value: v.name, placeholder: S('a name the others see'), oninput: e => { v.name = e.target.value; } })),
-    sect(S('Sides'), segOf(v.ffa ? 'ffa' : 'teams', [['ffa', S('Free-for-all'), S('Free-for-all: everyone on a team of their own')], ['teams', S('Teams'), S('Everyone picks a team')]], x => { v.ffa = x === 'ffa'; })),
-    sect(S('Level'), h('div', { class: 'drow' }, segOf(v.free_level ? 'own' : 'same', [['own', S('Each their own'), S('Everyone picks their own level (up to the highest)')], ['same', S('Same for all')]],
-      x => { v.free_level = x === 'own'; drawLvl(); }), lvl)),
-    sect(S('Fight as'), h('div', { class: 'chips pick' }, kind('hero', '🛡 ' + S('A hero')), kind('monster', '🐉 ' + S('A monster')))),
-    sect(S('Map'), chipsOf(v.map, maps, x => { v.map = x; })),
-    sect(S('Shop'), h('div', { class: 'drow' }, h('input', { type: 'number', min: 0, max: 1000000, step: 10, value: v.gold, class: 'goldin', 'aria-label': S('Gold'),
-      oninput: e => { v.gold = Math.max(0, Math.min(1000000, parseInt(e.target.value, 10) || 0)); } }),
-      h('span', { class: 'dim small' }, S('gp for each fighter to shop with, every round (0: no shop)')))),
-    sect(S('Audience'), h('div', { class: 'chips pick' }, toggleChip('👁 ' + S('Others may watch'), v.spectators, x => { v.spectators = x; })))),
-  () => [[l ? S('Save') : S('Open the duel'), () => {
-    const settings = { level: v.free_level ? Math.min(v.level, v.max_level) : v.level, free_level: v.free_level, max_level: v.free_level ? v.max_level : Math.max(v.level, v.max_level), ffa: v.ffa, kinds: [...v.kinds], map: v.map,
-      spectators: v.spectators, gold: v.gold };
+    parts); },
+  () => [[l ? S('Save') : v.mode === 'duel' ? S('Open the duel') : S('Open the lobby'), () => {
+    const arena = v.mode === 'arena';
+    const settings = { level: arena ? 1 : v.free_level ? Math.min(v.level, v.max_level) : v.level, free_level: arena ? false : v.free_level,
+      max_level: arena || v.free_level ? v.max_level : Math.max(v.level, v.max_level), ffa: arena ? false : v.ffa, map: v.map, spectators: v.spectators, gold: v.gold };
+    if (!arena) settings.kinds = [...v.kinds];
+    if (v.mode !== 'duel') Object.assign(settings, { difficulty: v.difficulty, enemy_style: v.style, trophies: v.trophies,
+      enemy_filters: { types: [...v.f.types], books: [...v.f.books], envs: [...v.f.envs], sizes: [...v.f.sizes], cr_min: v.f.cr_min || null, cr_max: v.f.cr_max || null } });
     const name = v.name.trim();
-    if (!l) return act('bg_create', { mode: 'duel', name, settings });
+    if (!l) return act('bg_create', { mode: v.mode, name, settings });
     return act('bg_settings', { room: l.id, settings }, true).then(() => name && name !== l.name ? act('bg_rename', { room: l.id, name }, true) : null);
   }], [S('Cancel'), () => null, 'flat']]);
+  $('detail').querySelector('.box').classList.add('wide');
   return null;
 }
 const endDuel = l => ask(S('End the fight now? Whoever is left standing wins (several teams: nobody).'), S('End it'), () => bgAct('bg_end', {}, true), 'danger');
