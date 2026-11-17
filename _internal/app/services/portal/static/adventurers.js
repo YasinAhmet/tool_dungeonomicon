@@ -14,7 +14,7 @@
 'use strict';
 const AVN = { char: store('advchar') || null, tab: store('advtab') || 'map', fold: store('advfold') || {}, shop: null,
   shopData: null, shopFor: null, q: '', checked: false, newChar: false, form: {}, sheet: store('advsheet') !== false,
-  area: {}, pinned: null, route: null, encSeen: null };
+  area: {}, pinned: null, route: null, encSeen: null, side: 'buy' };
 const advOn = () => !!(ST && ST.edition === 'adventurers');
 const advS = () => (ST && ST.adv) || null;
 const ai = (name, cls = '') => h('span', { class: 'gi ' + cls, 'aria-hidden': 'true', style: `--gi:url(/advart/icons/${name}.svg)` });
@@ -30,7 +30,7 @@ const SHOP_ICON = { tavern: 'tavern-sign', general: 'shop', blacksmith: 'anvil',
   alchemist: 'round-bottom-flask', temple: 'holy-symbol', wizard: 'wizard-staff', trader: 'swap-bag' };
 const QUEST_ICON = { slay: 'crossed-swords', retrieve: 'gems', rescue: 'circle-cage', clear: 'ancient-ruins', hunt: 'wolf-head',
   investigate: 'magnifying-glass', scout: 'surrounded-eye', gather: 'pine-tree', deliver: 'envelope', escort: 'footsteps' };
-const SERVICE_ICON = { rest: 'night-sleep', heal: 'heart-plus', cure: 'health-increase', raise: 'falling-star' };
+const SERVICE_ICON = { rest: 'night-sleep', heal: 'heart-plus', cure: 'health-increase' };
 
 // ---------------------------------------------------------------- logging in
 /** No key yet (or a stale one): the Adventurers app asks for a nickname and password; another app's page says to ask
@@ -99,6 +99,9 @@ body.adv #who{display:none}body.adv.avnosheet #body{grid-template-columns:minmax
 @keyframes avpulse{0%{box-shadow:0 0 0 0 rgba(168,48,31,.75)}100%{box-shadow:0 0 0 14px rgba(168,48,31,0)}}.avcard.enc{animation:avpulse 1.3s 3}
 .avadd{border:1px dashed var(--edge);color:var(--dim);justify-content:center;cursor:pointer}.avadd:hover{color:var(--text);background:var(--paper-hover)}
 .avqty{display:inline-flex;align-items:center;gap:2px}.avqty b{min-width:26px;text-align:center}.avtile .own{position:absolute;top:1px;left:3px;font-size:10.5px;color:var(--good)}
+#avflee{position:absolute;top:8px;right:8px;z-index:5;display:flex;gap:4px;align-items:center;padding:3px 8px;
+  background:var(--raised);border:1px solid var(--edge);box-shadow:0 2px 8px #0006}#avflee.ready{border-color:var(--bad);color:var(--bad)}
+#avflee.ready .gi{color:var(--bad)}#avflee:not(.ready){opacity:.7}
 #avpanes{position:relative;flex:1;min-height:0}.avpane{position:absolute;inset:0;overflow:auto;display:none;background:var(--panel)}
 .avpane.on{display:block}#avp-map{overflow:hidden;background:#5b4632}#avcv{display:block;width:100%;height:100%;touch-action:none;cursor:grab}
 #avcv.drag{cursor:grabbing}#avcv.step{cursor:pointer}
@@ -196,10 +199,31 @@ function setTab(t) {
   renderAdv();
 }
 
+/** In a group's fight: the Flee button over the battle map - ready on your turn within 10 ft of the map's edge. */
+const FLEE_EDGE = 2;
+function advFleeButton() {
+  const b = ST.battle, wrap = $('mapwrap');
+  let el = $('avflee');
+  const me = b && b.bg && b.phase === 'battle' && b.fighter != null ? (b.combatants || []).find(x => x.id === b.fighter) : null;
+  if (!me || !wrap) { if (el) el.remove(); return; }
+  const m = b.map || {}, p = me.pos, span = me.span || 1;
+  const near = !!p && (p[0] < FLEE_EDGE || p[1] < FLEE_EDGE || p[0] + span > (m.fw || m.w) - FLEE_EDGE || p[1] + span > m.h - FLEE_EDGE);
+  const ready = near && b.my_turn;
+  const words = ready ? S('Flee: leave the fight off the edge of the map (you share no XP from it)')
+    : near ? S('Flee: on your turn') : S('Flee: get within 10 ft of the map\'s edge first');
+  if (!el) {
+    el = h('button', { id: 'avflee', onclick: go(() => { const g = advGroup(); return g ? act('adv_escape', { group: g.id }) : null; }) }, ai('run'), h('span', null, S('Flee')));
+    wrap.append(el);
+  }
+  el.classList.toggle('ready', ready);
+  el.title = words;
+  el.setAttribute('aria-label', words);
+}
 /** The Adventure, or the fight: while the group fights the map pane shows the fight (world.js mapMode). */
 function renderAdv() {
   if (!advOn()) return;
   advBuild();
+  advFleeButton();
   document.body.classList.add('adv');
   document.body.classList.toggle('avnosheet', !AVN.sheet);
   const on = mapMode() === 'adv';
@@ -244,9 +268,9 @@ function renderAdv() {
   }
   if (AVN.tab === 'town') {
     advShopFetch(c, town);
-    part($('avp-town'), JSON.stringify([town, g && [g.id, g.lead, g.pack], c, AVN.shop, AVN.shopData, L]), () => advTownPage(A, town, g, c));
+    part($('avp-town'), JSON.stringify([town, g && [g.id, g.lead, g.pack], c, AVN.shop, AVN.shopData, AVN.side, L]), () => advTownPage(A, town, g, c));
     const st = $('avstock'), d = AVN.shopData;
-    if (st && d) part(st, JSON.stringify([AVN.q, d.key, d.purse, d.stock.length, d.own, L]), () => advStock(d, town.shops.find(s => s.key === d.key) || {}, c));
+    if (st && d && AVN.side === 'buy') part(st, JSON.stringify([AVN.q, d.key, d.purse, d.stock.length, d.own, L]), () => advStock(d, town.shops.find(s => s.key === d.key) || {}, c));
   }
   if (AVN.tab === 'group') part($('avp-group'), JSON.stringify([g, A.all_groups, A.online, A.invites, A.asked, c,
     ST.character && ST.character.name === (c && c.name) ? (ST.character.inventory || []).map(e => [e.name, e.qty]) : null, L]), () => advGroupPage(A, g, c));
@@ -357,7 +381,8 @@ function advNext(A, g, c) {
     go: () => { const t = here.shops.find(x => x.kind === 'tavern'); if (t) { AVN.shop = t.key; AVN.shopData = null; } setTab('town'); } };
   if (hurt.length && !here) {
     const s = M.settlements.reduce((b, x) => !b || Math.hypot(x.x - g.x, x.y - g.y) < Math.hypot(b.x - g.x, b.y - g.y) ? x : b, null);
-    return { icon: 'night-sleep', text: S('Wounded: head back to {0} ({1}) to rest', s.name, advDir(me, [s.x, s.y])), go: () => advGoTo([s.x, s.y]) };
+    return { icon: 'night-sleep', text: g.camp ? S('Wounded: make camp here ({0}% ambush at night) or head back to {1} ({2})', g.camp.long, s.name, advDir(me, [s.x, s.y]))
+      : S('Wounded: head back to {0} ({1}) to rest', s.name, advDir(me, [s.x, s.y])), go: () => advGoTo([s.x, s.y]) };
   }
   const q = g.quests.find(x => x.stage === 'active');
   if (q) {
@@ -454,7 +479,7 @@ function advSidecards(A, g, c) {
           () => act('adv_flee', { group: g.id })))
         : h('div', { class: 'small dim' }, S('The leader decides: fight or flee.'))], 'enc'));
   }
-  out.push(card('group', 'three-friends', g.name, g.members.map(m => advMember(m, false)), '',
+  out.push(card('group', 'three-friends', g.name, [...g.members.map(m => advMember(m, false)), advCamp(g)], '',
     h('span', { class: 'dim small', tip: S('Purse') }, g.purse)));
   const qs = g.quests;
   out.push(card('quests', 'scroll-unfurled', S('Quests') + ` ${qs.length}/${A.max_quests}`, qs.length ? qs.map(q => h('div', { class: 'avrow',
@@ -463,6 +488,16 @@ function advSidecards(A, g, c) {
   h('span', { class: 'small ' + (q.stage === 'ready' ? 'good' : 'dim') }, q.stage === 'ready' ? '✔' : q.progress)))
     : [h('div', { class: 'small dim' }, S('No quests: a tavern has a board.'))]));
   return out;
+}
+/** Making camp out in the wilds (the leader): a short rest or a night's sleep, each with its chance of an ambush. */
+function advCamp(g) {
+  if (!g.camp || !g.lead) return null;
+  const rest = (kind, icon, words, more) => aib(icon, `${words} - ${S('{0}% chance of an ambush', g.camp[kind])}\n${more}`,
+    e => avConfirm(e, `${words}?\n${S('{0}% chance something finds the camp.', g.camp[kind])}`, () => act('adv_camp', { group: g.id, kind })),
+    g.camp[kind] >= 50 ? 'bad' : g.camp[kind] >= 25 ? 'warn' : 'good');
+  return h('div', { class: 'avrow', style: 'margin-top:4px' }, h('span', { class: 'small dim grow' }, S('Make camp')),
+    rest('short', 'campfire', S('Short rest'), S('An hour: features come back, hit dice are spent on wounds.')),
+    rest('long', 'night-sleep', S('Long rest'), S('A night: everything back. Ambushed in the night, only an hour of it.')));
 }
 function advMember(m, actions, g) {
   const pct = m.max_hp ? m.hp / m.max_hp : 0;
@@ -504,6 +539,36 @@ function advTownPage(A, town, g, c) {
   if (sh.kind === 'tavern') out.push(advBoard(town, g));
   const d = AVN.shopData;
   if (!d || d.key !== sh.key) { out.push(h('div', { class: 'avsec dim small' }, S('Loading…'))); return out; }
+  const loot = g ? g.pack.filter(e => !e.quest && e.worth) : [];
+  const sellable = (d.own || []).length + loot.length;
+  if (sh.kind !== 'tavern') {
+    const side = (k, icon, words, n) => h('button', { class: 'ib' + (AVN.side === k ? ' on' : ''), onclick: () => { AVN.side = k; AVN.q = ''; renderAdv(); },
+      tip: words }, ai(icon), h('span', { class: 'small' }, words), n != null ? h('span', { class: 'ct' }, n) : null);
+    out.push(h('div', { class: 'avsec avrow' }, side('buy', 'shopping-cart', S('Buy')),
+      side('sell', 'sell-card', S('Sell'), sellable || null),
+      h('span', { class: 'grow' }), h('span', { class: 'small dim', tip: S("{0}'s purse", c.name) }, ai('two-coins'), ' ' + avMoney(d.purse)),
+      g ? h('span', { class: 'small dim', tip: S("The group's purse") }, ai('flying-flag'), ' ' + g.purse) : null));
+  }
+  if (AVN.side === 'sell' && sh.kind !== 'tavern') {
+    if (!sellable) { out.push(advEmpty('sell-card', S('Nothing to sell: loot from fights and the things {0} carries can be sold here.', c.name))); return out; }
+    const withWorth = loot.filter(e => e.cp != null);
+    if (withWorth.length) {
+      const total = withWorth.reduce((a, e) => a + e.worth * e.qty, 0);
+      out.push(h('div', { class: 'avsec avrow' }, h('span', { class: 'grow small' }, S('Loot in the pack: {0} pieces, {1}', withWorth.reduce((a, e) => a + e.qty, 0), avMoney(total))),
+        aib('trade', S('Sell all the loot (into the group\'s purse)'), e => avConfirm(e, S('Sell all the loot for {0}?', avMoney(total)),
+          () => aact('adv_sell_loot', { shop: sh.key })), 'good')));
+    }
+    if ((d.own || []).length) out.push(h('div', { class: 'avsec' }, h('h3', null, ai('knapsack'), S("{0}'s pack", c.name)), h('div', { class: 'avtiles' },
+      ...d.own.map(e => h('div', { class: 'avtile', tip: `${e.name} ×${e.qty}` + (e.equipped ? '\n' + S('in use') : '') + `\n${S('{0} each', avMoney(e.cp))}\n${S('Click: sell')}`,
+        onclick: ev => avSell(ev, sh, { name: e.name, qty: e.qty, worth: e.cp }, false), style: e.equipped ? 'opacity:.6' : '' },
+      e.icon ? gi(e.icon) : ai('knapsack'), e.qty > 1 ? h('span', { class: 'q' }, e.qty) : null,
+      h('span', null, short(e.name)), h('span', { class: 'good' }, avMoney(e.cp)))))));
+    if (loot.length) out.push(h('div', { class: 'avsec' }, h('h3', null, ai('flying-flag'), S("The group's pack (coins to the group's purse)")), h('div', { class: 'avtiles' },
+      ...loot.map(e => h('div', { class: 'avtile', tip: `${e.name} ×${e.qty}\n${S('{0} each', avMoney(e.worth))}\n${S('Click: sell')}`,
+        onclick: ev => avSell(ev, sh, e) }, e.icon ? gi(e.icon) : ai('knapsack'), e.qty > 1 ? h('span', { class: 'q' }, e.qty) : null,
+      h('span', null, short(e.name)), h('span', { class: 'good' }, avMoney(e.worth)))))));
+    return out;
+  }
   if (d.services.length) out.push(h('div', { class: 'avsec' }, h('h3', null, ai('hand'), S('Services')), h('div', { class: 'avtiles' },
     ...d.services.map(s => h('div', { class: 'avtile', onclick: e => avConfirm(e, `${S(s.label)}: ${avMoney(s.cp)}?\n${S(s.text)}`,
       () => aact('adv_service', { shop: sh.key, what: s.key })), tip: `${S(s.label)} - ${avMoney(s.cp)}\n${S(s.text)}` },
@@ -518,25 +583,11 @@ function advTownPage(A, town, g, c) {
           aib('upgrade', S('Learn {0}', s.name), e => avLearn(e, sh, s, c))))), true))));
   }
   if (d.stock.length) {                                  // the find line stays put while the goods under it change (advStock)
-    out.push(h('div', { class: 'avsec' }, h('h3', null, ai('shopping-cart'), h('span', { class: 'grow' }, S('For sale')),
-      h('span', { class: 'small dim', tip: S("{0}'s purse", c.name) }, ai('two-coins'), ' ' + avMoney(d.purse))),
+    out.push(h('div', { class: 'avsec' }, h('h3', null, ai('shopping-cart'), h('span', { class: 'grow' }, S('For sale'))),
     h('input', { id: 'avfind', placeholder: S('Find…'), value: AVN.q, style: 'width:100%;margin-bottom:4px' + (AVN.q ? '' : ';display:none'),
       oninput: e => { AVN.q = e.target.value; renderAdv(); } }),
     h('div', { id: 'avfindhint', class: 'small dim', style: 'margin-bottom:4px' + (AVN.q ? ';display:none' : '') }, S('Type to find (Esc clears)')),
     h('div', { id: 'avstock' })));
-  }
-  if ((d.own || []).length) {
-    out.push(h('div', { class: 'avsec' }, h('h3', null, ai('sell-card'), S("Sell from {0}'s pack", c.name)), h('div', { class: 'avtiles' },
-      ...d.own.map(e => h('div', { class: 'avtile', tip: `${e.name} ×${e.qty}` + (e.equipped ? '\n' + S('in use') : '') + `\n${S('{0} each', avMoney(e.cp))}\n${S('Click: sell')}`,
-        onclick: ev => avSell(ev, sh, { name: e.name, qty: e.qty, worth: e.cp }, false), style: e.equipped ? 'opacity:.6' : '' },
-      e.icon ? gi(e.icon) : ai('knapsack'), e.qty > 1 ? h('span', { class: 'q' }, e.qty) : null,
-      h('span', null, short(e.name)), h('span', { class: 'good' }, avMoney(e.cp)))))));
-  }
-  if (g && sh.kind !== 'tavern' && g.pack.some(e => !e.quest && e.worth)) {
-    out.push(h('div', { class: 'avsec' }, h('h3', null, ai('sell-card'), S('Sell from the pack')), h('div', { class: 'avtiles' },
-      ...g.pack.filter(e => !e.quest && e.worth).map(e => h('div', { class: 'avtile', tip: `${e.name} ×${e.qty}\n${S('{0} each', avMoney(e.worth))}\n${S('Click: sell')}`,
-        onclick: ev => avSell(ev, sh, e) }, e.icon ? gi(e.icon) : ai('knapsack'), e.qty > 1 ? h('span', { class: 'q' }, e.qty) : null,
-      h('span', null, short(e.name)), h('span', { class: 'good' }, avMoney(e.worth)))))));
   }
   return out;
 }

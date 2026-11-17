@@ -4039,7 +4039,7 @@ function spellsTab(c) {
     h('span', { class: 'small dim info', tip: how, 'aria-label': how, onclick: () => detail(how) }, 'ⓘ'), h('span', { class: 'grow' }),
     bg ? ibtn('spell-book', `${S('Change spells')}\n${S('Between battles you may change your spells at will')}`,
       () => bg.phase === 'lobby' ? bgSpellPicker(bg) : say(S('Spells are changed in the lobby, between battles.'), true), bg.phase === 'lobby' ? 'acc' : 'off')
-    : c.prepares ? needs('rest', ibtn('spell-book', `${S('Change spells')}\n${S('Pick your prepared spells again, without a rest.')}`, () => changeSpells(), 'acc')) : null,
+    : c.prepares ? needs(ST.edition === 'adventurers' ? 'adv_prepare' : 'rest', ibtn('spell-book', `${S('Change spells')}\n${S('Pick your prepared spells again, without a rest.')}`, () => changeSpells(), 'acc')) : null,
     slot));   // the how-to on hover (hold)
   const pipsOf = s => [...Array.from({ length: s.total }, (_, i) => h('button', { class: 'pip' + (i < s.left ? ' on' : ''),   // a full pip spends a slot, an empty one gets it back
       onclick: go(() => act('slot', { key: s.key, use: i < s.left }, true)), 'aria-label': i < s.left ? S('Spend a slot') : S('Get a slot back'),
