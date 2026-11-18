@@ -13,7 +13,7 @@
 // While the group fights the map pane shows the fight (world.js mapMode), with the usual action bar.
 'use strict';
 const AVN = { char: store('advchar') || null, tab: store('advtab') || 'map', fold: store('advfold') || {}, shop: null,
-  shopData: null, shopFor: null, q: '', checked: false, newChar: false, form: {}, sheet: store('advsheet') !== false,
+  shopData: null, shopFor: null, q: '', checked: false, newChar: false, form: {}, sheet: store('advsheet') === true,   // (the sheet: on the rail's person, until opened; the top bar has HP, gold, XP)
   area: {}, pinned: null, route: null, encSeen: null, side: 'buy' };
 const advOn = () => !!(ST && ST.edition === 'adventurers');
 const advS = () => (ST && ST.adv) || null;
@@ -94,8 +94,8 @@ body.adv #who{display:none}body.adv.avnosheet #body{grid-template-columns:minmax
 .avxp{width:70px;height:6px;background:var(--paper-down);display:inline-block;vertical-align:middle}.avxp i{display:block;height:100%;background:var(--gold)}
 #avnext{display:flex;gap:6px;align-items:center;padding:3px 8px;font-size:13px;background:var(--paper);border:1px solid var(--edge);
   color:var(--accent-dim);cursor:pointer}#avnext:hover{background:var(--paper-hover)}#avnext.idle{cursor:default;color:var(--dim)}#avnext .k{margin-left:auto;font-size:11px;color:var(--dim)}
-.hov{visibility:hidden}.avlist>div:hover .hov,.avlist>div:focus-within .hov,.avq:hover .hov,.avq:focus-within .hov{visibility:visible}
-@media (pointer:coarse){.hov{visibility:visible}}
+.hov{opacity:0;transition:opacity .12s}.avlist>div:hover .hov,.avlist>div:focus-within .hov,.avq:hover .hov,.avq:focus-within .hov{opacity:1}
+@media (pointer:coarse){.hov{opacity:1}}   /* (faded, not hidden: a click before the hover still lands) */
 @keyframes avpulse{0%{box-shadow:0 0 0 0 rgba(168,48,31,.75)}100%{box-shadow:0 0 0 14px rgba(168,48,31,0)}}.avcard.enc{animation:avpulse 1.3s 3}
 .avadd{border:1px dashed var(--edge);color:var(--dim);justify-content:center;cursor:pointer}.avadd:hover{color:var(--text);background:var(--paper-hover)}
 .avqty{display:inline-flex;align-items:center;gap:2px}.avqty b{min-width:26px;text-align:center}.avtile .own{position:absolute;top:1px;left:3px;font-size:10.5px;color:var(--good)}
@@ -128,7 +128,10 @@ body.adv #who{display:none}body.adv.avnosheet #body{grid-template-columns:minmax
 .advlogin{display:flex;flex-direction:column;gap:8px;max-width:340px;margin:auto}.advlogin input{font-size:16px}.advlogin .row{display:flex;gap:8px;justify-content:center}
 .advlogin .avlogo{width:96px;margin:0 auto}
 @media (max-width:900px){#advbody{grid-template-columns:1fr;grid-template-rows:minmax(0,1fr) auto}#avrail{flex-direction:row;justify-content:space-around;grid-row:2}
-  #avmain{grid-row:1}#avrail .grow{display:none}#avside{top:auto;left:8px;width:auto;max-height:46%}}`));
+  #avmain{grid-row:1}#avrail .grow{display:none}#avside{top:auto;left:8px;width:auto;max-height:46%}}
+@media (min-width:901px){body.avnosheet #avmain{display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-rows:auto minmax(0,1fr)}
+  body.avnosheet #avpanes{grid-column:1/-1}body.avnosheet #avnext{min-width:0}
+  body.avnosheet #avnext>span:not(.k):not(.gi){overflow:hidden;text-overflow:ellipsis;white-space:nowrap}}`));   /* no sheet beside it: the top bar and the next step in one row */
 }
 function advBuild() {
   if ($('advbody')) return;
@@ -162,7 +165,7 @@ function part(el, key, fn) {
   }
   el._k = key;
   const sc = el.scrollTop;
-  el.replaceChildren(...[fn()].flat().filter(Boolean));
+  morphKids(el, [fn()].flat().filter(Boolean));          // (portal.js: what stayed the same is left as it is)
   el.scrollTop = sc;
 }
 function avPop(e, ...kids) {
@@ -225,14 +228,19 @@ function renderAdv() {
   advBuild();
   advFleeButton();
   document.body.classList.add('adv');
-  document.body.classList.toggle('avnosheet', !AVN.sheet);
   const on = mapMode() === 'adv';
+  document.body.classList.toggle('avnosheet', !AVN.sheet && on);     // (a fight: the sheet beside it, the rail is away)
   document.body.classList.toggle('advmode', on);
   if ($('mapmode')) $('mapmode').classList.add('hide');
   const A = advS();
   if (!A) return;
   if (!A.account) { advLogout(); return; }
   if (!AVN.char || !A.characters.some(c => c.name === AVN.char)) AVN.char = A.characters.length ? A.characters[0].name : null;
+  // the sheet, the header and the actions follow the character picked here (a new one, one kept from last time): once
+  if (AVN.char && ST.me.active !== AVN.char && ST.me.characters.includes(AVN.char) && AVN.synced !== AVN.char) {
+    AVN.synced = AVN.char;
+    act('choose', { character: AVN.char }, true);
+  }
   const g = advGroup(), c = advMe(), town = advTown();
   const L = wordsLang || '';
   const enc = g && g.encounter ? JSON.stringify([g.encounter.label, g.encounter.text, g.x, g.y]) : null;
@@ -543,8 +551,8 @@ function advTownPage(A, town, g, c) {
     h('div', { class: 'avshops' }, ...town.shops.map(s => h('button', { class: 'ib' + (s.key === sh.key ? ' on' : ''),
       onclick: () => { AVN.shop = s.key; AVN.shopData = null; AVN.q = ''; renderAdv(); },
       tip: `${s.name}\n${s.owner.name}, ${S(s.owner.title)} (${s.owner.race})\n${s.owner.trait}` }, ai(SHOP_ICON[s.kind] || 'shop'), h('span', { class: 'small' }, S(s.label))))),
-    h('div', { class: 'avkeeper' }, h('b', null, sh.name), h('span', { class: 'dim' }, ` · ${sh.owner.name}, ${S(sh.owner.title)}: `),
-      h('i', null, '"' + sh.owner.greeting + '"')))];
+    h('div', { class: 'avkeeper', tip: `${sh.owner.name}, ${S(sh.owner.title)}\n"${sh.owner.greeting}"` }, h('b', null, sh.name),     // (who keeps it, on hover)
+      h('span', { class: 'dim' }, ` · ${sh.owner.name}`)))];
   if (sh.kind === 'tavern') out.push(advBoard(town, g));
   const d = AVN.shopData;
   if (!d || d.key !== sh.key) { out.push(h('div', { class: 'avsec dim small' }, S('Loading…'))); return out; }
@@ -592,10 +600,9 @@ function advTownPage(A, town, g, c) {
           aib('upgrade', S('Learn {0}', s.name), e => avLearn(e, sh, s, c))))), true))));
   }
   if (d.stock.length) {                                  // the find line stays put while the goods under it change (advStock)
-    out.push(h('div', { class: 'avsec' }, h('h3', null, ai('shopping-cart'), h('span', { class: 'grow' }, S('For sale'))),
+    out.push(h('div', { class: 'avsec' }, h('h3', { tip: S('Type to find (Esc clears)') }, ai('shopping-cart'), h('span', { class: 'grow' }, S('For sale')), ai('magnifying-glass', 'dim')),
     h('input', { id: 'avfind', placeholder: S('Find…'), value: AVN.q, style: 'width:100%;margin-bottom:4px' + (AVN.q ? '' : ';display:none'),
       oninput: e => { AVN.q = e.target.value; renderAdv(); } }),
-    h('div', { id: 'avfindhint', class: 'small dim', style: 'margin-bottom:4px' + (AVN.q ? ';display:none' : '') }, S('Type to find (Esc clears)')),
     h('div', { id: 'avstock' })));
   }
   return out;
@@ -624,10 +631,9 @@ function advFind(q) {
   renderAdv();
 }
 function advFold(key, title, count, body, open) {
-  const d = h('details', { class: 'avfold' }, h('summary', null, title, h('span', { class: 'dim' }, ` (${count})`)), body);
-  d.open = AVN.fold[key] === undefined ? !!open : AVN.fold[key] === true;
-  d.addEventListener('toggle', () => { AVN.fold[key] = d.open; store('advfold', AVN.fold); });
-  return d;
+  return h('details', { class: 'avfold', open: AVN.fold[key] === undefined ? !!open : AVN.fold[key] === true,
+    ontoggle: e => { AVN.fold[key] = e.currentTarget.open; store('advfold', AVN.fold); } },
+  h('summary', null, title, h('span', { class: 'dim' }, ` (${count})`)), body);
 }
 async function avLearn(e, sh, s, c) {
   const at = { currentTarget: e.currentTarget };
@@ -678,10 +684,9 @@ function advEmpty(icon, text) { return h('div', { class: 'avempty' }, ai(icon), 
 // ---------------------------------------------------------------- Quests and the log
 function advQuestCard(q, g, how = {}) {
   const here = g && g.here.settlement;
-  return h('div', { class: 'avq' },
+  return h('div', { class: 'avq', tip: `${q.title}\n${q.text}` },          // (the story on hover; the card: what, how much, who)
     h('div', { class: 'avrow' }, ai(QUEST_ICON[q.kind] || 'scroll-unfurled'), h('span', { class: 't grow' }, q.title),
       h('span', { class: 'small dim', tip: S('Danger: tier {0}', q.tier) }, '☠'.repeat(q.tier))),
-    h('p', { class: 'small' }, q.text),
     h('div', { class: 'avrow small' },
       h('span', { class: 'avstat', tip: S('The reward') }, ai('two-coins'), avMoney(q.reward.cp)), h('span', { class: 'avstat' }, ai('upgrade'), `${q.reward.xp} XP`),
       q.progress ? h('span', { class: q.stage === 'ready' ? 'good' : 'dim' }, q.progress) : h('span', { class: 'dim' }, S('asks') + ' ' + q.giver),
@@ -703,22 +708,30 @@ function advQuestPage(A, g) {
 function advLogPage(g) {
   if (!g) return advEmpty('open-book', S("Your group's story is written here."));
   return h('div', { class: 'avsec' }, h('h3', null, ai('open-book'), g.name), h('div', { class: 'avlist' },
-    ...g.log.slice().reverse().map(l => h('div', null, h('span', { class: 'dim small', style: 'min-width:44px' },
-      new Date(l.t * 1000).toTimeString().slice(0, 5)), h('span', { class: 'grow small' }, l.text)))));
+    ...g.log.slice().reverse().map(l => h('div', { title: new Date(l.t * 1000).toLocaleString() },    // (when: on hover)
+      h('span', { class: 'grow small' }, l.text)))));
 }
 
 // ---------------------------------------------------------------- Group
 function advGroupPage(A, g, c) {
   if (!c) return advEmpty('three-friends', S('Make a character first.'));
   if (!g) return advNoGroup(A, c);
-  const out = [h('div', { class: 'avsec' }, h('h3', null, ai('flying-flag'), h('span', { class: 'grow' }, g.name),
-    h('span', { class: 'small dim' }, S('Leader: {0}', g.leader || '—') + (g.admin ? ' · ' + S('you are admin') : ''))),
+  const who = S('Leader: {0}', g.leader || '—') + (g.admin ? ' · ' + S('you are admin') : '');      // (on hover: the name stays one line)
+  const out = [h('div', { class: 'avsec' }, h('h3', { tip: `${g.name}\n${who}` }, ai('flying-flag'), h('span', { class: 'grow' }, g.name),
+    g.admin ? h('span', { class: 'dim', 'aria-label': who }, ai('key')) : null),
   h('div', { class: 'avlist' }, ...g.members.map(m => h('div', null, advMember(m, true, g)))))];
-  const gp = h('input', { type: 'number', min: 1, value: 1, style: 'width:70px', 'aria-label': S('Gold') });
-  out.push(h('div', { class: 'avsec' }, h('h3', null, ai('two-coins'), h('span', { class: 'grow' }, S('Purse: {0}', g.purse))),
-    h('div', { class: 'avrow' }, gp, aib('hand', S("Take that much gold into {0}'s purse", c.name), () => aact('adv_take_gold', { gp: gp.value })),
-      aib('swap-bag', S("Put that much of {0}'s gold in the purse", c.name), () => aact('adv_put_gold', { gp: gp.value })),
-      g.lead ? aib('trade', S('Share the purse evenly among the members'), e => avConfirm(e, S('Share the purse evenly?'), () => act('adv_share', { group: g.id }))) : null)));
+  // the purse: its sum and three buttons; how much gold: asked in a small box by the button
+  const gold = (e, action, words) => {
+    const gp = h('input', { type: 'number', min: 1, value: 1, style: 'width:70px', 'aria-label': S('Gold'),
+      onkeydown: k => { if (k.key === 'Enter') { pop.remove(); aact(action, { gp: gp.value }); } } });
+    const pop = avPop(e, h('div', null, words), h('div', { class: 'avrow', style: 'margin-top:6px' }, gp,
+      aib('check-mark', S('Yes'), () => { pop.remove(); return aact(action, { gp: gp.value }); }, 'good'), aib('cancel', S('No'), () => pop.remove())));
+    gp.focus(); gp.select();
+  };
+  const takeWords = S("Take that much gold into {0}'s purse", c.name), putWords = S("Put that much of {0}'s gold in the purse", c.name);
+  out.push(h('div', { class: 'avsec' }, h('h3', null, ai('two-coins'), h('span', { class: 'grow' }, S('Purse: {0}', g.purse)),
+    aib('hand', takeWords, e => gold(e, 'adv_take_gold', takeWords)), aib('swap-bag', putWords, e => gold(e, 'adv_put_gold', putWords)),
+    g.lead ? aib('trade', S('Share the purse evenly among the members'), e => avConfirm(e, S('Share the purse evenly?'), () => act('adv_share', { group: g.id }))) : null)));
   const mine = ST.character && ST.character.name === c.name ? (ST.character.inventory || []) : [];
   out.push(h('div', { class: 'avsec' }, h('h3', null, ai('knapsack'), h('span', { class: 'grow' }, S("The group's pack"))),
     g.pack.length ? h('div', { class: 'avtiles' }, ...g.pack.map(e => h('div', { class: 'avtile',
@@ -818,7 +831,15 @@ function advNewChar(A) {
           onpick: v => { b.background = v; redo(); } }),
         h('label', { class: 'ddbtn namef' }, h('span', { class: 'ddl' }, S('Name')),
           h('input', { value: b.name || '', maxlength: 40, placeholder: S('Random'), oninput: e => { b.name = e.target.value; } }))),
-      pointBuy(b.scores, budget, costs, () => {}, o.abilities),
+      // the scores: a line saying them (a fair spread to start), the point buy under it when opened
+      (() => {
+        const names = Object.fromEntries(o.abilities || ABILS.map(a => [a, a.toUpperCase()]));
+        const sum = h('span', { class: 'dim small' });
+        const said = () => { sum.textContent = ' ' + ABILS.map(a => `${String(names[a] || a).slice(0, 3)} ${b.scores[a]}`).join(' · '); };
+        said();
+        return h('details', { class: 'more avpb', open: AVN.pbOpen ? true : null, ontoggle: e => { AVN.pbOpen = e.currentTarget.open; } },
+          h('summary', null, S('Ability scores'), sum), pointBuy(b.scores, budget, costs, said, o.abilities));
+      })(),
       h('div', { class: 'drow go' }, h('span', { class: 'dim small' }, ok ? S("Level 1: the class's kit and the background's purse; you start in a village. Spells next.")
         : S('Pick a class and a race.')), h('span', { class: 'grow' }),
       Object.assign(h('button', { class: 'primary', onclick: go(async () => {

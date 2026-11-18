@@ -837,20 +837,27 @@ function shopPane(g, l) {
   bgShop(l);
   for (const x of c.items) { const k = counts.get(x.name); if (k) k.n++; else counts.set(x.name, { ...x, n: 1 }); }
   const cart = h('div', { class: 'card cart' },
-    h('div', { class: 'drow' }, h('span', { class: 'title' }, '🛒 ' + S('Cart')), h('span', { class: 'grow' }),
+    h('div', { class: 'drow' }, h('span', { class: 'title', tip: S('What you buy is yours for the coming battle: worn, wielded and attuned when it begins.') },
+      '🛒 ' + S('Cart')), h('span', { class: 'grow' }),
       h('span', { class: 'small', tip: S('Your gold for each round: {0}', gp(c.gold * 100)) }, S('Spent {0}', gp(c.spent)) + ' · ', h('b', null, S('{0} left', gp(c.left)))),
       c.items.length ? btn(S('Empty'), () => bgAct('bg_cart_remove', { all: 1 }), 'sm flat', S('Take everything out of your cart')) : null),
     c.items.length ? h('div', { class: 'srows' }, ...[...counts.values()].map(x => shopRow(x, -1, me, ((BG.shopBy || {})[x.name] || {}).kind)))
-      : h('div', { class: 'dim small' }, S('Nothing in your cart yet.')),
-    h('div', { class: 'dim small' }, S('What you buy is yours for the coming battle: worn, wielded and attuned when it begins.')));
+      : h('div', { class: 'dim small' }, S('Nothing in your cart yet.')));
   const o = BG.shopKey === l.id + ':' + wordsLang ? BG.shop : null;
-  const narrow = fn => v => { fn(v); BG.sshut.clear(); shopList(l); };     // (a new filter: every category with a match opens again)
+  // the rarity and kind chips under a Filter fold, its summary saying what is picked
+  const sum = h('span', { class: 'dim small' });
+  const said = () => { sum.textContent = ' ' + [BG.sr ? Object.fromEntries((o && o.rarities) || [])[BG.sr] || BG.sr : S('Any rarity'),
+    BG.sg ? ((o && o.groups || []).find(x => x.key === BG.sg) || {}).label || BG.sg : S('Every kind')].join(' · '); };
+  said();
+  const narrow = fn => v => { fn(v); BG.sshut.clear(); said(); shopList(l); };     // (a new filter: every category with a match opens again)
+  const chips = [o && o.rarities && o.rarities.length > 1 ? chipsOf(BG.sr, o.rarities, narrow(v => { BG.sr = v; }), S('Any rarity')) : null,
+    o && o.groups && o.groups.length > 1 ? chipsOf(BG.sg, o.groups.map(x => [x.key, x.label]), narrow(v => { BG.sg = v; }), S('Every kind')) : null].filter(Boolean);
   const find = h('div', { class: 'schips' }, h('div', { class: 'drow sfind' },
     h('input', { type: 'search', value: BG.sq, placeholder: S('Find an item'), 'aria-label': S('Find an item'),
       oninput: e => narrow(v => { BG.sq = v; })(e.target.value) }),
     toggleChip(S('Only what I can afford'), BG.cheap, on => { BG.cheap = on; store('bgcheap', on); shopList(l); })),
-    o && o.rarities && o.rarities.length > 1 ? chipsOf(BG.sr, o.rarities, narrow(v => { BG.sr = v; }), S('Any rarity')) : null,
-    o && o.groups && o.groups.length > 1 ? chipsOf(BG.sg, o.groups.map(x => [x.key, x.label]), narrow(v => { BG.sg = v; }), S('Every kind')) : null);
+    chips.length ? h('details', { class: 'more sfilt', open: BG.sfilt || BG.sr || BG.sg ? true : null, ontoggle: e => { BG.sfilt = e.currentTarget.open; } },
+      h('summary', null, S('Filter'), sum), ...chips) : null);
   return [cart, find, h('div', { class: 'slist' }, ...shopRows(l, me))];
 }
 /** Words typed or a chip picked: then every category with a match is open (unless folded meanwhile). */
@@ -1209,12 +1216,22 @@ async function duelForm(l) {
       fights ? sect(S('Difficulty'), segOf(v.difficulty, DIFFS(), x => { v.difficulty = x; })) : null,
       fights ? sect(S('Opposition'), segOf(v.style, STYLES(), x => { v.style = x; })) : null,
       fights ? enemyFilters(v, F) : null,
-      m === 'arena' ? sect(S('Trophies'), h('div', { class: 'chips pick' }, toggleChip('🏆 ' + S('A trophy into the stash after each win'), v.trophies, x => { v.trophies = x; }))) : null,
-      sect(S('Map'), chipsOf(v.map, maps, x => { v.map = x; })),
-      sect(S('Shop'), h('div', { class: 'drow' }, h('input', { type: 'number', min: 0, max: 1000000, step: 10, value: v.gold, class: 'goldin', 'aria-label': S('Gold'),
-        oninput: e => { v.gold = Math.max(0, Math.min(1000000, parseInt(e.target.value, 10) || 0)); } }),
-        h('span', { class: 'dim small' }, S('gp for each fighter to shop with, every round (0: no shop)')))),
-      sect(S('Audience'), h('div', { class: 'chips pick' }, toggleChip('👁 ' + S('Others may watch'), v.spectators, x => { v.spectators = x; })))].filter(Boolean));
+      // the rest (the map, the shop, the audience, an arena's trophies) under More options, its summary saying how they stand
+      (() => {
+        const sum = h('span', { class: 'dim small' });
+        const said = () => { sum.textContent = ' ' + [(maps.find(x => x[0] === v.map) || [, v.map])[1], v.gold ? S('{0} gp to shop', v.gold) : S('no shop'),
+          v.spectators ? '👁' : null, m === 'arena' && v.trophies ? '🏆' : null].filter(Boolean).join(' · '); };
+        said();
+        return h('details', { class: 'more', open: v.more ? true : null, ontoggle: e => { v.more = e.currentTarget.open; } },
+          h('summary', null, S('More options'), sum),
+          h('div', { class: 'bgstack' },
+            m === 'arena' ? sect(S('Trophies'), h('div', { class: 'chips pick' }, toggleChip('🏆 ' + S('A trophy into the stash after each win'), v.trophies, x => { v.trophies = x; said(); }))) : null,
+            sect(S('Map'), chipsOf(v.map, maps, x => { v.map = x; said(); })),
+            sect(S('Shop'), h('div', { class: 'drow' }, h('input', { type: 'number', min: 0, max: 1000000, step: 10, value: v.gold, class: 'goldin', 'aria-label': S('Gold'),
+              oninput: e => { v.gold = Math.max(0, Math.min(1000000, parseInt(e.target.value, 10) || 0)); said(); } }),
+              h('span', { class: 'dim small' }, S('gp for each fighter to shop with, every round (0: no shop)')))),
+            sect(S('Audience'), h('div', { class: 'chips pick' }, toggleChip('👁 ' + S('Others may watch'), v.spectators, x => { v.spectators = x; said(); })))));
+      })()].filter(Boolean));
     const ok = $('detail').querySelector('.row button');
     if (ok && !l) ok.textContent = v.mode === 'duel' ? S('Open the duel') : S('Open the lobby');
   };

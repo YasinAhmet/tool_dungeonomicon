@@ -36,6 +36,15 @@ function setLook(name) {
 }
 const lookNow = () => document.documentElement.dataset.look;
 setLook();
+/** The look is the player's, kept by the table (api.set_look): the tunnel's address - and so this browser's storage -
+ *  changes from session to session. Their pick on the server wins; a pick only this browser kept goes up once. */
+let lookSent = false, lookAt = 0;
+function lookFrom(me) {
+  const mine = store('look');
+  if (Date.now() - lookAt < 5000) return;             // (just picked here: a state already on its way says the old one)
+  if (LOOKS.includes(me.look)) { if (me.look !== mine) setLook(me.look); }
+  else if (LOOKS.includes(mine) && !lookSent && typeof act === 'function') { lookSent = true; setTimeout(() => act('look', { look: mine }, true)); }
+}
 /** A badge's colour (made for the dark map) as ink on the parchment. */
 const inkc = c => !c || c.startsWith('var(') ? c : `color-mix(in srgb, ${c} 42%, var(--text))`;
 /** Words on the map with no plate behind them (a token's name, a zone's): in the map's pen, with its halo (drawBattle sets both). */
@@ -43,7 +52,8 @@ function mapText(g, text, x, y) {
   g.save(); g.lineJoin = 'round'; g.lineWidth = 2.5; g.strokeStyle = LOOK.halo; g.strokeText(text, x, y); g.fillStyle = LOOK.pen; g.fillText(text, x, y); g.restore();
 }
 const FOLDS = new Set(store('folds') || []);   // the categories folded away on this device: spell levels, feature sources, action groups
-const folded = k => FOLDS.has(k);
+const SHUT = new Set(['skills:other', 'profs', 'world:packs', 'world:log', 'notes:details', 'tn:new']);   // folded until opened: the details, not the everyday
+const folded = k => FOLDS.has(k) !== SHUT.has(k);
 const flipFold = (k, redraw) => { FOLDS.has(k) ? FOLDS.delete(k) : FOLDS.add(k); store('folds', [...FOLDS]); redraw(); };
 // a category's heading that folds it away: ▾/▸, its name and how many it holds (Enter or Space from the keyboard too)
 const foldHead = (k, text, n, redraw) => h('span', { class: 'fold', role: 'button', tabindex: 0, 'aria-expanded': String(!folded(k)),
@@ -52,7 +62,7 @@ const foldHead = (k, text, n, redraw) => h('span', { class: 'fold', role: 'butto
 const UI = { tab: store('tab') || 'overview', view: 'map', adv: '', target: null, inspect: null, cam: null, camFit: null, feed: store('feed') || 'all',
   open: new Set(), slot: '', amount: '', drag: null, ghost: null, move: null, tile: 32, local: [], editNote: store('editnote'),
   noteDraft: store('notedraft') || '', editDraft: store('editdraft') || {}, spellsOpen: !!store('spells'), mute: !!store('mute'),
-  notify: !!store('notify'), seenFeed: null, coin: 'gp', coinAmt: '', quick: {},
+  notify: !!store('notify'), seenFeed: null, moreActs: !!store('moreacts'), coin: 'gp', coinAmt: '', quick: {},
   tnEdit: store('tnedit'), tnDraft: store('tndraft') || { title: '', text: '' }, tnOpen: null };
 let ST = null;
 let WORDS = {}, wordsLang = null;                     // the page's words in the player's language (sent on demand)
@@ -71,16 +81,26 @@ function S(key, ...args) {
   return t;
 }
 const PLAIN = /^(BUTTON|A|INPUT|SELECT|TEXTAREA|LABEL|OPTION|SUMMARY)$/;
+/** h(): an element. Its handlers live on it (el._on, behind one listener per event) and so do its tip texts (el._tip,
+ *  el._more): morph() can then bring a drawn element up to date with a newly built one, handlers and all. */
+const addListener = EventTarget.prototype.addEventListener;
+function on(el, type, fn) {
+  const all = el._on || (el._on = {});
+  if (!all[type]) { all[type] = []; addListener.call(el, type, function (e) { for (const f of el._on[type] || []) f.call(this, e); }); }
+  all[type].push(fn);
+}
+function rawListener(...a) { this._raw = 1; return addListener.apply(this, a); }   // (one added later, not through h: never morphed)
 function h(tag, props, ...kids) {
   const el = document.createElement(tag);
-  if (props && props.tip) hold(el, () => detail(props.tip, props.more));    // touch: hold for the text (and its actions)
+  el._hx = 1;
+  if (props && props.tip) { el._tip = props.tip; el._more = props.more; hold(el, () => detail(el._tip, el._more)); }   // touch: hold for the text (and its actions)
   for (const [k, v] of Object.entries(props || {})) {
     if (v == null || v === false || k === 'more') continue;
-    if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
+    if (k.startsWith('on')) on(el, k.slice(2), v);
     else if (k === 'class') el.className = v;
     else if (k === 'tip') {
-      el.addEventListener('mouseover', e => { if (lastPointer === 'mouse' && e.target.closest('[data-tip]') === el) tip({ clientX: e.clientX, clientY: e.clientY, currentTarget: el }, v); });
-      el.addEventListener('mouseleave', () => tip());
+      on(el, 'mouseover', e => { const t = e.currentTarget; if (lastPointer === 'mouse' && e.target.closest('[data-tip]') === t) tip({ clientX: e.clientX, clientY: e.clientY, currentTarget: t }, t._tip); });
+      on(el, 'mouseleave', () => tip());
       el.setAttribute('data-tip', '');
     }
     else if (k === 'value') el.value = v;
@@ -89,11 +109,45 @@ function h(tag, props, ...kids) {
   if (props && props.onclick && !PLAIN.test(el.tagName)) {       // clickable, not a button: reachable by keyboard too
     if (!el.hasAttribute('role')) el.setAttribute('role', 'button');
     el.tabIndex = 0;
-    el.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target === el && !e.ctrlKey) { e.preventDefault(); el.click(); } });
+    on(el, 'keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target === e.currentTarget && !e.ctrlKey) { e.preventDefault(); e.currentTarget.click(); } });
   }
+  el._sig = Object.keys(el._on || {}).join();
+  el.addEventListener = rawListener;
   for (const c of kids.flat()) if (c != null && c !== false) el.append(c.nodeType ? c : document.createTextNode(String(c)));
   return el;
 }
+/** Bring `parent`'s children up to date with `kids` (newly built) in place: what is the same stays as it is - no
+ *  blink of its pictures, its hover and scroll kept - and only what changed is written. Fields, canvases and anything
+ *  wired outside h() are swapped whole (their handlers may hold the new element); a typed-in field keeps its text. */
+const NOMORPH = /^(INPUT|TEXTAREA|SELECT|CANVAS|VIDEO|AUDIO|IFRAME)$/;
+const RAWPROPS = ['onclick', 'onchange', 'oninput', 'onkeydown', 'onload', 'onerror', 'onpointerdown', 'onscroll', 'onwheel'];
+function sameKind(a, b) {
+  if (a.nodeType !== b.nodeType) return false;
+  if (a.nodeType !== 1) return a.nodeType === 3 || a.nodeType === 8;
+  return a.tagName === b.tagName && a._hx && b._hx && !a._raw && !b._raw && a._sig === b._sig && !NOMORPH.test(a.tagName)
+    && a.id === b.id && !RAWPROPS.some(p => a[p] || b[p]);
+}
+function morph(old, nu) {
+  if (old.nodeType !== 1) { if (old.nodeValue !== nu.nodeValue) old.nodeValue = nu.nodeValue; return; }
+  for (const a of [...old.attributes]) if (!nu.hasAttribute(a.name)) old.removeAttribute(a.name);
+  for (const a of nu.attributes) if (old.getAttribute(a.name) !== a.value) old.setAttribute(a.name, a.value);
+  for (const k of Object.keys(nu)) if (k[0] === '_') old[k] = nu[k];
+  if (old._k !== undefined) return;                       // (a part with its own redraw - adventurers.js part(): its children are its own)
+  morphKids(old, [...nu.childNodes]);
+}
+function morphKids(parent, kids) {
+  kids = kids.filter(k => k != null).map(k => k.nodeType ? k : document.createTextNode(String(k)));
+  const olds = [...parent.childNodes];
+  kids.forEach((k, i) => {
+    const o = olds[i] && olds[i].parentNode === parent ? olds[i] : null;    // (one a handler moved meanwhile: not ours to swap)
+    if (o && sameKind(o, k)) { morph(o, k); return; }
+    if (o && o._typed && k.tagName === o.tagName && k.type === o.type && k.placeholder === o.placeholder) k.value = o.value;
+    if (o) parent.replaceChild(k, o); else parent.insertBefore(k, parent.childNodes[i] || null);
+  });
+  for (let i = kids.length; i < olds.length; i++) if (olds[i].parentNode === parent) olds[i].remove();
+  while (parent.childNodes.length > kids.length) parent.lastChild.remove();
+}
+document.addEventListener('input', e => { e.target._typed = 1; }, true);
 /** A button that does something slow: disabled (with a small spinner) until the promise its handler returns settles. */
 function busyWhile(b, p) {
   if (!b || !p || typeof p.then !== 'function') return p;
@@ -221,7 +275,9 @@ function offline() {
 }
 /** The status pill in the header (live / reconnecting / closed), the closed-table banner, buttons off while away. */
 function conn() {
-  const el = $('conn'), s = NET.state;
+  const el = $('conn'), s = NET.state, k = `${s}|${NET.busy > 0}|${wordsLang}`;
+  if (el._k === k) return;                                 // (as it was: left alone, its spinner keeps turning)
+  el._k = k;
   el.className = `conn ${s}${NET.busy > 0 && s === 'live' ? ' busy' : ''}`;
   el.replaceChildren(h('i'), h('span', null, { live: NET.busy > 0 ? S('Working…') : S('Live'), retry: S('Reconnecting…'), closed: S('Table closed') }[s]));
   el.title = { live: S('Connected to the table'), retry: S("Can't reach the table right now - reconnecting…"), closed: S('The table is closed - ask your DM for a new link.') }[s];
@@ -295,7 +351,8 @@ let PARTV = {};
 /** Merge a state (asked for or pushed) into the page's; false: it said "unchanged" of something the page lacks (a
  *  pushed state names each unchanged unit with its fingerprint: one the page holds differently counts as lacking). */
 function merge(st, full) {
-  const shown = ST && ST.battle;                       // the battle the page showed (on the Battlegrounds face a lobby's: battlegrounds.js)
+  if (st.me) lookFrom(st.me);
+  const shown = ST && ST.battle;                      // the battle the page showed (on the Battlegrounds face a lobby's: battlegrounds.js)
   if (typeof bgUnswap === 'function') bgUnswap();      // (the campaign's battle back in its place while the parts merge)
   const was = ST, prints = st.prints || {}, sameIn = st.same || [], v = st.v || 0;
   const same = Array.isArray(sameIn) ? new Set(sameIn) : new Set(Object.keys(sameIn));
@@ -596,7 +653,7 @@ function menu(rebuild) {
     h('label', { class: 'f' }, S('Language')), lang,
     ...qualityPickers(),
     h('label', { class: 'f' }, S('Look')),
-    h('select', { 'aria-label': S('Look'), onchange: e => { setLook(e.target.value); menu(true); render(); } },
+    h('select', { 'aria-label': S('Look'), onchange: e => { lookAt = Date.now(); setLook(e.target.value); menu(true); render(); act('look', { look: e.target.value }, true); } },
       ...[['parchment', 'Bright parchment'], ['dim', 'Dim parchment'], ['dark', 'Dark parchment']].map(([v, w]) =>
         h('option', { value: v, selected: v === lookNow() }, S(w)))),
     h('button', { class: UI.mute ? '' : 'on', 'aria-pressed': String(!UI.mute), onclick: toggleMute }, (UI.mute ? '🔇 ' : '🔊 ') + S('Sound when it is your turn')),
@@ -616,12 +673,12 @@ function qualityPickers() {
   const out = [];
   for (const [kind, words] of [['audio', S('Sound quality')], ['visual', S('Picture quality')]]) {
     const q = quality(kind), top = TIERS.indexOf(q.max);
-    out.push(h('label', { class: 'f' }, words), h('select', { 'aria-label': words, onchange: e => setQuality(kind, e.target.value) },
+    out.push(h('label', { class: 'f', tip: S('A slow connection: pick Potato. Only your own token shows its picture.') }, words),   // (the advice: on hover)
+      h('select', { 'aria-label': words, onchange: e => setQuality(kind, e.target.value) },
       ...TIERS.map((t, i) => h('option', { value: t, selected: t === q.want, disabled: i > top },
         S(TIER_WORDS[t]) + (i > top ? ' ' + S("(over the DM's limit)") : '')))));
     if (q.use !== q.want) out.push(h('div', { class: 'small dim' }, S('The DM limits you to {0}.', S(TIER_WORDS[q.use]))));
   }
-  out.push(h('div', { class: 'small dim' }, S('A slow connection: pick Potato. Only your own token shows its picture.')));
   return out;
 }
 async function setQuality(kind, tier) {
@@ -634,7 +691,7 @@ document.addEventListener('click', e => { if (!$('menupop').classList.contains('
 function keepFocus(root, fn) {
   const a = document.activeElement;
   if (a && root.contains(a) && (a.tagName === 'INPUT' || a.tagName === 'TEXTAREA' || a.tagName === 'SELECT')) {
-    if (!a._kept) { a._kept = true; a.addEventListener('blur', () => { a._kept = false; keepFocus(root, fn); }, { once: true }); }
+    if (!a._kept) { a._kept = true; a.addEventListener('blur', () => { a._kept = false; setTimeout(() => keepFocus(root, fn)); }, { once: true }); }   // (after: a blur can come mid-redraw)
     return;
   }
   const scroll = root.scrollTop;
@@ -758,16 +815,16 @@ function musicPop(rebuild) {
   }
   if (pop.contains(document.activeElement) && document.activeElement.type === 'range') return;    // not under a dragged slider
   const ok = canMusic(), out = h('output', {}, MUSIC.vol + '%'), wait = MUSIC.on && !MUSIC.live;
-  pop.replaceChildren(
+  pop.replaceChildren(...[                              // (no null: replaceChildren would print it)
     h('button', { class: !MUSIC.on ? 'primary' : wait ? 'on wait' : 'on', disabled: !ok, 'aria-pressed': String(MUSIC.on),
-      'aria-busy': String(wait), title: wait ? S('Stop listening') : '', onclick: musicToggle },
+      'aria-busy': String(wait), title: wait ? S('Stop listening') : ok ? S('What the DM plays for the table. The volume is only yours: the others hear it as loud as they like.') : '',
+      onclick: musicToggle },                           // (what it is: on the button's hover)
       !MUSIC.on ? '▶ ' + S("Listen to the table's music") : wait ? S('Connecting…') : '⏸ ' + S('Stop listening')),
     h('label', { class: 'vol' }, h('span', { 'aria-hidden': 'true' }, '🔈'),
       h('input', { type: 'range', min: 0, max: 100, step: 1, value: MUSIC.vol, 'aria-label': S('Music volume'),
         oninput: e => { MUSIC.vol = +e.target.value; out.textContent = MUSIC.vol + '%'; musicVolume(); musicIcon(); store('musicvol', MUSIC.vol); } }),
       out),
-    h('div', { class: 'small dim' }, ok ? S('What the DM plays for the table. The volume is only yours: the others hear it as loud as they like.')
-      : S("This browser can't play the table's music. Try Chrome, Edge or Firefox.")));
+    ok ? null : h('div', { class: 'small dim' }, S("This browser can't play the table's music. Try Chrome, Edge or Firefox."))].filter(Boolean));
 }
 $('music').onclick = e => { e.stopPropagation(); musicPop(); };
 $('musicpop').onclick = e => e.stopPropagation();     // its button is rebuilt under the click: not a click outside
@@ -2146,12 +2203,16 @@ function renderMap() {
   $('target').replaceChildren(...targetInfo(b));
   renderKnown(b);
   const tap = touch(), walk = walker ? 'armed' : canMove(b) && mover() ? 'pick' : '';
-  $('hint').textContent = UI.aim ? (tap ? S('Tap to aim, tap the same place again (or Confirm) to use it. Tap ✕ to cancel.') : S('Right-click or Esc cancels.')) :
-    (walk === 'armed' ? (tap ? S('Tap a tile to see the way, tap again (or Move here) to go.') : S('Right-click a tile to walk there.')) + ' · '
-      : walk === 'pick' ? (tap ? S('Tap your token to pick it, then tap where it should go.') : S('Click your token to pick it, then right-click where it should go.')) + ' · ' : '') +
+  // the map's how-to: an ⓘ in its corner (the words on hover, a tap opens them); aiming, a line of its own there
+  const aimHow = UI.aim ? (tap ? S('Tap to aim, tap the same place again (or Confirm) to use it. Tap ✕ to cancel.') : S('Right-click or Esc cancels.')) : '';
+  const hint = $('hint');
+  hint._help = aimHow || (walk === 'armed' ? (tap ? S('Tap a tile to see the way, tap again (or Move here) to go.') : S('Right-click a tile to walk there.')) + '\n'
+      : walk === 'pick' ? (tap ? S('Tap your token to pick it, then tap where it should go.') : S('Click your token to pick it, then right-click where it should go.')) + '\n' : '') +
     (tap ? S('Drag to move around, pinch to zoom, tap a creature to target it. Hold a button for its details.') : S('Drag to move around, scroll to zoom, click a creature to target it.')) +
-    (!tap && !UI.aim && b.actions ? ' · ' + S('Keys 1–9: actions, Ctrl+Space: end turn') : '');
-  $('hint').title = $('hint').textContent;          // (one line on short screens: all of it on hover)
+    (!tap && b.actions ? '\n' + S('Keys 1–9: actions, Ctrl+Space: end turn') : '');
+  const pill = tap && aimHow;                           // (with a mouse the aim bar's ✕ says it; its keys are on the ⓘ)
+  hint.classList.toggle('pill', !!pill);
+  if (hint.textContent !== (pill || 'ⓘ')) hint.textContent = pill || 'ⓘ';
   renderOrder(b);
 }
 /** A creature's hit points as this player may see them: exact (their own side's, or shown by the DM), else in words
@@ -2177,14 +2238,16 @@ function renderOrder(b) {
   $('inittitle').textContent = S('Initiative');
   const side = c => c.mine ? 'us' : c.ally ? 'ally' : 'foe';
   const dot = { us: 'var(--good)', ally: 'var(--warn)', foe: 'var(--bad)' };
-  $('order').replaceChildren(...b.combatants.map(c => h('div', {
+  morphKids($('order'), b.combatants.map(c => h('div', {
     class: `oc ${side(c)}` + (c.turn ? ' turn' : '') + (c.mine ? ' mine' : '') + (c.id === UI.target ? ' tgt' : '') + (c.out ? ' out' : ''),
     tip: () => tokenCard(c),                            // the map's hover card
     onclick: () => { if (c.pos) centerOn(c); tapToken(c); } },
     h('i', null, c.init ?? '–'), h('span', { class: 'dot', style: `background:${dot[side(c)]}` }),
     h('span', { class: 'n' }, (c.turn ? '▶ ' : '') + c.name),
     ...(c.badges || []).slice(0, 3).map(k => h('span', { class: 'bdg', style: `color:${inkc((badgeLook()[k] || [])[1] || 'var(--warn)')}` }, gi(k))),
-    h('span', { class: 'hpw' }, hpWords(c)))));
+    // its health: the numbers when they are shown to me, else a mark in its colour (the word: on the hover card)
+    c.hp != null ? h('span', { class: 'hpw' }, hpWords(c)) : c.health ? h('span', { class: 'hpw pip', 'aria-label': c.health,
+      style: `background:${c.health_color || 'var(--dim)'}` }) : null)));
   const cur = b.combatants.findIndex(c => c.turn);
   if (cur >= 0 && b.status === 'active' && $('order').children[cur]) $('order').children[cur].scrollIntoView({ block: 'nearest', inline: 'nearest' });
   const btn = $('endturn');
@@ -3005,7 +3068,8 @@ function effectLines(c, look) {
 function renderKnown(b) {
   const box = $('known');
   if (!box) return;
-  const id = UI.inspect || UI.target, c = id != null ? b.combatants.find(x => x.id === id) : null;
+  // a target's card: on touch screens (with a mouse its hover card says the same, and the bar names the target)
+  const id = UI.inspect || (touch() ? UI.target : null), c = id != null ? b.combatants.find(x => x.id === id) : null;
   box.classList.toggle('hide', !c);
   if (!c) { box.replaceChildren(); return; }
   const seen = c.seen || {}, look = badgeLook(), me = meInBattle() || b.combatants.find(x => x.mine && x.pos);
@@ -3014,7 +3078,7 @@ function renderKnown(b) {
   const side = c.mine ? S('You') : c.kind === 'pc' || c.ally ? S('Ally') : S('Enemy');
   const pct = c.hp != null && c.max_hp ? Math.max(0, Math.min(100, 100 * c.hp / c.max_hp)) : null;
   const line = (label, items) => items && items.length ? h('div', { class: 'small' }, h('span', { class: 'dim' }, label + ' '), items.join(', ')) : null;
-  box.replaceChildren(
+  morphKids(box, [                                       // (a missing line is left out, never written "null")
     h('div', { class: 'kn-head' }, cv,
       h('div', { class: 'grow' }, h('b', null, c.name), h('div', { class: 'dim small' }, [side, seen.what, c.sub].filter(Boolean).join(' · '))),
       h('button', { class: 'sm flat', onclick: () => { UI.target = null; UI.inspect = null; renderMap(); }, 'aria-label': S('Close') }, '✕')),
@@ -3024,7 +3088,7 @@ function renderKnown(b) {
     line(S('Wears:'), seen.wears), line(S('Holds:'), seen.holds),
     c.conc ? h('div', { class: 'small' }, S('Concentrating on {0}', c.conc.spell)) : null,
     ...effectLines(c, look),
-    me && me.pos && c.pos && me.id !== c.id ? h('div', { class: 'dim small' }, S('{0} ft away', Geo.dist(me, c))) : null);
+    me && me.pos && c.pos && me.id !== c.id ? h('div', { class: 'dim small' }, S('{0} ft away', Geo.dist(me, c))) : null]);
 }
 function tapToken(c) {
   if (isMover(c)) {                                          // my token: picked (its details shown) or let go
@@ -3648,6 +3712,8 @@ function drawAimArea(g, b, T, a, me) {
 }
 
 // ---------------------------------------------------------------- the action bar: what my character can do now
+const RARE_ACTS = new Set(['standard:help', 'standard:search', 'standard:ready', 'standard:use_object', 'standard:grapple', 'standard:shove',
+  'standard:stabilize', 'standard:drop_prone', 'standard:douse', 'throw']);
 const COST_CLASS = { action: 'action', attack: 'action', multi: 'action', bonus: 'bonus', reaction: 'reaction', free: 'free', long: 'action', on_hit: 'spell' };
 const MODES = ['ask', 'always', 'never'];
 function renderActions() {
@@ -3659,7 +3725,8 @@ function renderActions() {
     tip: `${label}: ${n > 0 ? S('ready') : S('used this turn')}\n${about}` },
     h('i'), h('span', { class: 'lbl' }, label));             // (on phones the dot alone: its word on hold)
   const left = Math.min(t.move, a.speed);                   // (speed 0 mid-turn: nothing left)
-  const econ = [res('action', t.action, S('Action'), S('One a turn: attack, cast a spell, Dash, Dodge, Disengage, Help, Hide... The green-edged buttons use it.')),
+  // (out of combat none of it is counted: not shown)
+  const econ = !a.in_combat ? [] : [res('action', t.action, S('Action'), S('One a turn: attack, cast a spell, Dash, Dodge, Disengage, Help, Hide... The green-edged buttons use it.')),
     res('bonus', t.bonus, S('Bonus action'), S('One a turn, only for things that say so: an off-hand attack, some spells and class features. The yellow-edged buttons use it.')),
     res('reaction', t.reaction, S('Reaction'), S("One a round, even on others' turns: an opportunity attack, Shield... It comes back at the start of your turn.")),
     h('span', { class: 'res move' + (left > 0 ? '' : ' used'), tip: `${S('Movement')}: ${S('{0} of {1} ft left', left, a.speed)}\n${S('On your turn, click a square on the map to walk there; you can split it up between actions. Dash doubles it.')}` },
@@ -3678,8 +3745,8 @@ function renderActions() {
   if (a.concentrating) econ.push(h('span', { class: 'warn', tip: S('Concentrating on {0}', a.concentrating) + '\n' + S('Taking damage asks for a Constitution save to keep it; casting another concentration spell ends it.') },
     '◎ ' + a.concentrating));
   if (!a.economy && a.in_combat) econ.push(h('span', { class: 'dim small' }, S('(the DM turned the action economy off)')));
-  econ.push(h('span', { class: 'grow' }), advSeg(), !a.in_combat ? h('b', { class: 'good' }, S('Out of combat: any action, any time'))
-    : a.is_turn ? h('b', { class: 'good' }, S('Your turn')) : h('span', { class: 'dim small' }, S('Not your turn: reactions only')));
+  econ.push(h('span', { class: 'grow' }), advSeg(), !a.in_combat ? h('b', { class: 'good', tip: S('Out of combat: any action, any time') }, S('Out of combat'))
+    : a.is_turn ? null : h('span', { class: 'dim small', tip: S('Not your turn: reactions only') }, S('Reactions only')));   // (my turn: the header says it)
   kids.push(h('div', { class: 'econ' }, ...econ));
   const COST_WORD = { action: S('Action'), attack: S('Action'), multi: S('Action'), bonus: S('Bonus action'), reaction: S('Reaction'),
     free: S('Free'), legendary: S('Legendary action'), long: S('Takes longer than a turn'), on_hit: S('On hit') };
@@ -3689,7 +3756,10 @@ function renderActions() {
     iconOr(it.icon, 30, it.label, 'sync'),   // (no lazy: the bar is redrawn often - no blink)
     it.uses != null && it.uses !== '' ? h('span', { class: 'uses' }, it.uses) : null);
   const strip = [];                       // every group in one wrapping strip, a thin bar in its cost colour first (its name on hover)
-  UI.hotkeys = a.groups.filter(g => g.key !== 'reaction').flatMap(g => g.items).slice(0, 9);   // keys 1-9, in the strip's order
+  // what everyone can do but seldom does: behind ⋯ (its own row once opened; one being aimed stays in sight)
+  const rare = it => RARE_ACTS.has(it.id) && !(UI.aim && UI.aim.item.id === it.id);
+  const seldom = a.groups.filter(g => g.key !== 'reaction').flatMap(g => g.items.filter(rare));
+  UI.hotkeys = a.groups.filter(g => g.key !== 'reaction').flatMap(g => g.items.filter(it => !rare(it))).slice(0, 9);   // keys 1-9, in the strip's order
   const divider = (title, cls) => h('span', { class: 'gdiv ' + cls, tip: title, 'aria-label': title, role: 'separator' });
   const flip = k => () => { tip(); flipFold(k, renderActions); };
   const grip = (g, cls) => {             // a group's bar folds it away; folded, it shows ▸ and how many it holds
@@ -3699,12 +3769,16 @@ function renderActions() {
   };
   for (const g of a.groups) {
     if (g.key === 'reaction') continue;
-    strip.push(grip(g, COST_CLASS[g.key] || 'free'), ...(folded('bar:' + g.key) ? [] : g.items.map(button)));
+    strip.push(grip(g, COST_CLASS[g.key] || 'free'), ...(folded('bar:' + g.key) ? [] : g.items.filter(it => !rare(it)).map(button)));
   }
+  if (seldom.length) strip.push(h('button', { class: 'act ico txt moreacts' + (UI.moreActs ? ' on' : ''), 'aria-expanded': String(!!UI.moreActs),
+    'aria-label': S('More actions'), tip: `${S('More actions')}\n${seldom.map(it => it.label).join(', ')}`,
+    onclick: () => { tip(); UI.moreActs = !UI.moreActs; store('moreacts', UI.moreActs); renderActions(); } }, '⋯'));
   const open = UI.spellsOpen;
   if (a.spells.length) strip.push(divider(S('Spells'), 'spell'), ibtn('spell-book', open ? S('Hide spells') : S('Show spells'),
     () => { UI.spellsOpen = !open; store('spells', UI.spellsOpen); renderActions(); }, 'act ico spell' + (open ? ' on' : '')));
   if (strip.length) kids.push(h('div', { class: 'row strip' }, ...strip));
+  if (seldom.length && UI.moreActs) kids.push(h('div', { class: 'row strip seldom' }, ...seldom.map(button)));
   if (a.spells.length && open) {            // one strip too: a level tag (its slots on hover) before each level's spells
     const tag = g => { const k = 'barspells:' + g.level, shut = folded(k), n = g.level ? String(g.level) : '◌';
       const words = g.title + (g.slots ? `\n${S('Level {0} spell slots: {1} of {2} left', g.level, g.slots.left, g.slots.total)}` : '')
@@ -3724,7 +3798,7 @@ function renderActions() {
         r.icon ? gi(r.icon) : h('span', null, r.label), h('span', { class: 'mk' }, MARK[r.mode]));
     })));
   }
-  el.replaceChildren(...kids);
+  morphKids(el, kids);                                     // (in place: the buttons' pictures don't blink)
 }
 
 /** The hover card of an action: icon, name and cost, then the generic facts, the roll, a short summary, why not. */
@@ -3803,9 +3877,11 @@ function renderPending() {
 }
 
 // ---------------------------------------------------------------- the character sheet
+const TAB_ICON = { overview: 'person', spells: 'spell-book', inventory: 'backpack', features: 'swords-power', notes: 'quill-ink', teamnotes: 'three-friends' };
 const TABS = () => [['overview', S('Overview')], ['spells', S('Spells')], ['inventory', S('Inventory')], ['features', S('Features')], ['notes', S('Notes')], ['teamnotes', S('Team notes')]];
 function renderSheet() {
   const c = ST.character, el = $('sheet');
+  document.body.classList.toggle('nochar', !c);           // (no character: a wide screen gives its column to the map or the lobbies)
   if (!c) { el.replaceChildren(h('div', { class: 'card' }, h('div', { class: 'title' }, S('Your characters')),
     typeof bgApp === 'function' && bgApp() && !bgMember() ? S('Join a lobby to get a hero: it shows here.')      // (the Battlegrounds app)
     : typeof bgMember === 'function' && bgMember() ? S('Battlegrounds: your hero shows here once you have one.')     // (a member's sheet is their lobby hero's)
@@ -3821,19 +3897,22 @@ function renderSheet() {
   amount.setAttribute('aria-label', S('Hit points'));
   amount.setAttribute('inputmode', 'numeric');
   const head = [
-    h('div', { class: 'head' }, h('span', { class: 'nm' }, c.name), h('span', { class: 'dim line', tip: c.line }, c.line), h('span', { class: 'grow' }), advSeg()),
-    h('div', { class: 'hp' }, h('span', { class: 'big' }, `${S('HP')} ${c.current_hp}/${c.max_hp}`), c.temp_hp ? h('span', { class: 'acc' }, `+${c.temp_hp}`) : null,
-      needs('edit_hp', amount), needs('edit_hp', ibtn('damage', S('Damage: take the amount off your hit points'), () => hp('damage'), 'bad')),
-      needs('edit_hp', ibtn('heal', S('Heal the amount'), () => hp('heal'), 'good')),
-      needs('edit_hp', ibtn('temp_hp', S('Set temporary hit points (they don\'t stack: the larger pool stays)'), () => hp('temp'), 'cyan')),
+    h('div', { class: 'head' }, h('span', { class: 'nm' }, c.name),
+      h('span', { class: 'dim line', tip: c.line + (c.next_xp ? `\n${c.xp} XP · ${S('next level at {0}', c.next_xp)}` : '') }, c.line), h('span', { class: 'grow' }),
+      ST.battle && ST.battle.actions && !NARROW.matches ? null : advSeg()),     // (the action bar beside it has the same switch)
+    // the hit points; changing them (the amount, damage, heal, temporary) and the rests: on the row's hover
+    h('div', { class: 'hp' + (UI.amount ? ' typing' : '') }, h('span', { class: 'big' }, `${S('HP')} ${c.current_hp}/${c.max_hp}`), c.temp_hp ? h('span', { class: 'acc' }, `+${c.temp_hp}`) : null,
+      needs('edit_hp', h('span', { class: 'hpedit' }, amount, ibtn('damage', S('Damage: take the amount off your hit points'), () => hp('damage'), 'bad'),
+        ibtn('heal', S('Heal the amount'), () => hp('heal'), 'good'),
+        ibtn('temp_hp', S('Set temporary hit points (they don\'t stack: the larger pool stays)'), () => hp('temp'), 'cyan'))),
       h('span', { class: 'grow' }),
       ...Object.entries(c.hit_dice).map(([cls, hd]) => needs('rest', ibtn('hit_die', `${S('Spend a hit die')} (d${hd.die})\n${S('{0} of {1} left', hd.total - hd.used, hd.total)}`,
         () => hd.total - hd.used > 0 ? ask(S('Spend a d{0} hit die to heal?', hd.die), S('Spend a hit die'), () => act('hit_die', { cls })) : null,
         hd.total - hd.used ? '' : 'off', null, `d${hd.die} ${hd.total - hd.used}/${hd.total}`))),
       needs('rest', ibtn('short_rest', `${S('Short rest')}\n${S('Recover the features that come back on a short rest; spend hit dice to heal.')}`,
-        () => ask(S('Take a short rest? (Agree it with your DM first.)'), S('Short rest'), () => act('rest', { kind: 'short' })), 'warn')),
+        () => ask(S('Take a short rest? (Agree it with your DM first.)'), S('Short rest'), () => act('rest', { kind: 'short' })), 'warn hprest')),
       needs('rest', ibtn('long_rest', `${S('Long rest')}\n${S('Restore HP, spell slots, hit dice and features.')}`,
-        () => longRest(), 'acc'))),
+        () => longRest(), 'acc hprest'))),
     h('div', { class: 'hpbar' }, h('div', { style: `width:${pct}%;background:${pct > 50 ? 'var(--good)' : pct > 25 ? 'var(--warn)' : 'var(--bad)'}` })),
   ];
   const idf = c.identify || {};
@@ -3850,41 +3929,64 @@ function renderSheet() {
     head.push(h('div', { class: 'card warn' }, h('div', { class: 'title' }, S('Death saves')),
       `✔ ${pips(s.success, 3)}   ✘ ${pips(s.failure, 3)}  `, needs('roll', btn('🎲 ' + S('Roll'), () => act('death_save'), 'sm primary'))));
   }
-  const tabs = h('div', { class: 'tabs' }, ...TABS().filter(([k]) => k !== 'teamnotes' || (may('team_notes') && !(typeof bgApp === 'function' && bgApp()))).map(([k, l]) => h('button', { class: UI.tab === k ? 'on' : '', onclick: () => { UI.tab = k; store('tab', k); renderSheet(); } }, l)));
-  const body = { overview: overviewTab, spells: spellsTab, inventory: inventoryTab, features: featuresTab, notes: notesTab, teamnotes: teamNotesTab }[UI.tab](c);
-  el.replaceChildren(...head, tabs, ...body);
+  // the tabs as pictures, the open one with its word too (the others' words on hover); no Spells tab for a character
+  // with nothing to cast (the remembered tab comes back with the next character that has one)
+  const shown = TABS().filter(([k]) => (k !== 'teamnotes' || (may('team_notes') && !(typeof bgApp === 'function' && bgApp()))) && (k !== 'spells' || casts(c)));
+  const open = shown.some(([k]) => k === UI.tab) ? UI.tab : 'overview';
+  const tabs = h('div', { class: 'tabs itabs', role: 'tablist' }, ...shown.map(([k, l]) =>
+    h('button', { class: open === k ? 'on' : '', role: 'tab', 'aria-selected': String(open === k), 'aria-label': l, tip: open === k ? null : l,
+      onclick: () => { tip(); UI.tab = k; store('tab', k); renderSheet(); } }, gi(TAB_ICON[k], 'sm'), open === k ? h('span', null, l) : null)));
+  const body = { overview: overviewTab, spells: spellsTab, inventory: inventoryTab, features: featuresTab, notes: notesTab, teamnotes: teamNotesTab }[open](c);
+  morphKids(el, [...head, tabs, ...body]);              // (in place: only what changed is written - no blink, no jump)
   el.querySelectorAll('textarea').forEach(fitText);
 }
 /** A note or detail box as tall as its text (one line while empty, up to ~12 lines, then it scrolls). */
 function fitText(t) { if (!t.offsetParent) return; t.rows = 1; t.style.height = 'auto'; t.style.height = Math.min(t.scrollHeight + 2, 260) + 'px'; }
 document.addEventListener('input', e => { if (e.target.tagName === 'TEXTAREA' && e.target.closest('#sheet')) fitText(e.target); });
 
+/** A damage text with its types as their pictures ("1d8+3 slashing" -> 1d8+3 and a claw mark; the word on hover). */
+const DMG_ICON = { fire: 'flame', cold: 'ice-bolt', lightning: 'lightning-arc', thunder: 'thunder-struck', acid: 'acid', poison: 'poison-cloud',
+  necrotic: 'death-skull', radiant: 'sunbeams', psychic: 'psychic-waves', force: 'mighty-force', bludgeoning: 'hammer-drop', piercing: 'thrown-spear', slashing: 'claw-slashes' };
+const DMG_SPLIT = new RegExp(`(\\b(?:${Object.keys(DMG_ICON).join('|')})\\b)`, 'i');     // (a text in another language: words stay)
+function dmgIcons(text) {
+  return String(text || '').split(DMG_SPLIT).filter(p => p !== '').map(p => {
+    const icon = DMG_ICON[p.toLowerCase()];
+    return icon ? h('span', { class: 'dt', tip: p, 'aria-label': p }, gi(icon, 'xs')) : p;
+  });
+}
+const VITAL_ICON = { 'Armor Class': 'shield', Initiative: 'sprint', Speed: 'walking-boot', Proficiency: 'upgrade', 'Passive Perception': 'surrounded-eye' };
 function overviewTab(c) {
   const out = [];
-  out.push(h('div', { class: 'tiles' }, ...c.vitals.map(v => h('div', { class: 'tile', tip: v.tip }, h('b', null, v.value), h('span', null, v.label)))));
   const look = badgeLook();                          // conditions as their pictures and names, the rules on hover
-  const flags = [...(c.condition_info || []).map(x => h('span', { class: 'cond', style: `color:${inkc((look[x.name] || [])[1] || 'var(--warn)')}`, tip: `${x.label}\n${x.text}` },
-      gi(x.name), x.label)),
-    c.exhaustion ? h('span', { class: 'cond warn', tip: S('Exhaustion {0}', c.exhaustion) }, gi('exhaustion'), S('Exhaustion {0}', c.exhaustion)) : null,
-    c.inspiration ? h('span', { class: 'cond warn', tip: S('Inspiration') }, gi('inspiration'), S('Inspiration')) : null,
-    c.next_xp ? h('span', { class: 'dim small' }, `${c.xp} XP · ${S('next level at {0}', c.next_xp)}`) : null].filter(Boolean);
-  if (flags.length) out.push(h('div', { class: 'conds', style: 'margin-top:4px' }, ...flags));
+  // one strip: the numbers as pictures (their names and how they add up on hover; the HP is in the head), then what
+  // is on the character now
+  out.push(h('div', { class: 'vitals' }, ...c.vitals.filter(v => v.key !== 'Hit Points').map(v =>
+    h('span', { class: 'vit', tip: v.tip || v.label, 'aria-label': `${v.label} ${v.value}` }, gi(VITAL_ICON[v.key] || 'help', 'sm'), h('b', null, v.value))),
+  ...(c.condition_info || []).map(x => h('span', { class: 'cond', style: `color:${inkc((look[x.name] || [])[1] || 'var(--warn)')}`, tip: `${x.label}\n${x.text}` },
+    gi(x.name), x.label)),
+  c.exhaustion ? h('span', { class: 'cond warn', tip: S('Exhaustion {0}', c.exhaustion) }, gi('exhaustion'), S('Exhaustion {0}', c.exhaustion)) : null,
+  c.inspiration ? h('span', { class: 'cond warn', tip: S('Inspiration') }, gi('inspiration')) : null));
   const roll = (label, fn) => [label, fn];
-  out.push(h('div', { class: 'card' }, h('div', { class: 'title' }, S('Abilities')),      // the check and the save: two separate taps
-    h('div', { class: 'tiles' }, ...c.abilities.map(a => h('div', { class: 'tile ab' },
-      h('div', { class: 'chk', onclick: go(() => act('check', { what: a.name })), 'aria-label': S('Roll a {0} check', a.label),
-        tip: `${a.tip}\n\n${S('Click: roll a {0} check', a.label)}`,
-        more: () => [roll(S('Roll a {0} check', a.label), () => act('check', { what: a.name })), roll(S('Roll the saving throw'), () => act('save', { ability: a.key }))] },
-        h('b', null, sign(a.mod)), h('span', null, `${a.label} ${a.score}`)),
-      h('button', { onclick: go(() => act('save', { ability: a.key })), class: 'sv' + (a.save_prof ? ' on' : ''),
-        tip: `${a.save_tip}\n\n${S('Click: roll the saving throw')}`, more: () => [roll(S('Roll the saving throw'), () => act('save', { ability: a.key }))] },
-        S('Save {0}', sign(a.save))))))));
-  out.push(h('div', { class: 'card' }, h('div', { class: 'title' }, S('Skills')), h('div', { class: 'cols skills' }, ...c.skills.map(s =>
-    h('div', { class: 'li click', onclick: go(() => act('check', { what: s.name })), tip: s.tip, more: () => [roll(S('Roll'), () => act('check', { what: s.name }))] },
-      h('span', { class: s.prof ? 'acc' : 'dim' }, s.prof ? '●' : '○'),
-      h('span', { class: 'n' }, s.label), h('span', { class: 'dim small' }, s.ability), h('b', null, sign(s.bonus)))))));
+  // the six abilities: the modifier (click: a check) over the save (click: the saving throw); the score on hover
+  out.push(h('div', { class: 'abil' }, ...c.abilities.map(a => h('div', { class: 'ab2' + (a.save_prof ? ' prof' : '') },
+    h('div', { class: 'chk', onclick: go(() => act('check', { what: a.name })), 'aria-label': S('Roll a {0} check', a.label),
+      tip: `${a.label} ${a.score}\n${a.tip}\n\n${S('Click: roll a {0} check', a.label)}`,
+      more: () => [roll(S('Roll a {0} check', a.label), () => act('check', { what: a.name })), roll(S('Roll the saving throw'), () => act('save', { ability: a.key }))] },
+      h('span', { class: 'k' }, a.label.slice(0, 3).toLocaleUpperCase(wordsLang || undefined)), h('b', null, sign(a.mod))),   // (Turkish: BİL, not BIL)
+    h('button', { onclick: go(() => act('save', { ability: a.key })), class: 'sv' + (a.save_prof ? ' on' : ''), 'aria-label': S('Save {0}', sign(a.save)),
+      tip: `${a.save_tip}\n\n${S('Click: roll the saving throw')}`, more: () => [roll(S('Roll the saving throw'), () => act('save', { ability: a.key }))] },
+      gi('shield', 'xs'), sign(a.save))))));
+  // the skills: the trained ones; the rest folded away (one click, remembered); the ability and the sum on hover
+  const skill = s => h('div', { class: 'li click', onclick: go(() => act('check', { what: s.name })), tip: `${s.label} (${s.ability})\n${s.tip}`,
+    more: () => [roll(S('Roll'), () => act('check', { what: s.name }))] },
+  h('span', { class: s.prof ? 'acc' : 'dim' }, s.prof ? '●' : '○'), h('span', { class: 'n' }, s.label), h('b', null, sign(s.bonus)));
+  const trained = c.skills.filter(s => s.prof), other = c.skills.filter(s => !s.prof);
+  out.push(h('div', { class: 'card' }, h('div', { class: 'title' }, S('Skills')),
+    trained.length ? h('div', { class: 'cols skills' }, ...trained.map(skill)) : null,
+    other.length ? h('div', { class: 'sub' }, foldHead('skills:other', S('Other skills'), other.length, renderSheet)) : null,
+    other.length && !folded('skills:other') ? h('div', { class: 'cols skills' }, ...other.map(skill)) : null));
   out.push(h('div', { class: 'card' }, h('div', { class: 'title' }, S('Attacks')), ...c.attacks.map(a =>
-    h('div', { class: 'li atk', tip: a.tip ? `${a.label}\n${a.tip}` : null }, a.icon ? gi(a.icon, 'sm ii') : null, h('span', { class: 'n' }, a.label), h('span', { class: 'dim small' }, `${sign(a.attack)} · ${a.damage}`),
+    h('div', { class: 'li atk', tip: a.tip ? `${a.label}\n${a.tip}` : null }, a.icon ? gi(a.icon, 'sm ii') : null, h('span', { class: 'n' }, a.label), h('span', { class: 'dim small dmg' }, `${sign(a.attack)} · `, ...dmgIcons(a.damage)),
       may('roll') || (ST.battle.my_turn && may('battle_actions')) ? btn(S('Attack'), () => act('attack', { weapon: a.name }), 'sm primary', ST.battle.my_turn ? S('Attacks your target in the battle') : null) : null,
       needs('roll', ibtn('rolling-dices', S('Roll damage'), () => act('damage', { weapon: a.name }), 'sm')),          // pictures: room for the weapon's name
       needs('roll', ibtn('bright-explosion', S('Roll critical damage'), () => act('damage', { weapon: a.name, crit: true }), 'sm warn'))))));
@@ -3902,9 +4004,11 @@ function overviewTab(c) {
     return h('div', { class: 'li' }, h('span', { class: 'n' }, r.label), rest, ...count);
   })));
   if (c.defense.length) out.push(h('div', { class: 'small warn' }, c.defense.join(' ')));
-  out.push(h('div', { class: 'card' }, h('div', { class: 'title' }, S('Proficiencies')), ...c.proficiencies.filter(g => g.items.length).map(g =>
-    h('div', { class: 'small' }, h('span', { class: 'dim' }, g.title + ': '), g.items.join(', ')))));
-  out.push(needs('roll', h('div', { class: 'row' }, btn('⚡ ' + S('Roll initiative'), () => act('initiative'), 'sm primary'))));
+  const profs = c.proficiencies.filter(g => g.items.length);
+  if (profs.length) out.push(h('div', { class: 'card' }, h('div', { class: 'title' }, foldHead('profs', S('Proficiencies'), null, renderSheet)),
+    ...(folded('profs') ? [] : profs.map(g => h('div', { class: 'small' }, h('span', { class: 'dim' }, g.title + ': '), g.items.join(', '))))));
+  const mine = ((ST.battle || {}).combatants || []).filter(x => x.mine);          // (rolled already in this battle: not offered)
+  if (!mine.length || mine.some(x => x.init == null)) out.push(needs('roll', h('div', { class: 'row' }, btn('⚡ ' + S('Roll initiative'), () => act('initiative'), 'sm primary'))));
   return out;
 }
 
@@ -4025,6 +4129,8 @@ async function spellPicker(title, text, send, none) {
   recount();
   return null;
 }
+/** Whether a character has anything for the Spells tab: spells, slots, spells to prepare, a Battlegrounds hero's picks. */
+function casts(c) { return !!(c.spells.length || c.prepares || c.slots.length || (typeof bgMember === 'function' && bgMember() && bgMine())); }
 function spellsTab(c) {
   const bg = typeof bgMember === 'function' && bgMember() && bgMine();   // a Battlegrounds hero: its spells change in the lobby (bgSpellPicker)
   if (!c.spells.length && !c.prepares && !bg) return [h('div', { class: 'dim' }, S('No spells.'))];
@@ -4047,8 +4153,8 @@ function spellsTab(c) {
     h('span', { class: 'dim small' }, `${s.left}/${s.total}`)];
   const own = new Set(c.spells.map(g => String(g.level)));         // slots go on their level's title; the others (pact) get a line
   const loose = c.slots.filter(s => !own.has(String(s.key)));
-  if (loose.length) out.push(h('div', { class: 'card' }, h('div', { class: 'title' }, S('Spell slots')),
-    ...loose.map(s => h('div', { class: 'li' }, h('span', { class: 'n' }, s.label), ...pipsOf(s)))));
+  if (loose.length) out.push(h('div', { class: 'card slotline', tip: S('Spell slots') }, ...loose.map(s =>      // one line: each level, its pips
+    h('span', { class: 'sl' }, h('span', { class: 'dim small' }, s.label), ...pipsOf(s)))));
   for (const g of c.spells) {
     const mine = c.slots.find(s => String(s.key) === String(g.level)), k = 'spells:' + g.level;   // each level folds under its title
     out.push(h('div', { class: 'card' + (folded(k) ? ' shut' : '') }, h('div', { class: 'title lvl' }, foldHead(k, g.title, g.spells.length, renderSheet),
@@ -4212,11 +4318,12 @@ function quickAdd(where) {
   };
   const name = h('input', { type: 'text', value: q.name, maxlength: 120, class: 'qname', 'aria-label': S('Item name'),
     placeholder: where === 'team' ? S('Add to the team…') : S('Add an item…'),
-    oninput: e => { q.name = e.target.value; }, onkeydown: e => { if (e.key === 'Enter') { e.preventDefault(); go(now)(e); } } });
+    oninput: e => { q.name = e.target.value; e.target.parentNode.classList.toggle('typed', !!q.name.trim()); },   // (how many and ✎: once a name is typed)
+    onkeydown: e => { if (e.key === 'Enter') { e.preventDefault(); go(now)(e); } } });
   const qty = h('input', { type: 'number', min: 1, value: q.qty, placeholder: '1', inputmode: 'numeric', class: 'qn', 'aria-label': S('How many'),
     oninput: e => { q.qty = e.target.value; } });
   if (UI.quickFocus === where) { UI.quickFocus = null; setTimeout(() => name.focus({ preventScroll: true })); }
-  return h('div', { class: 'row quick' }, name, qty, btn('+', now, 'sm primary', S('Add')),
+  return h('div', { class: 'row quick' + (q.name.trim() ? ' typed' : '') }, name, qty, btn('+', now, 'sm primary', S('Add')),
     btn('✎', () => itemForm(where === 'team' ? S('Into the team inventory') : S('Into your pack'), { name: name.value.trim(), qty: parseInt(qty.value, 10) || 1 },
       send, S('Add')), 'sm flat', S('Add it with a description')));
 }
@@ -4265,9 +4372,12 @@ function inventoryTab(c) {
     it.usable ? mini(S('Use'), () => act('use_item', { item: it.name }), 'primary', S('Use one up')) : null,
     it.wearable ? mini('🛡', () => act('equip', { item: it.name, on: !it.equipped }, true), it.equipped ? 'on' : '', it.equipped ? S('Unequip') : S('Equip')) : null,
     it.attunable ? mini('✦', () => act('attune', { item: it.name, on: !it.attuned }, true), it.attuned ? 'on' : '', it.attuned ? S('Break attunement') : S('Attune')) : null));
-  const out = [h('div', { class: 'card' }, h('div', { class: 'row coins' }, h('span', { class: 'title' }, S('Coins')), h('b', null, coins), h('span', { class: 'grow' }),
-    needs('write_items', h('span', { class: 'cc' }, amt, coin, btn('+', () => money(1), 'sm primary', S('Coins you got')), btn('−', () => money(-1), 'sm', S('Coins you paid or lost'))))))];
-  if (mates.length) out.push(h('div', { class: 'mates' }, h('span', { class: 'title' }, S('Hand to')),
+  // the purse: one line; counting coins in or out opens its own small box (the amount and the coin)
+  const purse = () => detail(() => h('div', { class: 'txt' }, h('b', null, S('Coins') + ': ' + coins), h('div', { class: 'row coins' }, amt, coin)),
+    () => [[S('Coins you got'), () => money(1)], [S('Coins you paid or lost'), () => money(-1), '']]);
+  const out = [h('div', { class: 'row coins purse' }, gi('coins', 'sm'), h('b', null, coins), h('span', { class: 'grow' }),
+    needs('write_items', ibtn('coins', S('Count coins in or out'), purse, 'sm')))];
+  if (mates.length) out.push(h('div', { class: 'mates' }, h('span', { class: 'title' }, S('Hand to')),      // (shown while an item is dragged)
     ...mates.map(m => dropZone(h('span', { class: 'chip mate dz', tip: S('Drop an item here to hand it to {0}', m.name) }, m.name), ['mine', 'team'], m.name))));
   if (team) {
     const sup = team.supplies, low = sup && sup.days_left != null && sup.days_left < 2;
@@ -4295,19 +4405,20 @@ function inventoryTab(c) {
 function featuresTab(c) {
   return c.features.map(g => h('div', { class: 'card' + (folded('features:' + g.source) ? ' shut' : '') },   // each source folds under its title
     h('div', { class: 'title' }, foldHead('features:' + g.source, g.source, g.items.length, renderSheet)),
-    ...(folded('features:' + g.source) ? [] : g.items).map(f => {
-    const key = g.source + '|' + f.name, open = UI.open.has(key);
-    return h('div', { class: 'feat' }, h('div', { class: 'li click', tip: open ? null : `${f.label}\n${f.text}`,   // folded: its text on hover
-      onclick: () => { tip(); open ? UI.open.delete(key) : UI.open.add(key); renderSheet(); } },
-      h('span', { class: 'dim' }, open ? '▾' : '▸'), h('span', { class: 'n' }, f.label), f.level ? h('span', { class: 'dim small' }, S('Level {0}', f.level)) : null),
-      open ? h('div', { class: 'txt' }, f.text) : null);
-  })));
+    // the features as chips (their text on hover); a click opens one's text under them, another click closes it
+    ...(folded('features:' + g.source) ? [] : [h('div', { class: 'chips feats' }, ...g.items.map(f => {
+      const key = g.source + '|' + f.name, open = UI.open.has(key), lvl = f.level ? ` (${S('Level {0}', f.level)})` : '';
+      return h('span', { class: 'chip' + (open ? ' on' : ''), tip: open ? null : `${f.label}${lvl}\n${f.text}`, 'aria-expanded': String(open),
+        onclick: () => { tip(); open ? UI.open.delete(key) : UI.open.add(key); renderSheet(); } }, f.label);
+    })), ...g.items.filter(f => UI.open.has(g.source + '|' + f.name)).map(f =>
+      h('div', { class: 'txt feattxt' }, h('b', null, f.label), f.level ? h('span', { class: 'dim small' }, ' · ' + S('Level {0}', f.level)) : null, '\n' + f.text))])));
 }
 
 function notesTab(c) {
   // Drafts live in UI (and the browser's storage): a refresh, a re-render or a closing keyboard doesn't lose the text.
   const drafts = () => { store('notedraft', UI.noteDraft); store('editdraft', UI.editDraft); store('editnote', UI.editNote); };
-  const add = h('textarea', { placeholder: S('A new note…'), value: UI.noteDraft, 'aria-label': S('A new note…'), oninput: e => { UI.noteDraft = e.target.value; drafts(); } });
+  const add = h('textarea', { placeholder: S('A new note…'), value: UI.noteDraft, 'aria-label': S('A new note…'),
+    oninput: e => { UI.noteDraft = e.target.value; drafts(); e.target.parentNode.classList.toggle('typed', !!UI.noteDraft.trim()); } });   // (its button: once typed in)
   if (UI.editNote != null && !c.notes.some(n => n.id === UI.editNote)) UI.editNote = null;
   const list = c.notes.map(n => {
     if (UI.editNote === n.id) {
@@ -4324,13 +4435,15 @@ function notesTab(c) {
   const labels = { personality: S('Personality traits'), ideal: S('Ideals'), bond: S('Bonds'), flaw: S('Flaws'), appearance: S('Appearance'), backstory: S('Backstory') };
   const details = Object.entries(labels).map(([k, l]) => [h('label', { class: 'f' }, l),       // (read only while the DM keeps them)
     h('textarea', { value: c.details[k] || '', readonly: !may('edit_notes'), onchange: e => act('details', { fields: { [k]: e.target.value } }, true) })]);
-  return [h('div', { class: 'card' }, h('div', { class: 'title' }, S('Notes')), ...list, needs('edit_notes', add),
-    needs('edit_notes', h('div', { class: 'row' }, btn(S('Add note'), () => {
+  const filled = Object.keys(labels).filter(k => (c.details[k] || '').trim()).length;
+  return [h('div', { class: 'card' }, h('div', { class: 'title' }, S('Notes')), ...list,
+    needs('edit_notes', h('div', { class: 'nadd' + (UI.noteDraft.trim() ? ' typed' : '') }, add, h('div', { class: 'row' }, btn(S('Add note'), () => {
       const text = add.value;
       if (!text.trim()) return null;
       return act('note_add', { text }, true).then(r => { if (r) { UI.noteDraft = ''; add.value = ''; drafts(); keepFocus($('sheet'), renderSheet); } });
-    }, 'sm primary')))),
-  h('div', { class: 'card' }, h('div', { class: 'title' }, S('Details')), ...details.flat())];
+    }, 'sm primary'))))),
+  h('div', { class: 'card' }, h('div', { class: 'title' }, foldHead('notes:details', S('Details'), `${filled}/${details.length}`, renderSheet)),   // (folded until opened)
+    ...(folded('notes:details') ? [] : details.flat()))];
 }
 
 // ---------------------------------------------------------------- team notes: everyone's, one editor at a time
@@ -4404,13 +4517,16 @@ function teamNotesTab() {
   const d = UI.tnDraft;
   const title = h('input', { value: d.title, maxlength: 120, placeholder: S('Header'), 'aria-label': S('Header'), oninput: e => { d.title = e.target.value; tnStore(); } });
   const text = h('textarea', { value: d.text, placeholder: S('Description (shown on hover)'), 'aria-label': S('Description'), oninput: e => { d.text = e.target.value; tnStore(); } });
-  return [h('div', { class: 'card' }, h('div', { class: 'title' }, S('Team notes'), h('span', { class: 'grow' }), h('span', { class: 'dim small' }, String(notes.length))),
-    notes.length ? list : h('div', { class: 'empty dim small' }, S('No team notes yet.')),
-    h('div', { class: 'small dim' }, S('Every player sees these notes and can add to them. One person edits a note at a time.'))),
-  h('div', { class: 'card tnedit' }, h('div', { class: 'title' }, S('New team note')), title, text,
+  const drafting = !!(d.title.trim() || d.text.trim()), shut = folded('tn:new') && !drafting;    // (the new note's form: on its +)
+  return [h('div', { class: 'card' }, h('div', { class: 'title', tip: S('Every player sees these notes and can add to them. One person edits a note at a time.') },
+    S('Team notes'), h('span', { class: 'grow' }), h('span', { class: 'dim small' }, String(notes.length)),
+    shut ? btn('+', () => flipFold('tn:new', renderSheet), 'sm primary', S('New team note')) : null),
+  notes.length ? list : h('div', { class: 'empty dim small' }, S('No team notes yet.'))),
+  shut ? null : h('div', { class: 'card tnedit' }, h('div', { class: 'title' }, S('New team note'), h('span', { class: 'grow' }),
+    drafting ? null : btn('×', () => flipFold('tn:new', renderSheet), 'sm flat', S('Cancel'))), title, text,
     h('div', { class: 'row' }, btn(S('Add note'), () => {
       if (!d.title.trim()) { say(S('A note needs a header.'), true); return null; }
-      return act('tnote_add', { title: d.title, text: d.text }, true).then(r => { if (r) { UI.tnDraft = { title: '', text: '' }; tnStore(); keepFocus($('sheet'), renderSheet); } });
+      return act('tnote_add', { title: d.title, text: d.text }, true).then(r => { if (r) { UI.tnDraft = { title: '', text: '' }; tnStore(); if (!folded('tn:new')) flipFold('tn:new', () => {}); keepFocus($('sheet'), renderSheet); } });
     }, 'sm primary')))];
 }
 
@@ -4424,8 +4540,9 @@ function renderFeed() {
   const box = $('feed'), atEnd = box.scrollHeight - box.scrollTop - box.clientHeight < 30;
   const entries = [...ST.feed.map(e => ({ ...e, sort: e.id })), ...UI.local].sort((a, b) => a.sort - b.sort)
     .filter(e => UI.feed === 'all' || (UI.feed === 'roll' ? e.kind === 'roll' || e.kind === 'xp' || e.kind === 'action' :e.kind === 'chat' || e.kind === 'private'));
-  box.replaceChildren(...entries.slice(-120).map(e => h('div', { class: `e ${e.kind}${e.dm ? ' dm' : ''}${e.uid === ST.me.id ? ' me' : ''}` },
-    h('span', { class: 't' }, e.time), e.who ? h('span', { class: 'w' }, (e.dm ? '👑 ' : '') + e.who) : null, rich(e.text))));
+  // (the time: on hover; "only" lines - my creatures' own battle log, beside the table's lines that say the same - quieter)
+  morphKids(box, entries.slice(-120).map(e => h('div', { class: `e ${e.kind}${e.dm ? ' dm' : ''}${e.uid === ST.me.id ? ' me' : ''}${e.only ? ' own' : ''}`, title: e.time },
+    e.who ? h('span', { class: 'w' }, (e.dm ? '👑 ' : '') + e.who) : null, rich(e.text))));
   if (atEnd) box.scrollTop = box.scrollHeight;
   unread();
 }
@@ -4459,7 +4576,28 @@ async function send() {
 $('send').onclick = send;
 $('say').addEventListener('keydown', e => { if (e.key === 'Enter') send(); });
 needs('roll', $('quick'));
-$('quick').append(...['d4', 'd6', 'd8', 'd10', 'd12', 'd20', 'd100'].map(d => h('button', { onclick: go(() => act('roll', { expr: '1' + d }, true)), 'aria-label': S('Roll a {0}', d) }, d)));
+// the table's dice: one 🎲 (a d20 on a click); the others in its small menu - hover, or the ▴ beside it
+{
+  const die = d => h('button', { onclick: go(() => act('roll', { expr: '1' + d }, true)), 'aria-label': S('Roll a {0}', d), tip: S('Roll a {0}', d) }, d);
+  const menu = h('span', { class: 'dice' }, ...['d4', 'd6', 'd8', 'd10', 'd12', 'd100'].map(die));
+  $('quick').append(h('span', { class: 'dicebox' }, menu,
+    h('button', { class: 'd20', onclick: go(() => act('roll', { expr: '1d20' }, true)), 'aria-label': S('Roll a {0}', 'd20'), tip: S('Roll a {0}', 'd20') + '\n' + S('Other dice: point at it') }, 'd20'),
+    h('button', { class: 'more', 'aria-label': S('Other dice'), onclick: e => e.currentTarget.parentNode.classList.toggle('open') }, '▴')));
+}
+// a wide screen's sheet column: shown or tucked away (the map then has the width), kept on this device
+{
+  const words = S('Character sheet: show or hide it');
+  const tog = h('button', { id: 'sheettog', class: 'flat', 'aria-label': words, tip: words, 'aria-pressed': String(!store('nosheet')),
+    onclick: e => { tip(); const off = !document.body.classList.contains('nosheet'); document.body.classList.toggle('nosheet', off); store('nosheet', off);
+      e.currentTarget.setAttribute('aria-pressed', String(!off)); if (ST) render(); } }, gi('person'));
+  $('menu').before(tog);
+  document.body.classList.toggle('nosheet', !!store('nosheet'));
+}
+// the map's how-to (render() keeps its words): in the map's corner, the words on hover or a tap
+$('mapwrap').append($('hint'));
+$('hint').addEventListener('mouseover', e => { if (lastPointer === 'mouse') tip({ clientX: e.clientX, clientY: e.clientY, currentTarget: e.currentTarget }, e.currentTarget._help || ''); });
+$('hint').addEventListener('mouseleave', () => tip());
+$('hint').addEventListener('click', e => { if (!e.currentTarget.classList.contains('pill')) detail(e.currentTarget._help || ''); });
 if (store('folded')) document.body.classList.add('folded');
 $('dockfold').onclick = () => { store('folded', document.body.classList.toggle('folded')); unread(); if (ST) renderMap(); };
 

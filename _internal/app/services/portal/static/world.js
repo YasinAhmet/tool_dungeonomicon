@@ -207,37 +207,37 @@ function renderWorldSide() {
   const W = ST.world, f = W.food, side = $('worldside');
   const where = !W.party.pos ? S('The party is not on the map.') : W.near ? (W.near.here ? S('📍 At {0}', W.near.name)
     : S('📍 {0} mi from {1}', Math.round(W.near.miles), W.near.name)) : S('📍 Out in the wilds');
-  const parts = [h('div', { class: 'title' }, S('The party'), h('span', { class: 'grow' }),
-    W.party.pos && W.map ? btn('⌖ ' + S('Find the party'), () => wFind(), 'sm flat', S('Show where the party is')) : null),
-    h('div', { class: 'wwhere' }, where)];
-  if (W.route.miles) parts.push(h('div', { class: 'dim small' }, S('🧭 {0} mi to go, about {1} at a {2} pace', Math.round(W.route.miles), wDays(W.route.days), W.pace)));
+  // one line for where the party is (the way ahead on hover), one for its food (the sums on hover); each one's own
+  // food and the food's story folded away
+  const route = W.route.miles ? S('🧭 {0} mi to go, about {1} at a {2} pace', Math.round(W.route.miles), wDays(W.route.days), W.pace) : '';
+  const ping = touch() ? S('Tap the map to ping a place for everyone.') : S('Click the map to ping a place for everyone.');
+  const parts = [h('div', { class: 'wline', tip: [where, route, ping].filter(Boolean).join('\n') }, h('span', { class: 'wwhere grow' }, where),
+    route ? h('span', { class: 'dim small' }, `🧭 ${Math.round(W.route.miles)} mi`) : null,
+    W.party.pos && W.map ? ibtn('place', S('Find the party') + '\n' + S('Show where the party is'), () => wFind(), 'sm') : null)];
   const low = f.days_left !== null && f.days_left < 2;
-  parts.push(h('div', { class: 'title wgap' }, S('Group food'), h('span', { class: 'grow' }), h('span', { class: 'dim' }, S('Day {0}', f.day))));
-  parts.push(h('div', { class: 'wmeals' + (low ? ' bad' : '') }, '🍖 ', h('b', null, String(f.meals)), ' ', S('meals')));
-  const bits = [S('{0} eat each day', f.mouths)];
+  const bits = [S('Group food'), S('Day {0}', f.day), S('{0} eat each day', f.mouths)];
   if (f.average) bits.push(S('{0} spent a day on average', f.average));
   if (f.days_left !== null) bits.push(S('lasts about {0}', wDays(f.days_left)));
-  parts.push(h('div', { class: 'small ' + (low ? 'bad' : 'dim') }, bits.join(' · ')));
+  parts.push(h('div', { class: 'wline wmeals' + (low ? ' bad' : ''), tip: bits.join('\n') }, '🍖 ', h('b', null, String(f.meals)), ' ', S('meals'),
+    h('span', { class: 'grow' }), f.days_left !== null ? h('span', { class: 'small ' + (low ? 'bad' : 'dim') }, S('lasts about {0}', wDays(f.days_left))) : null));
   // each character's own food: the owner moves a meal into the group's
   const rows = W.packs.map(p => {
     const tipText = p.items.map(e => `${e.qty}× ${e.label}`).join('\n') || S('No food');
     return h('div', { class: 'wpack' + (p.mine ? ' mine' : '') },
       h('span', { class: 'grow', tip: tipText }, p.character),
       h('span', { class: p.meals ? '' : 'dim', tip: tipText }, '🍖 ' + p.meals),
-      p.mine && may('trade_items') ? btn(S('Add meal to group'), () => act('give_meal', { who: p.character }), 'sm primary',
-        S('Move one meal from {0}\'s pack into the group\'s food', p.character)) : null);
+      p.mine && p.meals && may('trade_items') ? btn('+', () => act('give_meal', { who: p.character }), 'sm primary',
+        S('Add meal to group') + '\n' + S('Move one meal from {0}\'s pack into the group\'s food', p.character)) : null);
   });
-  if (rows.length) parts.push(h('div', { class: 'title wgap' }, S('In their packs')), h('div', { class: 'wpacks' }, ...rows));
-  const mineEmpty = W.packs.some(p => p.mine && !p.meals);
-  if (mineEmpty) parts.push(h('div', { class: 'dim small' }, S('No food in your pack to share.')));
+  if (rows.length) parts.push(h('div', { class: 'title wgap' }, foldHead('world:packs', S('In their packs'), rows.length, renderWorldSide)),
+    folded('world:packs') ? null : h('div', { class: 'wpacks' }, ...rows));
   if (f.log.length) {
-    parts.push(h('div', { class: 'title wgap' }, S('Lately')));
-    parts.push(h('div', { class: 'wlog small' }, ...f.log.slice().reverse().map(e =>
+    parts.push(h('div', { class: 'title wgap' }, foldHead('world:log', S('Lately'), f.log.length, renderWorldSide)));
+    if (!folded('world:log')) parts.push(h('div', { class: 'wlog small' }, ...f.log.slice().reverse().map(e =>
       h('div', null, h('span', { class: 'dim' }, S('Day {0}', e.day) + ' '), h('b', { class: e.n > 0 ? 'good' : 'bad' }, (e.n > 0 ? '+' : '') + e.n),
         ' ' + e.why + (e.by ? ` · ${e.by}` : '')))));
   }
-  parts.push(h('div', { class: 'dim small wgap' }, touch() ? S('Tap the map to ping a place for everyone.') : S('Click the map to ping a place for everyone.')));
-  side.replaceChildren(...parts);
+  morphKids(side, parts);
 }
 
 // ---------------------------------------------------------------- the view

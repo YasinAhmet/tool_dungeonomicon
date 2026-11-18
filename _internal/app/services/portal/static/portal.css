@@ -484,11 +484,11 @@ details.more summary .sup{flex:1;min-width:0;overflow:hidden;text-overflow:ellip
 .rteam.on{background:color-mix(in srgb,var(--tc) 12%,var(--raised))}.rteam.ffa{border-left-color:var(--border)}
 .rteam.new{border-style:dashed;border-left-style:solid;color:var(--dim);text-align:left;padding:4px 8px}
 .rth{display:flex;align-items:center;gap:5px;font:600 11.5px var(--head);letter-spacing:1px;min-height:22px}
-.rth .mv{visibility:hidden;padding:0 6px;font:inherit;font-size:11.5px}.rteam:hover .rth .mv,.rth .mv:focus-visible{visibility:visible}
+.rth .mv{opacity:0;padding:0 6px;font:inherit;font-size:11.5px}.rteam:hover .rth .mv,.rth .mv:focus-visible{opacity:1}
 .rmem{display:flex;align-items:center;gap:6px;min-width:0;font-size:13.5px;padding:1px 0}.rmem.me .rp{color:var(--accent)}.rmem.out{opacity:.5}
 .rmem .rk{width:12px;flex:none;text-align:center;color:var(--dim)}.rmem.rdy .rk{color:var(--good);font-weight:700}
 .rmem .rn{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.rmem .kick{visibility:hidden;color:var(--bad)}.rmem:hover .kick,.rmem .kick:focus-visible{visibility:visible}
+.rmem .kick{opacity:0;color:var(--bad)}.rmem:hover .kick,.rmem .kick:focus-visible{opacity:1}
 .rspec{padding:2px 6px;cursor:help}
 .ktabs{align-self:flex-start;flex-wrap:wrap}.ktabs button{padding:2px 10px}
 .card.hero.mine{border-left:3px solid var(--accent);margin:0}
@@ -502,7 +502,7 @@ details.more summary .sup{flex:1;min-width:0;overflow:hidden;text-overflow:ellip
   .bgmid,.bgmid.withlog{display:flex;flex-direction:column;overflow:auto}.bgroster,.bgcenter,.bglogpane{overflow:visible;flex:none}
   .bgroster{flex-direction:row;flex-wrap:wrap;align-items:flex-start}.bgroster>.title{width:100%}.rteam{min-width:150px;flex:1}
   .bglogpane{border-left:0;border-top:1px solid var(--border);padding:6px 0 0}.bglogpane .lbody{max-height:40vh}
-  .rth .mv,.rmem .kick{visibility:visible}
+  .rth .mv,.rmem .kick{opacity:1}
 }
 @media (max-width:600px){
   .bgtop .side.mid{order:3;width:100%;justify-content:flex-start}.lfind{flex:1;width:auto}
@@ -576,3 +576,64 @@ details.more summary .sup{flex:1;min-width:0;overflow:hidden;text-overflow:ellip
 .optpick .opt{display:flex;flex-direction:column;align-items:flex-start;gap:1px;text-align:left;white-space:normal;padding:5px 8px;border-radius:0}
 .optpick .opt.on{background:var(--accent-dim);color:var(--on-accent);border-color:var(--gold)}.optpick .opt.on .dim{color:var(--on-accent)}
 .invpick .chip{font-size:11.5px;padding:0 5px;border-radius:0;background:var(--input);color:var(--dim)}.invpick .chip.on{color:var(--good)}
+
+/* The sheet's head, compact (all three apps): the numbers as pictures with their names on hover, the six abilities as
+   small tiles (the modifier over the save), the trained skills with the rest folded, roll buttons on hover. */
+.gi.xs{width:11px;height:11px;vertical-align:-1px}
+.vitals{display:flex;flex-wrap:wrap;gap:4px;align-items:center;margin:2px 0 6px}
+.vit{display:inline-flex;align-items:center;gap:4px;padding:2px 8px 2px 6px;background:var(--panel);border:1px solid var(--border);color:var(--dim);cursor:default}
+.vit b{font-size:14px;color:var(--text)}
+.abil{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px;margin-bottom:6px}
+.ab2{background:var(--panel);border:1px solid var(--border);display:flex;flex-direction:column;text-align:center;min-width:0}
+.ab2 .chk{cursor:pointer;padding:2px 0 0}.ab2 .chk:hover{background:var(--hover)}
+.ab2 .k{display:block;font-size:10.5px;letter-spacing:.08em;color:var(--dim)}
+.ab2 .chk b{display:block;font-size:16px;line-height:1.15}
+.ab2 .sv{margin:1px 3px 3px;padding:0 3px;font-size:11.5px;display:inline-flex;align-items:center;justify-content:center;gap:2px}
+.card .sub{margin-top:3px;font-size:12px;color:var(--dim)}
+.li.atk button.ib{opacity:0;transition:opacity .12s}.li.atk:hover button.ib,.li.atk:focus-within button.ib{opacity:1}
+@media (pointer:coarse){.li.atk button.ib{opacity:1}.ab2 .sv{min-height:32px}}
+/* Inventory: the purse on one line (counting coins: its own box), "Hand to" only while an item is dragged, a quick-add
+   row that is just its field until a name is typed. */
+.row.coins.purse{margin:0 0 6px;padding:0 2px}.row.coins.purse b{font-size:14px}
+.mates{display:none}body.dragging .mates{display:flex}
+.row.quick:not(.typed) .qn,.row.quick:not(.typed) button{display:none}
+/* The map's how-to: an ⓘ in its corner (the words on hover); while aiming, its line there. */
+#hint{position:absolute;right:6px;bottom:6px;z-index:2;width:22px;height:22px;display:flex;align-items:center;justify-content:center;border-radius:50%;
+  background:var(--glass);border:1px solid var(--border);cursor:help;font-size:13px;color:var(--dim);white-space:normal}
+#hint.pill{width:auto;height:auto;border-radius:0;padding:3px 8px;max-width:calc(100% - 12px);cursor:default;color:var(--text);border-color:var(--accent);font-size:12.5px}
+/* The table's dice: the d20, the others over it on hover (or ▴). */
+.dicebox{position:relative;display:inline-flex;gap:0}
+.dicebox .dice{display:none;position:absolute;bottom:100%;right:0;z-index:20;gap:2px;padding:4px;background:var(--raised);border:1px solid var(--border);box-shadow:0 4px 14px #0006}
+.dicebox:hover .dice,.dicebox.open .dice{display:flex}
+.dicebox .d20{display:inline-flex;align-items:center;gap:3px}.dicebox .more{padding:0 4px}
+@media (pointer:fine){.dicebox .more{display:none}}
+.card.slotline{display:flex;flex-wrap:wrap;gap:4px 14px;align-items:center}.card.slotline .sl{display:inline-flex;align-items:center;gap:4px}
+/* The action bar's economy: the coloured marks alone (their words and rules on hover), as on a phone. */
+#actionbar .res .lbl{display:none}#actionbar .econ{gap:8px}#actionbar .res{cursor:help}
+/* The connection: a dot while all is well (its words on hover); the words when it is not. */
+.conn.live{border-color:transparent;padding:0 4px;cursor:help}.conn.live span{display:none}
+/* The World side: a line for where, a line for the food (sums on hover), the rest folded. */
+.wline{display:flex;align-items:center;gap:6px;margin-bottom:4px;cursor:default}
+.wline.wmeals{font-size:14px;line-height:1.3}.wline.wmeals b{font-size:16px}
+.nadd:not(.typed) .row{display:none}
+/* The action bar's ⋯: the seldom standard actions, in their own row once opened. */
+#actionbar button.moreacts{font-size:20px;line-height:1;font-weight:700;color:var(--dim)}#actionbar button.moreacts.on{color:var(--text);border-color:var(--accent)}
+#actionbar .strip.seldom{margin-top:2px;padding-top:3px;border-top:1px dashed var(--border)}
+/* Item cards: their quick buttons on hover (an equipped / attuned mark stays as its state); touch: always. */
+@media (pointer:fine){.icard button.mini:not(.on){opacity:0;transition:opacity .12s}.icard:hover button.mini,.icard:focus-within button.mini{opacity:1}}
+/* The sheet's tabs as pictures: the open one with its word. */
+.tabs.itabs button{display:inline-flex;align-items:center;gap:5px;padding:3px 9px}.tabs.itabs button .gi{width:16px;height:16px}
+/* The sheet's HP row: the editing and the rests on its hover (or while an amount is typed); touch: always. */
+.hp .hpedit{display:inline-flex;align-items:center;gap:4px}
+@media (pointer:fine){.hp .hpedit,.hp .hprest{opacity:0;transition:opacity .12s}.hp:hover .hpedit,.hp:hover .hprest,.hp:focus-within .hpedit,.hp:focus-within .hprest,.hp.typing .hpedit{opacity:1}}
+/* The initiative: a name stays short, a creature's health a coloured mark (its word on the hover card). */
+.oc .n{max-width:11em}.oc .hpw.pip{width:9px;height:9px;border-radius:50%;flex:none;border:1px solid var(--edge)}
+.li.atk .dmg{display:inline-flex;align-items:center;gap:0;white-space:nowrap}.li.atk .dt{display:inline-flex;margin-left:3px}.li.atk .dt .gi{width:13px;height:13px}
+/* Phones: the character picker keeps room for a short name (it was squeezed to its arrow). */
+@media (max-width:900px){#who{min-width:64px;padding-left:4px;padding-right:2px}}@media (max-width:480px){header>.brand{display:none}}
+#feed .e.own{color:var(--dim);font-size:12.5px}
+/* A wide screen: the sheet column can be tucked away (header's person); phones have their views, Adventurers its rail. */
+#sheettog{display:none}#sheettog[aria-pressed=true]{color:var(--accent)}
+@media (min-width:901px){body:not(.adv) #sheettog{display:inline-flex}body.nosheet:not(.adv) #body{grid-template-columns:minmax(0,1fr)}body.nosheet:not(.adv) #sheet{display:none}}
+.chips.feats{margin-top:2px}.chips.feats .chip{cursor:pointer}.feattxt{margin-top:6px;padding-top:4px;border-top:1px dotted var(--border);white-space:pre-line}
+@media (min-width:901px){body.nochar:not(.adv) #body{grid-template-columns:minmax(0,1fr)}body.nochar:not(.adv) #sheet,body.nochar:not(.adv) #sheettog{display:none}}
