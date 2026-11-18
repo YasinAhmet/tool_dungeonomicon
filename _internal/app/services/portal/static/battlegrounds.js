@@ -1117,8 +1117,22 @@ async function bgLevelUp(l, cls, sub, io) {          // io: {plan(cls, sub), app
   const levelsOf = rows => [...new Set(rows.map(s => s.level))].sort((a, b) => a - b);
   if (sp.cantrips) { const rows = rowsOf(sp.cantrip_pool || []); parts.push(spellBlock(S('Cantrips'), rows, sp.cantrips, ch.cantrips, [0])); }
   if (sp.known) { const rows = rowsOf([...(sp.spell_pool || []), ...(sp.any_class_pool || [])]); parts.push(spellBlock(S('New spells'), rows, sp.known, ch.spells, levelsOf(rows))); }
-  if (sp.spellbook) { const rows = rowsOf(sp.spell_pool || []); parts.push(spellBlock(S('Into the spellbook'), rows, sp.spellbook, ch.spellbook, levelsOf(rows))); }
-  if (sp.prepared) { const rows = rowsOf([...new Set([...(sp.spell_pool || []), ...ch.prepared])]); parts.push(spellBlock(S('Prepared spells'), rows, sp.prepared, ch.prepared, levelsOf(rows))); }
+  // a Wizard prepares from the spellbook only: the one kept and this level's picks into it (the list follows those
+  // picks, its open folds kept); a class that prepares from its whole list keeps that list
+  const book = sp.spellbook != null, always = new Set(sp.always_prepared || []);
+  const prepPool = () => book ? [...new Set([...((plan.spell_state || {}).spellbook || []), ...ch.spellbook])]
+    .filter(n => !always.has(n) && ((plan.spell_rows || {})[n] || { level: 1 }).level <= (sp.max_spell_level || 9))
+    : [...new Set([...(sp.spell_pool || []), ...ch.prepared])];
+  const prepSlot = h('div');
+  const redoPrep = () => {
+    const pool = prepPool(), opened = new Set([...prepSlot.querySelectorAll('details')].filter(d => d.open).map(d => d.querySelector('summary > span').textContent));
+    if (book) [...ch.prepared].forEach(n => { if (!pool.includes(n)) ch.prepared.delete(n); });
+    const rows = rowsOf(pool), blk = spellBlock(S('Prepared spells'), rows, sp.prepared, ch.prepared, levelsOf(rows));
+    if (blk) blk.querySelectorAll('details').forEach(d => { if (opened.has(d.querySelector('summary > span').textContent)) d.open = true; });
+    prepSlot.replaceChildren(...(blk ? [blk] : !book || pool.length ? [] : [h('div', { class: 'pcls dim small' }, h('b', null, S('Prepared spells')), ' · ', S('Your spellbook is empty.'))]));
+  };
+  if (sp.spellbook) { const rows = rowsOf(sp.spell_pool || []); parts.push(spellBlock(S('Into the spellbook'), rows, sp.spellbook, ch.spellbook, levelsOf(rows), book && sp.prepared ? redoPrep : null)); }
+  if (sp.prepared) { redoPrep(); parts.push(prepSlot); }
   if ((plan.features || []).length) parts.push(h('div', { class: 'card' }, h('div', { class: 'title' }, S('Features gained')),
     ...plan.features.map(f => h('details', null, h('summary', null, f.label || f.name), h('div', { class: 'ptxt' }, f.text)))));
   const root = h('div', { class: 'prep' }, ...parts.filter(Boolean));

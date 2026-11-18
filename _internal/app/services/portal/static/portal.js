@@ -2974,7 +2974,9 @@ board.addEventListener('pointermove', e => {
     const c = ST && tokenAt(pointAt(e)), it = ST && !c && !UI.aim ? groundAt(pointAt(e)) : null;
     board.style.cursor = UI.aim || UI.place ? 'crosshair' : c || it ? 'pointer' : 'grab';
     if ((it ? it.id : null) !== (UI.groundHover ?? null)) { UI.groundHover = it ? it.id : null; requestAnimationFrame(renderMap); }
-    if (c && !UI.aim) { if (UI.tipFor !== c.id + '|' + ST.v) { UI.tipFor = c.id + '|' + ST.v; tip({ clientX: e.clientX, clientY: e.clientY, currentTarget: { getBoundingClientRect: () => ({ left: e.clientX + 12, top: e.clientY - 8, bottom: e.clientY + 18 }) } }, () => tokenCard(c)); } }
+    const at = { clientX: e.clientX, clientY: e.clientY, currentTarget: { getBoundingClientRect: () => ({ left: e.clientX + 12, top: e.clientY - 8, bottom: e.clientY + 18 }) } };
+    if (c && !UI.aim) { if (UI.tipFor !== c.id + '|' + ST.v) { UI.tipFor = c.id + '|' + ST.v; tip(at, () => tokenCard(c)); } }
+    else if (c && UI.aim && ['creature', 'split'].includes((UI.aim.item.target || {}).type)) aimTip(at, UI.aim, c);
     else if (!c && !it && !UI.aim && propAt(tileAt(e))) propTip(e, propAt(tileAt(e)));
     else if (UI.tipFor) { UI.tipFor = null; tip(); }
     const p = pointAt(e), key = UI.aim || (ST && moveArmed(ST.battle)) ? p.join(',') : '';
@@ -3033,6 +3035,51 @@ function rightClick(e) {
   if (me.pos && x >= me.pos[0] && x < me.pos[0] + me.span && y >= me.pos[1] && y < me.pos[1] + me.span) return;   // on itself
   if (UI.move) { UI.move = null; renderAimbar(); }
   if (me.pos) walkTo(me.id, x, y); else act('move', { x, y });   // (not on the map yet: put there)
+}
+/** The target hover while aiming: the roll's advantage or disadvantage against it and why, and the cover it has - asked
+ *  of the table once per action, target and change of the battle (api attack_odds), then kept. */
+const ODDS = new Map();
+function aimTip(at, a, c) {
+  const key = [a.item.id, a.option || '', c.id, ST.v].join('|');
+  if (!ODDS.has(key)) {
+    ODDS.set(key, null);                                     // (asked: the card says so until the answer comes)
+    while (ODDS.size > 200) ODDS.delete(ODDS.keys().next().value);
+    api('/api/act', { action: 'preview', character: ST.me.active, item: a.item.id, option: a.option || null, odds: c.id })
+      .then(r => r.data || {}, () => ({}))
+      .then(d => { ODDS.set(key, d); if (UI.tipFor === 'aim|' + key && UI.aim === a) tip(UI.aimAt, () => aimCard(a, c, d)); });
+  }
+  UI.aimAt = at;
+  if (UI.tipFor === 'aim|' + key) return;
+  UI.tipFor = 'aim|' + key;
+  tip(at, () => aimCard(a, c, ODDS.get(key)));
+}
+const SAVE_WORD = { str: 'Strength', dex: 'Dexterity', con: 'Constitution', int: 'Intelligence', wis: 'Wisdom', cha: 'Charisma' };
+function aimCard(a, c, o) {
+  const me = meInBattle(), d = me && me.pos && c.pos && me.id !== c.id ? Geo.dist(me, c) : null;
+  const line = (cls, head, why) => h('div', { class: 'small' }, h('span', { class: cls }, head),
+    why && why.length ? h('span', { class: 'dim' }, ' · ' + why.join(', ')) : null);
+  const kids = [h('div', { class: 'tc-head' }, h('b', null, c.name), h('span', { class: 'grow' }), d != null ? h('span', { class: 'dim small' }, S('{0} ft away', d)) : null)];
+  if (c.untargetable && !c.mine) kids.push(line('warn', S("Can't be targeted now")));
+  else if (d != null && a.item.range != null && d > Math.max(5, a.item.range)) kids.push(line('bad', S('Out of range ({0} ft)', Math.max(5, a.item.range))));
+  if (o === null) kids.push(h('div', { class: 'dim small' }, '…'));
+  else if (o && o.roll === 'attack') {
+    const mine = UI.adv === 'advantage' ? 'adv' : UI.adv === 'disadvantage' ? 'dis' : '';      // the switch on the aim bar
+    const modes = new Set(o.modes || []);
+    if (mine) modes.add(mine);
+    const adv = [...o.adv || [], ...(mine === 'adv' ? [S('your pick')] : [])], dis = [...o.dis || [], ...(mine === 'dis' ? [S('your pick')] : [])];
+    if (modes.size === 2) kids.push(line('dim', '= ' + S('Advantage and disadvantage cancel out')), line('good', '▲', adv), line('warn', '▼', dis));
+    else if (modes.has('adv')) kids.push(line('good', '▲ ' + S('Advantage'), adv));
+    else if (modes.has('dis')) kids.push(line('warn', '▼ ' + S('Disadvantage'), dis));
+    else kids.push(line('dim', '= ' + S('Normal roll')));
+    if ((o.cancel || []).length) kids.push(line('warn', S('No advantage'), o.cancel));
+  } else if (o && o.roll === 'save') {
+    const ab = S(SAVE_WORD[o.save] || o.save);
+    kids.push(o.mode === 'fail' ? line('good', '▼ ' + S('Fails its {0} save', ab), o.dis)
+      : o.mode === 'dis' ? line('good', '▼ ' + S('{0} save at disadvantage', ab), o.dis) : line('dim', S('{0} save', ab)));
+  }
+  if (o && o.cover) kids.push(o.cover_bonus == null ? line('bad', '⛨ ' + S("Total cover: can't be reached"))
+    : line('warn', '⛨ ' + S(o.cover.charAt(0).toUpperCase() + o.cover.slice(1)), [o.roll === 'save' ? S('+{0} to its save', o.cover_bonus) : S('+{0} to its AC', o.cover_bonus)]));
+  return h('div', { class: 'tokcard' }, ...kids);
 }
 /** A creature's hover card on the map: its name and health, its conditions and effects as pictures, how far it is,
  *  and what a click does. */

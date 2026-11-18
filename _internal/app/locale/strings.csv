@@ -6048,3 +6048,33 @@ no shop,no shop,dükkân yok
 {0} gp to shop,{0} gp to shop,alışverişe {0} gp
 More options,More options,Diğer seçenekler
 Out of combat,Out of combat,Savaş dışı
+Can't be targeted now,Can't be targeted now,Şu an hedef alınamaz
+Out of range ({0} ft),Out of range ({0} ft),Menzil dışında ({0} ft)
+your pick,your pick,senin seçimin
+Advantage and disadvantage cancel out,Advantage and disadvantage cancel out,Avantaj ve dezavantaj birbirini götürür
+No advantage,No advantage,Avantaj yok
+Fails its {0} save,Fails its {0} save,{0} kurtarmasında otomatik başarısız
+{0} save at disadvantage,{0} save at disadvantage,{0} kurtarması dezavantajlı
+Total cover: can't be reached,Total cover: can't be reached,Tam siper: ulaşılamaz
+Three-quarters cover,Three-quarters cover,Dörtte üç siper
++{0} to its save,+{0} to its save,kurtarmasına +{0}
++{0} to its AC,+{0} to its AC,AC'sine +{0}
+chosen,chosen,seçildi
+target prone,target prone,hedef yerde
+target prone (far),target prone (far),hedef yerde (uzakta)
+target restrained,target restrained,hedef kısıtlanmış
+target paralyzed,target paralyzed,hedef felçli
+target stunned,target stunned,hedef sersemlemiş
+target unconscious,target unconscious,hedef baygın
+target petrified,target petrified,hedef taşlaşmış
+attacker poisoned,attacker poisoned,saldıran zehirlenmiş
+attacker restrained,attacker restrained,saldıran kısıtlanmış
+attacker prone,attacker prone,saldıran yerde
+attacker frightened,attacker frightened,saldıran korkmuş
+attacker exhausted,attacker exhausted,saldıran bitkin
+can't see the target,can't see the target,hedefi göremiyor
+unseen attacker,unseen attacker,görünmeyen saldıran
+enemy within 5 ft,enemy within 5 ft,5 ft içinde düşman
+long range,long range,uzun menzil
+pack tactics,pack tactics,sürü taktikleri
+"heavy weapon, small wielder","heavy weapon, small wielder","ağır silah, küçük kullanıcı"
