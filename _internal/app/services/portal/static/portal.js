@@ -3728,6 +3728,30 @@ function movePeek(c, x, y) {
   }
   return null;
 }
+/** The table's word on an area being aimed - {tiles, targets}, the very tiles the cast or use will cover (walls and
+ *  total cover cut away from its origin, an upcast's bigger size) - asked once the pointer rests (one at a time, kept
+ *  by aim); null until it answers, the shape alone drawn meanwhile. */
+const AREA_PEEKS = new Map();
+function areaPeek(a, area, aim, b) {
+  if (AREA_PEEKS.drawings !== b.drawings || AREA_PEEKS.zones !== b.zones) {     // a door opened, a wall went up: asked again
+    AREA_PEEKS.clear(); AREA_PEEKS.drawings = b.drawings; AREA_PEEKS.zones = b.zones;
+  }
+  const key = `${a.item.id}|${a.slot || ''}|${aim ? aim.join(',') : '-'}|${b.combatants.map(o => o.pos).join(';')}`;
+  if (AREA_PEEKS.has(key)) return AREA_PEEKS.get(key);
+  if (UI.areaWant !== key) {
+    UI.areaWant = key; clearTimeout(UI.areaTimer);
+    const spell = String(a.item.id).startsWith('spell:');
+    UI.areaTimer = setTimeout(() => api('/api/act', { action: 'preview', character: ST.me.active, item: a.item.id, point: aim,
+      slot: a.slot || null, ...(spell ? {} : { area }) })
+      .then(r => {
+        const d = r.data || {};
+        AREA_PEEKS.set(key, Array.isArray(d.tiles) && (d.tiles.length || !d.why) ? { tiles: d.tiles, targets: d.targets || [] } : null);   // (out of range: the shape alone)
+        while (AREA_PEEKS.size > 200) AREA_PEEKS.delete(AREA_PEEKS.keys().next().value);
+      }, () => { AREA_PEEKS.set(key, null); })
+      .finally(() => { if (UI.areaWant === key) requestAnimationFrame(renderMap); }), 60);
+  }
+  return null;
+}
 /** The board while aiming: the reach, the area and who it hits, the targets picked. */
 function drawAimArea(g, b, T, a, me) {
   const t = a.item.target || {}, area = aimArea(a), reach = t.teleport || a.item.range;
@@ -3740,10 +3764,14 @@ function drawAimArea(g, b, T, a, me) {
   if (area && me && me.pos) {
     const hv = UI.hover, aim = t.type === 'point' || (t.type === 'self_area' && t.aim) ?
       (hv ? (['sphere', 'cylinder'].includes(area.shape) ? [Math.round(hv[0]), Math.round(hv[1])] : [Math.floor(hv[0]) + .5, Math.floor(hv[1]) + .5]) : null) : null;
-    const tiles = Geo.tiles(area, me, aim, b.map.w, b.map.h), set = new Set(tiles.map(p => p.join(',')));
-    g.fillStyle = 'rgba(255,140,40,.28)'; g.strokeStyle = 'rgba(255,140,40,.9)'; g.lineWidth = 1;
+    const told = areaPeek(a, area, aim, b);                  // the table's tiles: walls and pillars cut, as the cast will be
+    const tiles = told ? told.tiles : Geo.tiles(area, me, aim, b.map.w, b.map.h), set = new Set(tiles.map(p => p.join(',')));
+    g.fillStyle = told ? 'rgba(255,140,40,.28)' : 'rgba(255,140,40,.14)'; g.lineWidth = 1;   // (fainter: the shape alone, until the table answers)
     for (const [x, y] of tiles) { g.fillRect(x * T + .5, y * T + .5, T - 1, T - 1); }
-    for (const c of b.combatants) {
+    if (told) {
+      const seen = new Set(b.combatants.map(c => c.id));
+      a.hit = told.targets.filter(id => seen.has(id));
+    } else for (const c of b.combatants) {
       if (!c.pos || c.id === me.id && area.origin === 'caster' || c.untargetable) continue;   // (banished, ethereal: out of the area's reach)
       for (let i = 0; i < c.span; i++) for (let j = 0; j < c.span; j++) if (set.has(`${c.pos[0] + i},${c.pos[1] + j}`) && !a.hit.includes(c.id)) a.hit.push(c.id);
     }
