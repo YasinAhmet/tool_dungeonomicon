@@ -2221,6 +2221,7 @@ function renderMap() {
   const FW = b.map.fw || W, floors = floorsOf(b.map);   // the floors of a building, side by side (gaps between them)
   g.fillStyle = LOOK.raised;                           // (a dim or dark map: drawLight lays the dark over it)
   for (const [, x0] of floors) g.fillRect(x0 * T, 0, FW * T, H * T);
+  drawBackdrop(g, b, T, floors, FW, H);                // the map's ground: grass, gravel... (repeating)
   const view = [(-cam.x - shx) / T, (-cam.y - shy) / T, (vw - cam.x - shx) / T, (vh - cam.y - shy) / T];   // the tiles in sight
   UI.view = view;
   const ground = drawImages(g, b, T, 'ground');        // a battle map picture: under the grid
@@ -2302,6 +2303,14 @@ function renderMap() {
     if (c.out) { g.strokeStyle = '#f87171'; g.beginPath(); g.moveTo(cx - r * .6, cy - r * .6); g.lineTo(cx + r * .6, cy + r * .6); g.stroke(); }
     if (T >= 40) { g.font = '11px Alegreya Sans, Segoe UI'; g.textAlign = 'center'; g.textBaseline = 'alphabetic'; mapText(g, c.name.slice(0, Math.floor(s / 6.5)), cx, y * T + s + 11); }
     if (!c.out) FX.badges(g, c, cx, cy - r - 2, T);    // its conditions, over its top edge
+    if (c.alt > 0) {                                    // flying: its height on a tag over its bottom-left
+      const words = (T >= 36 ? `↑${c.alt} ft` : `↑${c.alt}`), fs = Math.max(9, r * .42);
+      g.font = `700 ${fs}px Alegreya Sans, Segoe UI`; g.textAlign = 'center'; g.textBaseline = 'middle';
+      const w = g.measureText(words).width + 6, h = fs + 4, tx = cx - r, ty = cy + r - h;
+      g.fillStyle = '#0a0c10dd'; g.strokeStyle = '#7c8cff'; g.lineWidth = 1;
+      g.beginPath(); if (g.roundRect) g.roundRect(tx, ty, w, h, h / 2); else g.rect(tx, ty, w, h); g.fill(); g.stroke();
+      g.fillStyle = '#fff'; g.fillText(words, tx + w / 2, ty + h / 2 + .5);
+    }
     g.globalAlpha = 1;
     paintPips(g, c, cx - r - 2, cy - r - 2, 2 * r + 4);    // dying: its death saves, on its bottom edge
   }
@@ -2692,6 +2701,14 @@ function terrainMarks(g, kind, col, cells, view) {     // each tile's texture, f
     }
     g.strokeStyle = light; g.lineWidth = .035; g.lineCap = 'round'; g.stroke(); return;
   }
+  if (kind === 'grass') {                              // a few short blades, on about half the tiles
+    for (const [x, y] of seen) {
+      if (rnd(x, y, 1010) >= .55) continue;
+      const cx = x + .2 + .6 * rnd(x, y, 1020), cy = y + .3 + .5 * rnd(x, y, 1030);
+      for (const a of [-.4, 0, .4]) { g.moveTo(cx, cy); g.lineTo(cx + .06 * Math.sin(a), cy - .08 * Math.cos(a)); }
+    }
+    g.strokeStyle = dark; g.lineWidth = .025; g.lineCap = 'round'; g.stroke(); return;
+  }
   if (kind === 'brush') {
     for (const [x, y] of seen) for (let i = 0; i < 3; i++) {
       const cx = x + .18 + .64 * rnd(x, y, 610 + i), cy = y + .3 + .55 * rnd(x, y, 620 + i);
@@ -2728,6 +2745,73 @@ function terrainMarks(g, kind, col, cells, view) {     // each tile's texture, f
   g.fillStyle = dark; g.fill(); g.beginPath();
   for (const [x, y] of seen) { const cx = x + .25 + .5 * rnd(x, y, 450), cy = y + .25 + .5 * rnd(x, y, 460); g.moveTo(cx + .03, cy); g.ellipse(cx, cy, .03, .02, 0, 0, Math.PI * 2); }
   g.fillStyle = light; g.fill();
+}
+// the map's ground (drawing.GROUNDS): one repeating block of BLOCK×BLOCK tiles under the whole map (groundart.py)
+const GROUNDS = { grass: '#5f7d3c', dirt: '#7a5b3d', gravel: '#8b857a', stone: '#8e8b83', cobbles: '#7d776d', planks: '#8a6843',
+  sand: '#c9ab6e', snow: '#dfe5ec', block: 8, px: 48, cache: {} };
+const GRAINS = { dirt: [3, .05, .68, 1.3], gravel: [8, .065, .68, 1.3], sand: [6, .018, .68, 1.3], snow: [2, .03, .92, 1.5] };
+function groundTile(g, kind, col, x, y, r) {          // one tile of the ground; r(k): its scatter (groundart.py: _ground_tile)
+  const line = (c, w, pts) => { g.strokeStyle = c; g.lineWidth = w; g.lineCap = 'round'; g.beginPath(); g.moveTo(pts[0], pts[1]); g.lineTo(pts[2], pts[3]); g.stroke(); };
+  const ellipse = (fill, cx, cy, rx, ry, pen, pw) => { g.beginPath(); g.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2); g.fillStyle = fill; g.fill(); if (pen) { g.strokeStyle = pen; g.lineWidth = pw; g.stroke(); } };
+  const rounded = (fill, pen, pw, x0, y0, w, h, rad) => { g.beginPath(); g.roundRect(x0, y0, w, h, rad); g.fillStyle = fill; g.fill(); g.strokeStyle = pen; g.lineWidth = pw; g.stroke(); };
+  if (kind === 'planks') {                            // two boards a tile, their ends here and there
+    for (let j = 0; j < 2; j++) {
+      g.fillStyle = shade(col, .86 + .26 * r(80 + j), 1); g.fillRect(x, y + j * .5, 1, .5);
+      line(shade(col, .55, .9), .03, [x, y + j * .5, x + 1, y + j * .5]);
+      if (r(84 + j) < .35) line(shade(col, .55, .9), .03, [x, y + j * .5, x, y + j * .5 + .5]);
+      const gy = y + j * .5 + .15 + .2 * r(88 + j);
+      line(shade(col, .72, .5), .015, [x + .1, gy, x + .9, gy + .03]);
+    }
+    return;
+  }
+  if (r(1) < .55) ellipse(shade(col, r(6) < .5 ? 1.12 : kind === 'snow' ? .97 : .9, .35), x + r(2), y + r(3), .45 + .4 * r(4), .3 + .3 * r(5));   // a soft patch
+  if (kind === 'grass') {                             // tufts of blades
+    for (let i = 0; i < 3; i++) if (r(10 + i) < .7) {
+      const cx = x + r(20 + i), cy = y + r(30 + i);
+      for (const a of [-.45, 0, .45]) line(shade(col, .7, .7), .03, [cx, cy, cx + .07 * Math.sin(a), cy - .11 * Math.cos(a)]);
+    }
+  } else if (GRAINS[kind]) {                          // pebbles, stones, grains, sparkles
+    const [n, big, lo, hi] = GRAINS[kind];
+    for (let i = 0; i < n; i++) {
+      if (kind === 'dirt' && r(10 + i) > .6) continue;
+      const rad = big * (.6 + .8 * r(40 + i));
+      ellipse(shade(col, r(50 + i) < .5 ? hi : lo, .85), x + r(20 + i), y + r(30 + i), rad, rad * .8, kind === 'gravel' ? shade(col, .55, .8) : null, .015);
+    }
+    if (kind === 'sand' && r(60) < .5) {              // a ripple
+      const cx = x + r(61), cy = y + r(62);
+      g.beginPath(); g.moveTo(cx - .3, cy); g.quadraticCurveTo(cx, cy - .12, cx + .3, cy);
+      g.strokeStyle = shade(col, 1.25, .7); g.lineWidth = .025; g.lineCap = 'round'; g.stroke();
+    }
+  } else if (kind === 'stone') {                      // a flagstone a tile, now and then cracked
+    rounded(shade(col, .88 + .24 * r(7), 1), shade(col, .55, .9), .035, x + .03, y + .03, .94, .94, .06);
+    if (r(8) < .25) line(shade(col, .6, .7), .02, [x + .2 + .3 * r(9), y + .15, x + .4 + .4 * r(11), y + .6 + .3 * r(12)]);
+  } else if (kind === 'cobbles') {                    // four round-cornered stones, every other row offset
+    for (let j = 0; j < 2; j++) for (let i = 0; i < 2; i++)
+      rounded(shade(col, .85 + .35 * r(70 + j * 2 + i), 1), shade(col, .5, .9), .025, x + i * .5 + .04 + .25 * j, y + j * .5 + .04, .42, .42, .12);
+  }
+}
+function groundPattern(g, kind) {                    // the ground's block (drawn once), as a repeating pattern
+  const col = GROUNDS[kind];
+  if (typeof col !== 'string') return null;
+  if (!GROUNDS.cache[kind]) {
+    const n = GROUNDS.block, s = GROUNDS.px, c = document.createElement('canvas');
+    c.width = c.height = n * s;
+    const t = c.getContext('2d');
+    t.fillStyle = col; t.fillRect(0, 0, n * s, n * s); t.scale(s, s);
+    for (let y = -1; y <= n; y++) for (let x = -1; x <= n; x++) {   // (the tiles just outside too: no seam where it repeats)
+      const kx = ((x % n) + n) % n, ky = ((y % n) + n) % n;
+      groundTile(t, kind, col, x, y, k => roomRand(kx, ky, Math.trunc(roomRand(k, 7, 1499) * 1e6)));   // (rehashed: no streaks)
+    }
+    GROUNDS.cache[kind] = c;
+  }
+  return g.createPattern(GROUNDS.cache[kind], 'repeat');
+}
+function drawBackdrop(g, b, T, floors, FW, H) {
+  const pat = b.map.backdrop && groundPattern(g, b.map.backdrop);
+  if (!pat) return;
+  pat.setTransform(new DOMMatrix().scale(T / GROUNDS.px));
+  g.fillStyle = pat;
+  for (const [, x0] of floors) g.fillRect(x0 * T, 0, FW * T, H * T);
 }
 function drawTerrain(g, b, T, view) {
   const ds = (b.drawings || []).filter(d => d.type === 'terrain' && d.tiles && d.tiles.length);
