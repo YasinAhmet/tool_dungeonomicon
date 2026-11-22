@@ -3712,7 +3712,7 @@ Turned (degrees),Turned (degrees),Dönüş (derece)
 "Move the party: click where it travels, along the roads and paths where they help (Shift+click: put it there, no trail · Ctrl+Z: take the move back)","Move the party: click where it travels, along the roads and paths where they help (Shift+click: put it there, no trail · Ctrl+Z: take the move back)","Grubu taşı: gideceği yere tıkla, işe yarıyorsa yollar ve patikalar boyunca gider (Shift+tık: oraya koy, iz yok · Ctrl+Z: hareketi geri al)"
 ↩ Take back the move,↩ Take back the move,↩ Hareketi geri al
 The party goes back where it was: the days the trip took turn back and the meals eaten on the way go back into the group's food (Ctrl+Z with 🚩),The party goes back where it was: the days the trip took turn back and the meals eaten on the way go back into the group's food (Ctrl+Z with 🚩),"Grup bulunduğu yere döner: yolculuğun sürdüğü günler geri sarılır, yolda yenen öğünler grubun yiyeceğine geri döner (🚩 ile Ctrl+Z)"
-The party travels {0} mi: {1} days pass on the way and the group eats {2} meals.,The party travels {0} mi: {1} days pass on the way and the group eats {2} meals.,Grup {0} mil yol alıyor: yolda {1} gün geçiyor ve grup {2} öğün yiyor.
+The party travels {0} mi: {1} days pass on the way.,The party travels {0} mi: {1} days pass on the way.,Grup {0} mil yol alıyor: yolda {1} gün geçiyor.
 Not enough food on the way: {0} meals short.,Not enough food on the way: {0} meals short.,Yolda yeterli yiyecek yok: {0} öğün eksik.
 Move taken back: {0} days turn back and {1} meals go back into the group's food.,Move taken back: {0} days turn back and {1} meals go back into the group's food.,Hareket geri alındı: {0} gün geri sarıldı ve {1} öğün grubun yiyeceğine döndü.
 The party's last move is taken back.,The party's last move is taken back.,Grubun son hareketi geri alındı.
@@ -6078,3 +6078,15 @@ enemy within 5 ft,enemy within 5 ft,5 ft içinde düşman
 long range,long range,uzun menzil
 pack tactics,pack tactics,sürü taktikleri
 "heavy weapon, small wielder","heavy weapon, small wielder","ağır silah, küçük kullanıcı"
+Granted,Granted,Verilen
+Revoke,Revoke,Geri al
+Grant a spell,Grant a spell,Büyü ver
+Grant {0},Grant {0},{0} ver
+Granted by the DM,Granted by the DM,DM tarafından verildi
+Granted by the DM: {0},Granted by the DM: {0},DM tarafından verildi: {0}
+cantrip,cantrip,cantrip
+Offered when choosing or preparing spells. Right-click to revoke.,Offered when choosing or preparing spells. Right-click to revoke.,Büyü seçerken ya da hazırlarken sunulur. Geri almak için sağ tıkla.
+Grant a spell: the character knows it from now on and can pick it,Grant a spell: the character knows it from now on and can pick it,Büyü ver: karakter artık onu bilir ve seçebilir
+"Spells the DM granted, on top of the class list","Spells the DM granted, on top of the class list",Sınıf listesine ek olarak DM'in verdiği büyüler
+The character knows it from now on: it is offered when they choose or prepare spells.,The character knows it from now on: it is offered when they choose or prepare spells.,Karakter artık bu büyüyü bilir: büyü seçerken ya da hazırlarken sunulur.
+Why do they know it? (optional),Why do they know it? (optional),Neden biliyor? (isteğe bağlı)

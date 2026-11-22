@@ -1413,7 +1413,7 @@ const FX = {
     }
     if (k === 'land') {                                // the thrown thing drops to where it lies (a bounce, a short roll)
       const a = f.at, b = f.to, dur = Math.max(.28, Math.min(.5, .25 + Math.hypot(b[0] - a[0], b[1] - a[1]) * .08));
-      this.add('toss', t, dur, { a, b, look: f.item, h: .35, spin: f.n % 2 ? 1 : -1, slow: true });
+      this.add('toss', t, dur, { a, b, look: f.item, h: f.h || .35, spin: f.n % 2 ? 1 : -1, slow: !f.h });   // (h: thrown at a tile)
       for (const key of ['gid', 'did']) if (f[key] != null) this.flying[`${key}:${f[key]}`] = t + dur;   // hidden until it gets there
       return t + .05;
     }
@@ -3740,7 +3740,7 @@ function aimTap(p, token) {
   const a = UI.aim, t = a.item.target || {}, tile = [Math.floor(p[0]), Math.floor(p[1])], key = tile.join(',');
   if (!aimNeedsClick(a)) return;
   const tok = token || tokenAt(p);
-  if ((t.type === 'creature' || t.type === 'split') && !tok) return;
+  if ((t.type === 'creature' || t.type === 'split') && !tok && !(t.tile && !a.targets.length)) return;   // (a Throw: any tile)
   if (a.pending && a.pending.key === key) return aimPick();
   a.pending = { key, p, token: tok };
   UI.hover = p; UI.hoverKey = null;
@@ -3760,6 +3760,11 @@ function aimClick(p, token) {
   const a = UI.aim, t = a.item.target || {}, me = meInBattle(), tile = [Math.floor(p[0]), Math.floor(p[1])];
   const tok = token || tokenAt(p);
   if (t.type === 'creature' || t.type === 'split') {
+    if (!tok && t.tile && !a.targets.length) {                 // a Throw at an empty tile: it lands there
+      a.point = [tile[0] + .5, tile[1] + .5];
+      if (me && me.pos && a.item.range != null && Geo.toPoint(me, a.point) > a.item.range) { a.point = null; return say(S('Out of range'), true); }
+      return commitAim();
+    }
     if (!tok) return;
     if (tok.untargetable && !tok.mine) return say(S("{0} can't be targeted now", tok.name), true);   // banished, ethereal, sealed
     if (me && me.pos && tok.pos && a.item.range != null && Geo.dist(me, tok) > Math.max(5, a.item.range)) return say(S('Out of range'), true);
@@ -3819,7 +3824,8 @@ function renderAimbar() {
     creature: S('Click {0} creature(s) ({1}/{0})', aimCount(a), a.targets.length), split: S('Click targets for each of {0} ({1}/{0}) - the same creature more than once is fine', aimCount(a), a.targets.length),
     point: t.teleport ? S('Click where to go (up to {0} ft)', t.teleport) : S('Click a point within {0} ft', a.item.range), self_area: S('Click the direction to aim'),
   })[t.type] || S('Confirm to use it');
-  kids.push(h('span', { class: 'dim' }, say_));
+  kids.push(h('span', { class: 'dim' }, t.tile ? (tap ? S('Tap a creature or any tile within {0} ft, then confirm', a.item.range)
+    : S('Click a creature or any tile within {0} ft', a.item.range)) : say_));
   if (a.item.kind === 'spell' && a.item.level > 0 && ST.battle.actions) {
     const lv = slotLevels(a.item);                  // the level to cast at: any slot left at the spell's level or up
     const word = l => l.pact ? S('Level {0} pact slot ({1} left)', l.level, l.left) : S('Level {0} slot ({1} left)', l.level, l.left);

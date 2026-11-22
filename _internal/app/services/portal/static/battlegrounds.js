@@ -268,7 +268,7 @@ function roomScreen(g, l) {
 /** The lobby's rules, a line each (the host changes them in the settings). */
 function rulesWords(g, l) {
   const st = l.settings || {}, map = ((g.maps || []).find(m => m.key === st.map) || {}).name || st.map;
-  const kinds = { hero: S('Heroes'), pool: S("The DM's heroes"), monster: S('Monsters') };
+  const kinds = { hero: S('Heroes'), pool: S("The DM's heroes"), monster: S('Monsters'), own: S('Own characters') };
   return [l.mode === 'arena' ? S('Start at level 1, up to {0}', st.max_level) : st.free_level ? S('Any level up to {0}', st.max_level) : S('Level {0}', st.level),
     st.ffa ? S('Free-for-all') : S('Teams'), l.mode !== 'duel' && st.difficulty ? S(st.difficulty[0].toUpperCase() + st.difficulty.slice(1)) : null,
     l.mode !== 'duel' && st.enemy_style ? S('Opposition: {0}', S(st.enemy_style[0].toUpperCase() + st.enemy_style.slice(1))) : null,
@@ -650,13 +650,15 @@ const freshScores = () => ({ str: 15, dex: 14, con: 13, int: 12, wis: 10, cha: 8
 function fighterPane(g, l) {
   const me = g.me, st = l.settings, o = bgOptions(l), parts = [];
   if (!me && l.phase !== 'lobby') return parts;
-  const kinds = (st.kinds || []).filter(k => ['hero', 'pool', 'monster'].includes(k));
+  const own = g.own || [];                       // (their own characters: first, when they have any)
+  const kinds = ['own', 'hero', 'pool', 'monster'].filter(k => (st.kinds || []).includes(k) && (k !== 'own' || own.length));
   if (!kinds.includes(BG.tab)) BG.tab = kinds[0] || 'hero';
   const words = { hero: ['🛡', S('A new hero'), S('Pick a class and race; the rest is rolled')], pool: ['🎲', S("The DM's heroes") + (l.pool.length ? ` (${l.pool.length})` : ''), S('Ready-made, one each')],
-    monster: ['🐉', S('A monster'), S('Any creature of the books')] };
+    monster: ['🐉', S('A monster'), S('Any creature of the books')],
+    own: ['🧝', S('My characters'), S('One of your own characters, fully rested; nothing done here changes their sheet')] };
   const tabs = kinds.length > 1 ? h('div', { class: 'seg ktabs', role: 'tablist' }, ...kinds.map(k => h('button', { class: BG.tab === k ? 'on' : '', role: 'tab',
     'aria-selected': String(BG.tab === k), tip: words[k][2], onclick: () => { BG.tab = k; store('bgtab', k); bgRedo(); } }, words[k][0] + ' ' + words[k][1]))) : null;
-  const body = BG.tab === 'hero' ? heroForm(g, l, o) : BG.tab === 'pool' ? poolCards(g, l) : monsterSearch(g, l, o);
+  const body = BG.tab === 'hero' ? heroForm(g, l, o) : BG.tab === 'pool' ? poolCards(g, l) : BG.tab === 'own' ? ownCards(g, own) : monsterSearch(g, l, o);
   const has = me && (me.char || me.kind);
   if (!has) return [h('div', { class: 'drow' }, h('span', { class: 'title' }, S('Fight as')), h('span', { class: 'grow' }), tabs), ...body];
   // a fighter picked: it is on show, the pickers fold away until wanted
@@ -741,6 +743,14 @@ function poolCards(g, l) {
     h('div', { class: 'drow' }, btn('👁 ' + S('Look'), () => bgPoolLook(l, p), 'sm'),
       p.mine ? h('span', { class: 'good small' }, '✔ ' + S('Yours')) : p.taken_by ? h('span', { class: 'dim small' }, S('Taken by {0}', p.taken_by))
       : btn(me ? S('Take this hero') : '⚔ ' + S('Join as this hero'), () => bgAct('bg_pick', { pick: { kind: 'pool', id: p.id } }), 'sm primary')))))];
+}
+/** Their own characters (copies: whatever the fight does never reaches the real sheet). */
+function ownCards(g, own) {
+  const me = g.me;
+  return [h('div', { class: 'pool' }, ...own.map(c => h('div', { class: 'pcard' + (c.mine ? ' me' : '') },
+    h('b', null, c.name), h('span', { class: 'dim small' }, [c.race, c.cls].filter(Boolean).join(' ') + ` · ${S('Level')} ${c.level}`),
+    h('div', { class: 'drow' }, c.mine ? h('span', { class: 'good small' }, '✔ ' + S('Yours'))
+      : btn(me ? S('Fight as {0}', c.name) : '⚔ ' + S('Join as {0}', c.name), () => bgAct('bg_pick', { pick: { kind: 'own', name: c.name } }), 'sm primary')))))];
 }
 async function bgPoolLook(l, p) {
   try {
@@ -1198,11 +1208,11 @@ async function duelForm(l) {
   const g = bgState();
   let F;
   try { F = await bgFilters(l); } catch (e) { if (e.message !== 'login') say(e.message, true); return null; }
-  const st = l ? l.settings : { level: 3, free_level: true, max_level: 20, ffa: true, kinds: ['hero', 'monster'], map: 'arena', spectators: true,
+  const st = l ? l.settings : { level: 3, free_level: true, max_level: 20, ffa: true, kinds: ['hero', 'monster', 'own'], map: 'arena', spectators: true,
     difficulty: 'normal', enemy_style: 'monsters', enemy_filters: {}, trophies: true };
   const ef = st.enemy_filters || {};
   const v = { mode: l ? l.mode : (BG.newMode || 'duel'), name: l ? l.name : '', level: st.level || 3, free_level: !!st.free_level, max_level: st.max_level || 20,
-    ffa: !!st.ffa, kinds: new Set((st.kinds || []).filter(k => k === 'hero' || k === 'monster')), map: st.map || 'arena', spectators: st.spectators !== false,
+    ffa: !!st.ffa, kinds: new Set((st.kinds || []).filter(k => k === 'hero' || k === 'monster' || k === 'own')), map: st.map || 'arena', spectators: st.spectators !== false,
     gold: Math.max(0, +st.gold || 0), difficulty: st.difficulty || 'normal', style: st.enemy_style || 'monsters', trophies: st.trophies !== false,
     f: { types: new Set(ef.types || []), books: new Set(ef.books || []), envs: new Set(ef.envs || []), sizes: new Set(ef.sizes || []),
       cr_min: ef.cr_min || '', cr_max: ef.cr_max || '' } };
@@ -1226,7 +1236,7 @@ async function duelForm(l) {
       m !== 'arena' ? sect(S('Sides'), segOf(v.ffa ? 'ffa' : 'teams', [['ffa', S('Free-for-all'), S('Free-for-all: everyone on a team of their own')], ['teams', S('Teams'), S('Everyone picks a team')]], x => { v.ffa = x === 'ffa'; })) : null,
       m === 'arena' ? sect(S('Level'), lvl) : sect(S('Level'), h('div', { class: 'drow' }, segOf(v.free_level ? 'own' : 'same', [['own', S('Each their own'), S('Everyone picks their own level (up to the highest)')], ['same', S('Same for all')]],
         x => { v.free_level = x === 'own'; drawLvl(); }), lvl)),
-      m !== 'arena' ? sect(S('Fight as'), h('div', { class: 'chips pick' }, kind('hero', '🛡 ' + S('A hero')), kind('monster', '🐉 ' + S('A monster')))) : null,
+      m !== 'arena' ? sect(S('Fight as'), h('div', { class: 'chips pick' }, kind('hero', '🛡 ' + S('A hero')), kind('monster', '🐉 ' + S('A monster')), kind('own', '🧝 ' + S('Own characters')))) : null,
       fights ? sect(S('Difficulty'), segOf(v.difficulty, DIFFS(), x => { v.difficulty = x; })) : null,
       fights ? sect(S('Opposition'), segOf(v.style, STYLES(), x => { v.style = x; })) : null,
       fights ? enemyFilters(v, F) : null,
