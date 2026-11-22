@@ -1,24 +1,47 @@
-/* The editor's look (app/ui/theme.py) on the player page: three close tones of parchment written on in ink, square, compact.
-   :root is theme.py's LIGHT; data-look=dim (the menu's Dim parchment; a dark-mode device starts there) is its DARK, data-look=dark
-   its DEEP - keep them alike.
+/* The editor's look (app/ui/theme.py) on the player page: three close tones of a paper written on in ink, square, compact.
+   The palettes are theme.py's PALETTES, each light and dark: data-look=<palette>-<light|dark> (portal.js setLook) - keep
+   them alike. :root is parchment-light (theme.py LIGHT). Any element with a data-look takes that palette (the picker's
+   previews).
    The fonts are the editor's (app/ui/fonts, sent by the server as /fonts/...). */
 @font-face{font-family:'Alegreya Sans';src:url(/fonts/AlegreyaSans-Regular.ttf);font-weight:400;font-display:swap}
 @font-face{font-family:'Alegreya Sans';src:url(/fonts/AlegreyaSans-Bold.ttf);font-weight:700;font-display:swap}
 @font-face{font-family:'Cinzel';src:url(/fonts/Cinzel-Variable.ttf);font-weight:400 900;font-display:swap}
-:root{--bg:#b09c74;--panel:#c0ae86;--raised:#c8b790;--hover:#b5a279;--border:#917c54;--text:#2f2317;--dim:#564530;--handle:#8a7650;
+:root,[data-look=parchment-light]{--bg:#b09c74;--panel:#c0ae86;--raised:#c8b790;--hover:#b5a279;--border:#917c54;--text:#2f2317;--dim:#564530;--handle:#8a7650;
   --input:#d6c7a1;--paper:#d6c7a1;--paper-alt:#cdbd96;--paper-hover:#e0d3b0;--paper-down:#baa77d;--ink-dim:#6b583e;--edge:#5e4c33;--spell:#5a3a8c;
   --accent:#7b4a14;--accent-dim:#7b3b20;--accent-hover:#91482a;--gold:#9a7430;--good:#3f7a24;--bad:#a8301f;--warn:#96580c;--blue:#1f6585;--pink:#9c2a66;
   --on-accent:#ece0c0;--glass:#c8b790f2;--dock:230px;
   --font:'Alegreya Sans','Segoe UI',system-ui,sans-serif;--head:'Cinzel','Alegreya Sans','Segoe UI',serif}
-:root[data-look=dim]{--bg:#897a5a;--panel:#968869;--raised:#9c8f70;--hover:#8d7e5e;--border:#716142;--text:#19120b;--dim:#34291d;--handle:#6c5c3e;
-  --input:#a79b7e;--paper:#a79b7e;--paper-alt:#a09375;--paper-hover:#afa589;--paper-down:#918262;--ink-dim:#403525;--edge:#493b28;--spell:#3a2560;
-  --accent:#4a2c0c;--accent-dim:#6e331b;--accent-hover:#84401f;--gold:#785a25;--good:#264916;--bad:#6b1b10;--warn:#5a3507;--blue:#133d50;--pink:#5e193d;
-  --on-accent:#e4d8b8;--glass:#9c8f70f2}
-/* data-look=dark (the menu's Dark parchment): theme.py's DEEP - deep brown, written on in cream */
-:root[data-look=dark]{--bg:#2a1f15;--panel:#34271b;--raised:#3d2e20;--hover:#463628;--border:#5c4830;--text:#e2d3ae;--dim:#b09c78;--handle:#6e5b40;
+/* parchment-dark: theme.py's DEEP - deep brown, written on in cream */
+[data-look=parchment-dark]{--bg:#2a1f15;--panel:#34271b;--raised:#3d2e20;--hover:#463628;--border:#5c4830;--text:#e2d3ae;--dim:#b09c78;--handle:#6e5b40;
   --input:#453524;--paper:#453524;--paper-alt:#3e2f20;--paper-hover:#52402b;--paper-down:#30241a;--ink-dim:#a8956f;--edge:#7a6444;--spell:#b79be6;
   --accent:#d9a253;--accent-dim:#8a3d22;--accent-hover:#a04a2b;--gold:#c09a4a;--good:#86b85c;--bad:#e0705c;--warn:#dba24a;--blue:#6bb0cf;--pink:#d67aa8;
   --on-accent:#f0e4c4;--glass:#3d2e20f2;color-scheme:dark}
+/* Sea Chart, Ashen Stone, Elven Sage, Feywild Rose (theme.py SEA_/STONE_/SAGE_/ROSE_ LIGHT and DARK) */
+[data-look=sea-light]{--bg:#94a3a8;--panel:#a7b4b8;--raised:#b1bdc0;--hover:#99a7ac;--border:#748288;--text:#15212a;--dim:#3b4850;--handle:#6e7c82;--input:#c3ccce;--paper:#c3ccce;--paper-alt:#b8c2c5;--paper-hover:#d2d9da;--paper-down:#a2afb3;--ink-dim:#545f65;--edge:#435057;--spell:#4a3a8a;--accent:#9a4028;--accent-dim:#1f3d58;--accent-hover:#244767;--gold:#806a30;--good:#2e6a3c;--bad:#a02e26;--warn:#8a5810;--blue:#1a5a86;--pink:#8e2e60;--on-accent:#e4ecee;--glass:#b1bdc0f2;color-scheme:light}
+[data-look=sea-dark]{--bg:#191e1f;--panel:#212729;--raised:#282f32;--hover:#2c3537;--border:#3d494d;--text:#ccd5d7;--dim:#95a8ac;--handle:#465458;--input:#313a3d;--paper:#313a3d;--paper-alt:#2b3336;--paper-hover:#3a4548;--paper-down:#232a2c;--ink-dim:#8da1a5;--edge:#56666c;--spell:#aca2d8;--accent:#d68671;--accent-dim:#2c567c;--accent-hover:#336591;--gold:#c5aa63;--good:#71c184;--bad:#da736c;--warn:#d6a45c;--blue:#6cadda;--pink:#d57caa;--on-accent:#e5eaeb;--glass:#282f32f2;color-scheme:dark}
+[data-look=stone-light]{--bg:#9c9a94;--panel:#adaba5;--raised:#b6b4ae;--hover:#a09e98;--border:#7d7c78;--text:#1f2124;--dim:#444546;--handle:#767672;--input:#c7c5bf;--paper:#c7c5bf;--paper-alt:#bdbbb5;--paper-hover:#d5d4cf;--paper-down:#a9a7a1;--ink-dim:#5b5c5c;--edge:#4c4d4c;--spell:#4c3a80;--accent:#3e4a58;--accent-dim:#5a2a30;--accent-hover:#693138;--gold:#85703a;--good:#3a6a3a;--bad:#9a2a24;--warn:#8a5a10;--blue:#245a7a;--pink:#8a2c5a;--on-accent:#ece6e0;--glass:#b6b4aef2;color-scheme:light}
+[data-look=stone-dark]{--bg:#1f1d19;--panel:#292721;--raised:#312f28;--hover:#37342d;--border:#4c483e;--text:#d7d4cc;--dim:#aca695;--handle:#575347;--input:#3c3a31;--paper:#3c3a31;--paper-alt:#35332c;--paper-hover:#48443b;--paper-down:#2b2a24;--ink-dim:#a59f8d;--edge:#6b6657;--spell:#b1a4d6;--accent:#8ca1ba;--accent-dim:#73363d;--accent-hover:#873f47;--gold:#bea66a;--good:#7bb77b;--bad:#da726c;--warn:#d6a65c;--blue:#71b0d5;--pink:#d57ca7;--on-accent:#ebe9e5;--glass:#312f28f2;color-scheme:dark}
+[data-look=sage-light]{--bg:#9ea58a;--panel:#b0b69b;--raised:#b9bfa4;--hover:#a2a98e;--border:#7e856d;--text:#1e2617;--dim:#444c3a;--handle:#787f68;--input:#c9ceb4;--paper:#c9ceb4;--paper-alt:#bfc4aa;--paper-hover:#d6dac7;--paper-down:#abb197;--ink-dim:#5c6250;--edge:#4c5440;--spell:#543a86;--accent:#3d5a22;--accent-dim:#2f4a28;--accent-hover:#37572f;--gold:#7f6f2a;--good:#2f6a1c;--bad:#9a3020;--warn:#86580c;--blue:#23607a;--pink:#8c2e5e;--on-accent:#e6ead6;--glass:#b9bfa4f2;color-scheme:light}
+[data-look=sage-dark]{--bg:#1e2018;--panel:#282a20;--raised:#303326;--hover:#35392b;--border:#4a4f3b;--text:#d7dbc7;--dim:#adb48d;--handle:#555a44;--input:#3b3f2f;--paper:#3b3f2f;--paper-alt:#343729;--paper-hover:#464a38;--paper-down:#2a2d22;--ink-dim:#a6ae84;--edge:#686f53;--spell:#b4a2d7;--accent:#a2cd7a;--accent-dim:#456d3b;--accent-hover:#518045;--gold:#cab55e;--good:#7bd45e;--bad:#da7b6c;--warn:#d6a85c;--blue:#70b8d6;--pink:#d47ca9;--on-accent:#ebede3;--glass:#303326f2;color-scheme:dark}
+[data-look=rose-light]{--bg:#b49a98;--panel:#c4abaa;--raised:#ccb5b3;--hover:#b89e9c;--border:#927a7a;--text:#2c1a1e;--dim:#554043;--handle:#8b7473;--input:#dbc6c3;--paper:#dbc6c3;--paper-alt:#d2bbb9;--paper-hover:#e4d4d2;--paper-down:#c0a7a5;--ink-dim:#6b5859;--edge:#5d484a;--spell:#52348a;--accent:#7a2a46;--accent-dim:#6a2440;--accent-hover:#7c2a4b;--gold:#8c6a2c;--good:#3a6a32;--bad:#a42a26;--warn:#8e5212;--blue:#2a5a80;--pink:#8c2a6a;--on-accent:#f4e6e8;--glass:#ccb5b3f2;color-scheme:light}
+[data-look=rose-dark]{--bg:#211817;--panel:#2b1f1f;--raised:#342625;--hover:#3a2a29;--border:#513b39;--text:#ddc8c6;--dim:#b88f89;--handle:#5d4341;--input:#402f2d;--paper:#402f2d;--paper-alt:#392928;--paper-hover:#4c3736;--paper-down:#2e2221;--ink-dim:#b28680;--edge:#725350;--spell:#b49fdb;--accent:#d07696;--accent-dim:#7e2b4c;--accent-hover:#933259;--gold:#cca45c;--good:#7fbe74;--bad:#da706c;--warn:#d69b5c;--blue:#75a9d2;--pink:#d77ab7;--on-accent:#eee4e2;--glass:#342625f2;color-scheme:dark}
+/* the look: ☀/☾ in the bar; the palette dropdown in ⚙ (the page shows the one under the pointer); the first visit's picker */
+#mode{font-size:16px;padding:0 6px;flex:none;width:30px}
+.lookdd{position:relative}.lookdd>button{width:100%;display:flex;align-items:center;gap:8px;text-align:left}.lookdd>button .grow{flex:1}
+.lookdd ul{list-style:none;margin:0;padding:2px;position:absolute;left:0;right:0;top:100%;z-index:11;background:var(--paper);border:1px solid var(--edge);box-shadow:0 8px 20px #0008}
+.lookdd li{display:flex;align-items:center;gap:8px;padding:4px 6px;cursor:pointer;color:var(--text)}.lookdd li:hover,.lookdd li:focus{background:var(--paper-hover);outline:0}
+.lookdd li[aria-selected=true]{background:var(--accent-dim);color:var(--on-accent)}
+.sw{display:inline-flex;width:30px;height:14px;border:1px solid var(--edge);flex:none}.sw i{flex:1}
+#lookpick{position:fixed;inset:0;z-index:30;background:#000a;display:flex;align-items:center;justify-content:center;padding:12px}
+#lookpick .box{background:var(--panel);color:var(--text);border:1px solid var(--gold);padding:14px;width:min(760px,100%);max-height:100%;overflow:auto;display:flex;flex-direction:column;gap:10px}
+#lookpick h2{font:700 18px var(--head);margin:0}#lookpick .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+#lookpick .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px}
+.lookcard{display:flex;flex-direction:column;gap:5px;padding:0;text-align:left;background:var(--bg);color:var(--text);border:2px solid var(--border);white-space:normal}
+.lookcard:hover{background:var(--bg);border-color:var(--gold)}.lookcard.picked{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
+.lookcard .t{font:700 13px var(--head);padding:5px 8px 0}.lookcard .pv{background:var(--panel);padding:6px 8px;display:flex;flex-direction:column;gap:4px;border-top:1px solid var(--border)}
+.lookcard .pv .ln{background:var(--paper);color:var(--text);border:1px solid var(--edge);padding:1px 6px;font-size:12.5px}
+.lookcard .pv .ln.sel{background:var(--accent-dim);color:var(--on-accent);border-color:var(--accent-dim)}
+.lookcard .pv .st{display:flex;gap:8px;font-size:12px;flex-wrap:wrap}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font:14px/1.3 var(--font);overflow:hidden}
 button,input,select,textarea{font:inherit;color:var(--text);background:var(--paper);border:1px solid var(--edge);border-radius:0;padding:3px 8px}
@@ -209,7 +232,7 @@ button.wait::after{content:'';display:inline-block;width:8px;height:8px;margin-l
   body.myturn header{box-shadow:inset 0 -3px 0 var(--good)}
 }
 @media (pointer:coarse){
-  button.sm,.quick button,.seg button,#zin,#zout,#zfit,#dockfold,#menu,#music,#nowheart{min-height:40px;min-width:40px}
+  button.sm,.quick button,.seg button,#zin,#zout,#zfit,#dockfold,#menu,#mode,#music,#nowheart{min-height:40px;min-width:40px}
   .chip{min-height:36px;display:inline-flex;align-items:center}.li{min-height:40px}#views button{min-height:34px}
   .tile .sv{min-height:36px}#actionbar button.act.ico{width:46px;height:46px}
   [data-tip]{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}

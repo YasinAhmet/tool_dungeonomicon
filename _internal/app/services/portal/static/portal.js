@@ -18,32 +18,107 @@ const store = (k, v) => { try {   // dp_: what a browser kept before the rename,
   if (v === undefined) return JSON.parse(localStorage.getItem('dm_' + k) ?? localStorage.getItem('dp_' + k));
   localStorage.setItem('dm_' + k, JSON.stringify(v)); localStorage.removeItem('dp_' + k);
 } catch { return null; } };
-/** The page's look (portal.css): the editor's parchment, the same less bright ('dim') or deep brown ('dark') - this
- *  device's pick in the ⚙ menu; until one is picked, a dark-mode device starts dim. (What an older page kept: 'dim',
- *  true or false.) LOOK: the colours the canvases take from it (the bare map). */
-const LOOK = {}, LOOKS = ['parchment', 'dim', 'dark'];
-function setLook(name) {
-  if (name != null) store('look', name);
-  let pick = store('look');
-  if (!LOOKS.includes(pick)) { const old = store('dim'); pick = old == null ? null : old ? 'dim' : 'parchment'; }
-  const on = pick || (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dim' : 'parchment');
+/** The page's look (portal.css): a palette (the editor's, theme.py PALETTES) light or dark - '<palette>-<light|dark>'.
+ *  The player's pick (⚙ Palette, ☀/☾ in the bar, the first visit's picker); until one is picked, the device's own
+ *  dark mode decides light or dark. (What an older page kept: 'parchment', 'dim', 'dark', or true/false.)
+ *  LOOK: the colours the canvases take from it (the bare map). */
+const LOOK = {}, PALETTES = [['parchment', 'Parchment'], ['sea', 'Sea Chart'], ['stone', 'Ashen Stone'], ['sage', 'Elven Sage'], ['rose', 'Feywild Rose']];
+const LOOKS = PALETTES.flatMap(([p]) => [p + '-light', p + '-dark']);
+const OLD_LOOK = { parchment: 'parchment-light', dim: 'parchment-dark', dark: 'parchment-dark', true: 'parchment-dark', false: 'parchment-light' };
+const lookName = v => LOOKS.includes(v) ? v : OLD_LOOK[v] || null;
+const deviceDark = () => !!(window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches);
+function paintLook(on) {                              // (also the dropdown's preview: shown, not kept)
   document.documentElement.dataset.look = on;
   const cs = getComputedStyle(document.documentElement);
   for (const k of ['bg', 'raised', 'text', 'dim']) LOOK[k] = cs.getPropertyValue('--' + k).trim() || { bg: '#b09c74', raised: '#c8b790', text: '#2f2317', dim: '#564530' }[k];
   const meta = document.querySelector('meta[name=theme-color]');
   if (meta) meta.content = LOOK.bg;
+  if ($('mode')) $('mode').textContent = on.endsWith('-dark') ? '☀' : '☾';    // (its words: header(), once the page has them)
+}
+function setLook(name) {
+  if (name != null) store('look', lookName(name));
+  const on = lookName(store('look')) || lookName(store('dim')) || (deviceDark() ? 'parchment-dark' : 'parchment-light');
+  paintLook(on);
   return on;
 }
 const lookNow = () => document.documentElement.dataset.look;
+const paletteNow = () => lookNow().split('-')[0];
+const darkNow = () => lookNow().endsWith('-dark');
 setLook();
+/** Pick a look: kept here and by the table (api.set_look), for every device of this player. */
+function pickLook(name) { lookAt = Date.now(); const on = setLook(name); if (typeof act === 'function') act('look', { look: on }, true); return on; }
+$('mode').onclick = e => { e.stopPropagation(); pickLook(paletteNow() + (darkNow() ? '-light' : '-dark')); if (ST) { render(); header(); } };
+const swatch = look => h('span', { class: 'sw', 'data-look': look, 'aria-hidden': 'true' },
+  h('i', { style: 'background:var(--bg)' }), h('i', { style: 'background:var(--paper)' }), h('i', { style: 'background:var(--accent-dim)' }));
+/** ⚙ Palette: a dropdown of the palettes; while it is open the page shows the one under the pointer (or the keys),
+ *  and goes back to the chosen one when it closes without a pick. */
+function paletteDropdown() {
+  const mode = darkNow() ? '-dark' : '-light', box = h('div', { class: 'lookdd' });
+  const name = p => S(PALETTES.find(x => x[0] === p)[1]);
+  const head = h('button', { type: 'button', 'aria-haspopup': 'listbox', 'aria-expanded': 'false', 'aria-label': S('Palette') },
+    swatch(paletteNow() + mode), h('span', { class: 'grow' }, name(paletteNow())), '▾');
+  let list = null;
+  const shut = () => { if (!list) return; list.remove(); list = null; head.setAttribute('aria-expanded', 'false'); paintLook(setLook()); };
+  head.onclick = e => {
+    e.stopPropagation();
+    if (list) return shut();
+    list = h('ul', { role: 'listbox', 'aria-label': S('Palette'), onmouseleave: () => paintLook(setLook()) },
+      ...PALETTES.map(([p, w]) => h('li', { role: 'option', tabindex: 0, 'aria-selected': String(p === paletteNow()),
+        onmouseenter: () => paintLook(p + mode), onfocus: () => paintLook(p + mode),
+        onclick: ev => { ev.stopPropagation(); list.remove(); list = null; pickLook(p + mode); menu(true); render(); },
+        onkeydown: ev => {
+          if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); ev.target.click(); }
+          else if (ev.key === 'Escape') { ev.preventDefault(); shut(); head.focus(); }
+          else if (ev.key === 'ArrowDown' || ev.key === 'ArrowUp') { ev.preventDefault(); const n = ev.key === 'ArrowDown' ? ev.target.nextSibling : ev.target.previousSibling; if (n) n.focus(); }
+        } }, swatch(p + mode), S(w))));
+    box.appendChild(list);
+    head.setAttribute('aria-expanded', 'true');
+    (list.querySelector('[aria-selected=true]') || list.firstChild).focus({ preventScroll: true });
+  };
+  box.appendChild(head);
+  return box;
+}
+/** The first visit: the player picks a palette (each card shows it) and light or dark before anything else. */
+function lookPicker() {
+  if ($('lookpick')) return;
+  let dark = deviceDark(), pick = null;
+  const el = h('div', { id: 'lookpick' });
+  const draw = () => {
+    const cards = PALETTES.map(([p, w]) => {
+      const look = p + (dark ? '-dark' : '-light');
+      return h('button', { type: 'button', class: 'lookcard' + (pick === p ? ' picked' : ''), 'data-look': look, 'aria-pressed': String(pick === p),
+        onclick: () => { pick = p; paintLook(look); draw(); } },
+        h('span', { class: 't' }, S(w)),
+        h('span', { class: 'pv' },
+          h('span', { class: 'ln' }, S('Longsword')), h('span', { class: 'ln sel' }, S('Healing potion')),
+          h('span', { class: 'st' }, h('span', { class: 'good' }, S('HP') + ' 38/44'), h('span', { class: 'bad' }, S('Poisoned')),
+            h('span', { class: 'acc' }, S('Long rest')))));
+    });
+    el.replaceChildren(h('div', { class: 'box', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'lookpicktitle' },
+      h('h2', { id: 'lookpicktitle' }, S('Pick your colours')),
+      h('div', { class: 'small dim' }, S('You can change them any time: ☀/☾ in the bar, and the palette under ⚙.')),
+      h('div', { class: 'row' },
+        h('button', { type: 'button', class: dark ? '' : 'on', 'aria-pressed': String(!dark), onclick: () => { dark = false; if (pick) paintLook(pick + '-light'); draw(); } }, '☀ ' + S('Light')),
+        h('button', { type: 'button', class: dark ? 'on' : '', 'aria-pressed': String(dark), onclick: () => { dark = true; if (pick) paintLook(pick + '-dark'); draw(); } }, '☾ ' + S('Dark'))),
+      h('div', { class: 'cards' }, ...cards),
+      h('div', { class: 'row' }, h('span', { class: 'grow' }),
+        h('button', { type: 'button', class: 'primary', disabled: !pick, onclick: () => { pickLook(pick + (dark ? '-dark' : '-light')); el.remove(); render(); } }, S('Use these colours')))));
+  };
+  draw();
+  document.body.appendChild(el);
+  const first = el.querySelector('.lookcard');
+  if (first) first.focus({ preventScroll: true });
+}
 /** The look is the player's, kept by the table (api.set_look): the tunnel's address - and so this browser's storage -
  *  changes from session to session. Their pick on the server wins; a pick only this browser kept goes up once. */
 let lookSent = false, lookAt = 0;
 function lookFrom(me) {
-  const mine = store('look');
+  const mine = lookName(store('look'));
   if (Date.now() - lookAt < 5000) return;             // (just picked here: a state already on its way says the old one)
-  if (LOOKS.includes(me.look)) { if (me.look !== mine) setLook(me.look); }
-  else if (LOOKS.includes(mine) && !lookSent && typeof act === 'function') { lookSent = true; setTimeout(() => act('look', { look: mine }, true)); }
+  const theirs = lookName(me.look);
+  if (theirs) { if (theirs !== mine && !$('lookpick')) setLook(theirs); }
+  else if (mine && !lookSent && typeof act === 'function') { lookSent = true; setTimeout(() => act('look', { look: mine }, true)); }
+  else if (!mine) lookPicker();                       // never picked, here or on another device: the first visit's picker
 }
 /** A badge's colour (made for the dark map) as ink on the parchment. */
 const inkc = c => !c || c.startsWith('var(') ? c : `color-mix(in srgb, ${c} 42%, var(--text))`;
@@ -627,6 +702,8 @@ function header() {
     b.title = words;
   }
   $('views').setAttribute('aria-label', S('Views'));
+  const modeWords = darkNow() ? S('Light mode') : S('Dark mode');
+  $('mode').title = modeWords; $('mode').setAttribute('aria-label', modeWords);
   $('menu').title = S('Settings');
   $('menu').setAttribute('aria-label', S('Settings'));
   $('zfit').textContent = '⤢'; $('zfit').setAttribute('aria-label', S('Fit'));
@@ -652,10 +729,9 @@ function menu(rebuild) {
   pop.replaceChildren(...[                              // (no null: replaceChildren would print it)
     h('label', { class: 'f' }, S('Language')), lang,
     ...qualityPickers(),
-    h('label', { class: 'f' }, S('Look')),
-    h('select', { 'aria-label': S('Look'), onchange: e => { lookAt = Date.now(); setLook(e.target.value); menu(true); render(); act('look', { look: e.target.value }, true); } },
-      ...[['parchment', 'Bright parchment'], ['dim', 'Dim parchment'], ['dark', 'Dark parchment']].map(([v, w]) =>
-        h('option', { value: v, selected: v === lookNow() }, S(w)))),
+    h('label', { class: 'f' }, S('Palette')), paletteDropdown(),
+    h('button', { class: darkNow() ? 'on' : '', 'aria-pressed': String(darkNow()), onclick: e => { e.stopPropagation(); $('mode').click(); menu(true); } },
+      (darkNow() ? '☾ ' : '☀ ') + S('Dark mode')),
     h('button', { class: UI.mute ? '' : 'on', 'aria-pressed': String(!UI.mute), onclick: toggleMute }, (UI.mute ? '🔇 ' : '🔊 ') + S('Sound when it is your turn')),
     h('button', { class: UI.notify && notifyOk ? 'on' : '', 'aria-pressed': String(!!UI.notify), onclick: toggleNotify, disabled: !window.Notification },
       (UI.notify && notifyOk ? '🔔 ' : '🔕 ') + S('Notify me when the page is in the background')),
@@ -686,7 +762,7 @@ async function setQuality(kind, tier) {
   if (r && r.data && r.data.quality && ST) { ST.me.quality = r.data.quality; render(); renderMusic(); }   // (listening: the
 }                                                       // stream starts over at the new tier)
 $('menu').onclick = e => { e.stopPropagation(); $('musicpop').classList.add('hide'); menu(); };
-document.addEventListener('click', e => { if (!$('menupop').classList.contains('hide') && !$('menupop').contains(e.target) && e.target !== $('menu')) { $('menupop').classList.add('hide'); $('menu').setAttribute('aria-expanded', 'false'); } });
+document.addEventListener('click', e => { if (!$('menupop').classList.contains('hide') && !$('menupop').contains(e.target) && e.target !== $('menu')) { $('menupop').classList.add('hide'); $('menu').setAttribute('aria-expanded', 'false'); setLook(); } });   // (setLook: a palette only previewed goes back)
 /** Don't rebuild a part of the page while someone is typing or choosing in it; do it when they leave the field. */
 function keepFocus(root, fn) {
   const a = document.activeElement;
@@ -840,6 +916,10 @@ const SHATTER = { potion_orange: '#ff7a1a', potion_green: '#a3e635', potion_whit
 const FXC = { hit:'#f87171', miss: '#9aa3b2', crit: '#fbbf24', magic: '#a78bfa', heal: '#5eead4', saved: '#93c5fd', failed: '#f87171', down: '#7f1d1d' };
 const BURSTS = ['sphere', 'cylinder', 'cube', 'square', 'emanation', 'burst'];
 const LOBBED = ['fire', 'acid', 'cold', 'poison'];      // bursts of these arc over as a bead; sound and energy just go off there
+// the light spells give off (services/battle/sight.py: LIGHT_TINT, GLOWS; vfx.py: GLOW_ON) - lightning's is blue
+const LIGHT_TINT = { fire: '#ff9a3c', lightning: '#6fa8ff', radiant: '#fff1b8', force: '#c084fc', cold: '#9bd8ff', light: '#ffe2b0' };
+const GLOWS = { fire: 1, lightning: 1, radiant: 1, force: .6, cold: .4 };
+const GLOW_ON = { bright: .35, dim: .7, dark: 1 };       // how strongly an effect's light shows on a bright, dim, dark map
 const DECAL = { fire: ['#1c1008', .42], cold: ['#dbeafe', .16], acid: ['#84cc16', .16], poison: ['#4ade80', .1] };   // left on the floor
 const LEGENDARY = '#f59e0b';
 // a damage number's look by its type: how far it rises (tiles; below 0 it sinks), a glow, an outline, doubles beside it
@@ -999,6 +1079,43 @@ const FX = {
   },
   add(kind, t0, dur, o) { this.items.push({ kind, t0, dur, ...o }); },
   shake(t0, amp, dur = .28) { if (!CALM.matches) this.shakes.push([t0, dur, amp]); },      // still with reduced motion
+  /** The light a spell's effect gives off for a moment (vfx.py: _light; only GLOWS' kinds shine, in LIGHT_TINT's
+   *  colour): 'fly' from a to b (a lobbed bead arcs `lift` up), 'burst' at a, 'line' / 'flicker' along a to b. */
+  light(t0, dur, dtype, a, r, how = 'burst', b = null, lift = 0) {
+    dtype = (dtype || '').toLowerCase();
+    if (!(dtype in GLOWS) || !a) return;
+    this.add('light', t0, dur, { how, a: [+a[0], +a[1]], b: b ? [+b[0], +b[1]] : null, r, col: LIGHT_TINT[dtype], glow: GLOWS[dtype], lift });
+  },
+  /** Those lights: a soft glow in their colour over the map and the tokens, stronger the darker the map. */
+  glow(g, T, light) {
+    const now = now_(), lit = this.items.filter(i => i.kind === 'light' && now >= i.t0 && now <= i.t0 + i.dur);
+    if (!lit.length) return;
+    const k = GLOW_ON[light] ?? GLOW_ON.bright;
+    g.save(); g.globalCompositeOperation = 'screen';
+    for (const i of lit) {
+      const u = (now - i.t0) / i.dur, [a, b] = [i.a, i.b];
+      let env, spots;
+      if (i.how === 'fly') {
+        env = Math.min(1, u / .15);
+        spots = [[a[0] + (b[0] - a[0]) * u, a[1] + (b[1] - a[1]) * u - 4 * u * (1 - u) * i.lift]];
+      } else if (i.how === 'line' || i.how === 'flicker') {
+        env = (u < .5 ? 1 : (1 - u) / .5) * .6 * (i.how === 'flicker' ? .45 + .55 * Math.abs(Math.sin(Math.floor(now * 30) * 12.9898 + a[0] * 7)) : 1);
+        const n = Math.max(1, Math.floor(Math.hypot(b[0] - a[0], b[1] - a[1]) / 1.5));
+        spots = Array.from({ length: n + 1 }, (_, j) => [a[0] + (b[0] - a[0]) * j / n, a[1] + (b[1] - a[1]) * j / n]);
+      } else {
+        env = Math.min(1, u / .06) * (1 - u) ** 1.2 * 1.6;   // a big flash, then dying away
+        spots = [a];
+      }
+      const al = Math.min(.95, .55 * env * i.glow * k), R = i.r * T;
+      if (al <= .01) continue;
+      for (const [x, y] of spots) {
+        const gr = g.createRadialGradient(x * T, y * T, 0, x * T, y * T, R);
+        gr.addColorStop(0, rgba(i.col, al)); gr.addColorStop(.4, rgba(i.col, al * .45)); gr.addColorStop(1, rgba(i.col, 0));
+        g.fillStyle = gr; g.beginPath(); g.arc(x * T, y * T, R, 0, Math.PI * 2); g.fill();
+      }
+    }
+    g.restore();
+  },
   mine(id) { const c = this.bodies[id]; return !!(c && c.mine); },
   // a token drawn off its place for a while: moved (dx, dy tiles), scaled 1 + k, opacity 1 + a; ease 'bump' there and
   // back, 'to' going there, 'from' coming back. With reduced motion only the fades play.
@@ -1266,6 +1383,8 @@ const FX = {
       } else if (!f.melee && A) {
         const fly = Math.max(.12, Math.min(.32, Math.hypot(T[0] - A[0], T[1] - A[1]) * .028));
         this.add('bolt', t, fly, { a: A, b: f.res === 'miss' ? [T[0] + .55, T[1] - .45] : T, col: f.res === 'miss' ? FXC.miss : col });
+        this.light(t, fly, f.dtype, A, 1.8, 'fly', f.res === 'miss' ? [T[0] + .55, T[1] - .45] : T);   // a Fire Bolt lights its way
+        if (f.res !== 'miss') this.light(t + fly, .3, f.dtype, T, 2);
         hit = t + fly;
       }
       if (f.res === 'miss') {
@@ -1334,9 +1453,11 @@ const FX = {
           const half = Math.min(.9, Math.max(...tiles.map(off)) + .1);
           this.add('front', t, .12 + far * speed, { at: A, ang, half, far, col });
           this.motes(t, .3 + far * speed, A, col, 16, 'burst', far, .065, [ang, half]);
+          this.light(t, .45 + far * speed, dtype, [(A[0] + mid[0]) / 2, (A[1] + mid[1]) / 2], far * .7 + 1.5);
         } else {                                       // the whole line at once (lightning flickers)
           const B = tiles.map(([x, y]) => [x + .5, y + .5]).reduce((m, q) => Math.hypot(q[0] - A[0], q[1] - A[1]) > Math.hypot(m[0] - A[0], m[1] - A[1]) ? q : m);
           this.add('ray', t, .4, { a: A, b: B, col, jag: dtype === 'lightning' });
+          this.light(t, .45, dtype, A, 3, dtype === 'lightning' ? 'flicker' : 'line', B);
         }
         if (tiles.length > 12) this.shake(t, 2);
         this.decal(t + .2, tiles, dtype);
@@ -1349,11 +1470,13 @@ const FX = {
       } else if (BURSTS.includes(shape) && A && Math.hypot(o[0] - A[0], o[1] - A[1]) > 1.5 && LOBBED.includes(dtype)) {
         const fly = Math.max(.25, Math.min(.5, Math.hypot(o[0] - A[0], o[1] - A[1]) * .035));   // a bead (a flask, a glob) arcs over
         this.add('lob', t, fly, { a: A, b: o, col });
+        this.light(t, fly, dtype, A, 2.2, 'fly', o, Math.min(2.5, Math.hypot(o[0] - A[0], o[1] - A[1]) * .25));   // lit on its way
         t += fly;
       }
       const burst = BURSTS.includes(shape), speed = burst ? .035 : .025, small = tiles.length <= 9;
       let far = 0;
       const cells = tiles.map(([x, y]) => { const d = Math.hypot(x + .5 - o[0], y + .5 - o[1]); far = Math.max(far, d); return [x, y, d * speed]; });
+      this.light(t, small ? .4 : .8, dtype, o, far + 3.5);                                                   // and where it goes off
       this.add('flash', t, small ? .3 : .5, { tiles: cells, col, peak: .6 });
       this.decal(t + .15, tiles, dtype);
       if (burst && !small) {
@@ -2197,6 +2320,7 @@ function renderMap() {
   }
   drawImages(g, b, T, 'top');                          // roofs, canopies: over the tokens
   groundLabel(g, b, T);
+  FX.glow(g, T, b.map.light);                          // a spell's light: fire, lightning (blue)...
   FX.over(g, T);
   drawPing(g, T);
   if (FX.frame) return;                                // an animation frame: the board only
@@ -2275,6 +2399,9 @@ $('endturn').onclick = go(() => {
  * inside the walls, thick walls and doors. The scatter comes from roomRand, the same numbers as the DM's map; the
  * rooms are drawn once for a zoom into a picture, panning only moves it. */
 const ROOM = { ink: '#1d1915', paper: '#f2ede1', floor: '#f6f2e9', cache: null };
+/** A layer picture's pixels per tile for a zoom: the next step of √2 up (roomart.py: layer_scale), so zooming within
+ *  a step draws the same picture a little smaller instead of making it again on every turn of the wheel. */
+const layerScale = (T, dpr) => Math.round(2 ** (Math.ceil(Math.log2(Math.max(1, T * (dpr || 1))) * 2 - 1e-9) / 2) * 1000) / 1000;
 function roomRand(x, y, k) {
   let h = (Math.imul(x, 374761393) + Math.imul(y, 668265263) + Math.imul(k, 2147483647)) >>> 0;
   h = Math.imul(h ^ (h >>> 13), 1274126177) >>> 0;
@@ -2286,7 +2413,7 @@ function drawRooms(g, b, T, dpr) {
   let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
   for (const [ax, ay, bx, by] of r.runs.concat(r.slants || [])) { x0 = Math.min(x0, ax, bx); y0 = Math.min(y0, ay, by); x1 = Math.max(x1, ax, bx); y1 = Math.max(y1, ay, by); }
   x0 = Math.floor(x0 - 1.1); y0 = Math.floor(y0 - 1.1); x1 = Math.ceil(x1 + 1.1); y1 = Math.ceil(y1 + 1.1);
-  const k = Math.min(T * (dpr || 1), 4096 / Math.max(1, x1 - x0, y1 - y0));
+  const k = Math.min(layerScale(T, dpr), 4096 / Math.max(1, x1 - x0, y1 - y0));
   let c = ROOM.cache;
   if (!c || c.src !== r || Math.abs(c.k - k) > 1e-3) {
     const cv = document.createElement('canvas');
@@ -2716,7 +2843,7 @@ function drawLight(g, b, T, dpr) {
   const dark = LIGHT[b.map.light];
   if (!dark) return;
   const floors = floorsOf(b.map), FW = b.map.fw || b.map.w, H = b.map.h, x1 = floors[floors.length - 1][1] + FW;
-  const k = Math.min(T * (dpr || 1), 4096 / Math.max(1, x1, H));
+  const k = Math.min(layerScale(T, dpr), 4096 / Math.max(1, x1, H));
   let c = LIGHT.cache;
   if (!c || c.src !== b.lights || c.light !== b.map.light || Math.abs(c.k - k) > 1e-3 || c.w !== x1 || c.h !== H) {
     const cv = document.createElement('canvas');
@@ -2736,7 +2863,8 @@ function drawLight(g, b, T, dpr) {
       q.fillStyle = gr; poly(); q.fill();
       q.globalCompositeOperation = 'source-over';    // firelight: warm in the middle, fading out
       gr = q.createRadialGradient(s.x, s.y, 0, s.x, s.y, reach);
-      gr.addColorStop(0, 'rgba(255,160,70,.27)'); gr.addColorStop(inner, 'rgba(255,160,70,.12)'); gr.addColorStop(1, 'rgba(255,160,70,0)');
+      const hue = s.col || '#ffa046';                  // (a spell's light: its own colour)
+      gr.addColorStop(0, rgba(hue, .27)); gr.addColorStop(inner, rgba(hue, .12)); gr.addColorStop(1, rgba(hue, 0));
       q.fillStyle = gr; poly(); q.fill();
       q.restore();
     }
