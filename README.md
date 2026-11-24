@@ -1,9 +1,15 @@
 
 
-https://github.com/user-attachments/assets/a743fe5f-e1f7-4131-bbed-56d31bf4f3cf
+[![Dungeonomicon trailer: battles with spell light, painted world maps, the player portal, Battlegrounds, Adventurers](.github/preview.webp)](.github/trailer.mp4)
+
+*[Watch the full trailer (40 s)](.github/trailer.mp4)*
 
 # tool_dungeonomicon
-A tool that allows many things for a DnD session. Combat management, map drawing, character creation and tracking, audio steering etc..
+A Dungeon Master's table for D&D 5e on your own PC: characters with a full rules engine, battle maps with spell light
+and shadows, painted world maps, a player portal in your players' browsers, Battlegrounds (duels and arenas),
+Adventurers (one shared world for many groups), music and sound, and a Discord bot.
+
+**[Download the newest release](../../releases/latest)** - one zip, unzip it, run `App.exe`.
 
 Everything began when I wanted to steer some background music to my players.
 Then I kept adding more and more into it recently. It evolved into something actually useful. So I'm sharing it with you guys and gals.
@@ -18,17 +24,31 @@ Below this, you will find a guide prepared by AI, however feel free to come and 
 # Dungeonomicon guide
 
 Dungeonomicon is a Dungeon Master desktop app for D&D 5e (2014 rules). It covers characters with a full rules engine,
-battles on a map, a rules library with your own homebrew, a creature generator, dice, background music and sound, a
-player portal in the browser, and a Discord bot. It all runs on your own PC.
+battles on a map, painted world maps with travel, a rules library with your own homebrew, a creature generator, dice,
+background music and sound, a player portal in the browser, and a Discord bot. It all runs on your own PC.
+
+Three programs share one folder:
+
+* **`App.exe`** - the campaign editor: your party, battles, world map, library, audio and player portal.
+* **`Battlegrounds.exe`** - duels, skirmishes and the arena, apart from your campaign.
+* **`Adventurers.exe`** - one shared world for many groups: accounts, quests, towns, shops and fights in the browser.
 
 ## Getting started
 
-1. Download **Dungeonomicon-vX.zip** from [Releases](../../releases) (Windows, 64-bit): the one marked *Latest* is
-   the LTS (stable) release, the newest *Pre-release* is Cutting Edge.
-2. Unzip it anywhere, for example to your desktop.
+1. Download **Dungeonomicon-vX.zip** from [Releases](../../releases) (Windows 10/11, 64-bit): the one marked
+   *Latest* is the LTS (stable) release, the newest *Pre-release* is Cutting Edge. It is **one zip with everything**:
+   the three programs, the updater and all the modules (books, tokens, art, sounds). You don't need the other files
+   of the release.
+2. Unzip it anywhere you can write to, for example your desktop or Documents (not Program Files). Unzip it first:
+   running `App.exe` from inside the zip window doesn't work.
 3. Open the `Dungeonomicon` folder and double-click **`App.exe`** (the campaign editor), **`Battlegrounds.exe`**
-   (duels, skirmishes and arenas) or **`Adventurers.exe`** (one shared world for many groups - Cutting Edge only for
-   now). Nothing needs installing.
+   (duels, skirmishes and arenas) or **`Adventurers.exe`** (one shared world for many groups). Nothing needs
+   installing.
+
+On its first start the program fetches whatever its folder is missing, on its own: a module the folder lacks (for
+example after you got the program some other way than the release zip; the loading window shows the download), and
+`cloudflared`, the small Cloudflare program that gives the player portal its public link. Windows may warn about an
+unknown publisher the first time: choose **More info ▸ Run anyway**.
 
 To get the newest build later, double-click **`Update.exe`** in the same folder (no need to close the apps first) and pick
 **LTS** (the stable release) or **Cutting Edge** (the newest build); you can switch between them any time. It downloads only
@@ -49,8 +69,11 @@ subclass each, 9 races, 319 spells, 322 creatures and about 1,000 items.
 
 Other content comes as **modules**: `.dmmod` files that hold books, creatures, pictures, sounds or portraits.
 
-* Put `.dmmod` files in the **`modules`** folder next to `App.exe` (it starts empty, apart from a read-me). Their
-  books show up in **Settings ▸ Sourcebooks** at once, even while the app is running.
+* The release zip comes with every module already in the **`modules`** folder next to `App.exe`. Put other `.dmmod`
+  files there too; their books show up in **Settings ▸ Sourcebooks** at once, even while the app is running.
+* The asset modules (action icons, item sprites, map props, table sounds and world map art) are needed for the
+  program to look and sound right: when one is missing, the program downloads it again on its next start. The book
+  modules are yours to keep or take out.
 * Take a file out and its content goes with it. A character keeps what it already has, and shows the missing book
   by name.
 * **Settings ▸ Installations** lists your modules. From there you can switch them off, remove them, export them, or
@@ -108,10 +131,20 @@ team notes.
 Shortcuts: **Ctrl+Space** ends the turn, **Ctrl+Z** undoes the last change, **Ctrl+E** switches between Edit and
 Play, and **D** and **H** damage or heal the selected token.
 
+**The look of a fight:** spells light the map and walls cast shadows, area spells show the tiles they will cover
+before you cast, and thrown weapons land where they fall. Start from a **premade battle map**, paint the ground with
+textures (grass, stone, sand, water...) and drop painted props.
+
 **Drawing on the map:** ✏ draw turns rough strokes into straight walls along the grid (a stroke that ends near its
 start becomes a room), 〰 draws free lines such as rivers and paths, and 🧽 erases. Map symbols (doors, secret doors,
 stairs, traps, chests, pillars, fire, water, trees...) can be dragged onto a tile. With ✋ select, drag a symbol to
 move it; **R** rotates it and **Del** removes it.
+
+## The world map
+
+The **World map** is a painted map of your campaign: land and sea, mountains, forests, roads, rivers and cliffs, towns
+and castles as painted or pen-and-ink stamps, labels and your own notes. Travel takes days: move the party along a
+route and the calendar follows. Players see the parts you reveal on their page.
 
 ## The Library
 
@@ -124,9 +157,10 @@ can filter by almost anything, and they understand a short search syntax, for ex
 
 The 🌐 button on the toolbar opens **Party ▸ Player portal**.
 
-1. The first time, press **Download cloudflared**. This is one program from Cloudflare's official releases (about
-   60 MB, saved to `Documents\Dungeonomicon\tools`). Its signature is checked, and nothing is installed.
-2. Press **Share with players**. A free Cloudflare tunnel gives the page a public `https://….trycloudflare.com`
+1. The player portal needs **cloudflared**, one program from Cloudflare's official releases (about 60 MB, saved to
+   `Documents\Dungeonomicon\tools`). The program downloads it by itself on its first start (or press **Download
+   cloudflared**). Its signature is checked, and nothing is installed.
+2. Press **Share with players** (the program shares at start already). A free Cloudflare tunnel gives the page a public `https://….trycloudflare.com`
    address. There's no router setup and no open ports, and your IP stays hidden. The address changes each time you
    start sharing.
 3. Every player who owns a character gets a **personal link** that logs them in. Copy it, or have the Discord bot
@@ -144,6 +178,8 @@ down.
 
 ## Battlegrounds: duels, skirmishes and the arena (`Battlegrounds.exe`)
 
+Players can also fight as their own campaign characters when you allow it.
+
 Next to `App.exe` is a second program, **`Battlegrounds.exe`**: fights for fun, apart from your campaign. It uses the
 same `modules` folder but keeps everything else apart: its own settings, players, layouts and logs in
 `Documents\Dungeonomicon Battlegrounds`, and its own player portal with its own links (port 8810, so both programs can
@@ -158,6 +194,18 @@ run at once). Your players' campaign characters never appear in it.
   remove or change anything, then **Confirm and start**. Enemies play their own turns unless you untick Autoplay.
 * Every battle - in both programs - is recorded as a replay while **Record battles** is ticked. The Replays page lists
   them with who fought; **Watch** plays one for everyone at 0.25x-8x, **Fight again** sets it up to be fought anew.
+
+## Adventurers: one shared world (`Adventurers.exe`)
+
+A third program for a persistent world shared by many groups. Players make an account on the portal page, build a
+character with point buy, join or found a group and set off on a painted map: quests, towns with shops and selling,
+camping and rests, routes and a next step that always says what to do. Fights play out on the battle map in the
+browser, with spoils and level-ups. It keeps its own data in `Documents\Dungeonomicon Adventurers`.
+
+## Looks and languages
+
+**Settings ▸ Look** picks a palette (Parchment, Sea Chart, Ashen Stone, Elven Sage, Feywild Rose), each
+light or a real dark mode; the player portal follows it. **Settings ▸ Language** picks the interface language.
 
 ## Discord bot (optional)
 
