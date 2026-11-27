@@ -89,6 +89,7 @@ function mapMode() {
 function setMapMode(m) {
   WM.mode = m; store('mapmode', m);
   if (typeof bgSwap === 'function' && bgSwap()) { render(); return; }        // to or from a lobby's map: everything anew
+  applyScene();                                                       // (the layout follows the map shown: portal.js)
   renderWorld(); if (m === 'battle') renderMap();
 }
 

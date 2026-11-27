@@ -639,9 +639,21 @@ function applyRights() {
     : chat ? S('Say something to the table') : S('Type a /command (/help)');
   if (UI.tab === 'teamnotes' && !may('team_notes')) UI.tab = 'overview';
 }
+/** A wide screen's layout follows the scene (what the table is doing, not a click): a fight (the turn order a rail
+ *  beside the map), the battle map out of a fight, the world (the sheet roomier). The table feed sits under the sheet
+ *  in every one, so the map has the full height. Not the Adventurers or Battlegrounds faces; phones keep their views. */
+function applyScene() {
+  const b = document.body, mode = typeof mapMode === 'function' ? mapMode() : 'battle';
+  const other = ST.edition === 'adventurers' || ST.edition === 'battlegrounds' || b.classList.contains('adv') || b.classList.contains('bgmode');
+  const scene = other || !ST.character || (mode !== 'battle' && mode !== 'world') ? ''
+    : mode === 'world' ? 'world' : ST.battle.status === 'active' ? 'fight' : 'explore';
+  b.classList.toggle('desk', !!scene);
+  if (scene) b.dataset.scene = scene; else delete b.dataset.scene;
+}
 function render() {
   applyRights();
   header();
+  applyScene();                                       // (before the maps: they size their canvases to the layout)
   const b = ST.battle;
   if (UI.aim && !b.actions) UI.aim = null;
   turnPick(b);
@@ -4258,7 +4270,10 @@ function overviewTab(c) {
   ...(c.condition_info || []).map(x => h('span', { class: 'cond', style: `color:${inkc((look[x.name] || [])[1] || 'var(--warn)')}`, tip: `${x.label}\n${x.text}` },
     gi(x.name), x.label)),
   c.exhaustion ? h('span', { class: 'cond warn', tip: S('Exhaustion {0}', c.exhaustion) }, gi('exhaustion'), S('Exhaustion {0}', c.exhaustion)) : null,
-  c.inspiration ? h('span', { class: 'cond warn', tip: S('Inspiration') }, gi('inspiration')) : null));
+  // inspiration: a tick that gains or spends it
+  needs('track_uses', h('button', { class: 'vit insp' + (c.inspiration ? ' on' : ''), role: 'checkbox', 'aria-checked': String(!!c.inspiration),
+    'aria-label': S('Inspiration'), tip: `${S('Inspiration')}\n\n${c.inspiration ? S('Click to spend it.') : S('Click to give it.')}`,
+    onclick: go(() => act('inspiration')) }, gi('inspiration', 'sm'), h('b', null, c.inspiration ? '☑' : '☐')))));
   const roll = (label, fn) => [label, fn];
   // the six abilities: the modifier (click: a check) over the save (click: the saving throw); the score on hover
   out.push(h('div', { class: 'abil' }, ...c.abilities.map(a => h('div', { class: 'ab2' + (a.save_prof ? ' prof' : '') },

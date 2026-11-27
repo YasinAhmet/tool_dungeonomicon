@@ -606,6 +606,8 @@ details.more summary .sup{flex:1;min-width:0;overflow:hidden;text-overflow:ellip
 .vitals{display:flex;flex-wrap:wrap;gap:4px;align-items:center;margin:2px 0 6px}
 .vit{display:inline-flex;align-items:center;gap:4px;padding:2px 8px 2px 6px;background:var(--panel);border:1px solid var(--border);color:var(--dim);cursor:default}
 .vit b{font-size:14px;color:var(--text)}
+.vit.insp{cursor:pointer;font:inherit}.vit.insp:hover{background:var(--hover)}.vit.insp b{color:var(--dim)}
+.vit.insp.on{color:var(--gold);border-color:var(--gold)}.vit.insp.on b{color:var(--gold)}
 .abil{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px;margin-bottom:6px}
 .ab2{background:var(--panel);border:1px solid var(--border);display:flex;flex-direction:column;text-align:center;min-width:0}
 .ab2 .chk{cursor:pointer;padding:2px 0 0}.ab2 .chk:hover{background:var(--hover)}
@@ -660,3 +662,20 @@ details.more summary .sup{flex:1;min-width:0;overflow:hidden;text-overflow:ellip
 @media (min-width:901px){body:not(.adv) #sheettog{display:inline-flex}body.nosheet:not(.adv) #body{grid-template-columns:minmax(0,1fr)}body.nosheet:not(.adv) #sheet{display:none}}
 .chips.feats{margin-top:2px}.chips.feats .chip{cursor:pointer}.feattxt{margin-top:6px;padding-top:4px;border-top:1px dotted var(--border);white-space:pre-line}
 @media (min-width:901px){body.nochar:not(.adv) #body{grid-template-columns:minmax(0,1fr)}body.nochar:not(.adv) #sheet,body.nochar:not(.adv) #sheettog{display:none}}
+/* A wide screen's layout by scene (portal.js applyScene): the table feed under the sheet, the map the full height.
+   fight: the turn order a rail left of the map; explore: the battle map out of a fight; world: a roomier sheet. */
+@media (min-width:901px){
+  body.desk:not(.nosheet){--side:clamp(340px,30vw,460px);--table:clamp(170px,32vh,320px)}
+  body.desk.folded:not(.nosheet){--table:34px}
+  body.desk[data-scene=world]:not(.nosheet){--side:clamp(380px,36vw,560px);--table:clamp(200px,40vh,440px)}
+  body.desk[data-scene=world] #worldbody{flex-direction:column}
+  body.desk[data-scene=world] #worldside{width:auto;max-height:32%;flex:none}   /* the land is wide: the route and food under it */
+  body.desk:not(.nosheet) #body{bottom:0;grid-template-columns:minmax(0,1fr) var(--side);grid-template-rows:minmax(0,1fr) var(--table)}
+  body.desk:not(.nosheet) #map{grid-row:1/3}
+  body.desk:not(.nosheet) footer{left:auto;right:8px;bottom:8px;width:var(--side);height:var(--table);border:1px solid var(--border);background:var(--panel)}
+  body.desk:not(.nosheet) #results{left:calc((100% - var(--side)) / 2);bottom:16px}
+  body.desk[data-scene=fight] .mapbody{flex-direction:row}
+  body.desk[data-scene=fight] #initiative{width:160px;flex-direction:column;align-items:stretch}
+  body.desk[data-scene=fight] #order{flex-direction:column;overflow-x:hidden;overflow-y:auto}
+  body.desk[data-scene=fight] #order .oc{flex:none}body.desk[data-scene=fight] #endturn{width:100%}
+}
