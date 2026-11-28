@@ -3377,7 +3377,7 @@ Turn invisible,Turn invisible,
 Invisible until you attack or cast a spell (a bonus action makes you visible again).,Invisible until you attack or cast a spell (a bonus action makes you visible again).,
 Flying speed 60 ft for an hour; afterwards not again for 1d12 hours.,Flying speed 60 ft for an hour; afterwards not again for 1d12 hours.,
 Immune to nonmagical damage for 10 minutes. Once a day.,Immune to nonmagical damage for 10 minutes. Once a day.,
-Truesight,Truesight,
+Truesight,Truesight,Gerçek görüş
 Truesight out to 120 ft for 10 minutes (1 charge).,Truesight out to 120 ft for 10 minutes (1 charge).,
 Puzzler's Wit,Puzzler's Wit,
 Advantage on your next Intelligence check (1 charge).,Advantage on your next Intelligence check (1 charge).,
@@ -4782,7 +4782,7 @@ Join with this hero,Join with this hero,
 The hero is made now; you can pick its spells afterwards,The hero is made now; you can pick its spells afterwards,
 The rest is rolled for you.,The rest is rolled for you.,
 The DM has not generated any heroes yet.,The DM has not generated any heroes yet.,
-Yours,Yours,
+Yours,Yours,Senin
 Taken by {0},Taken by {0},
 Take this hero,Take this hero,
 Join as this hero,Join as this hero,
@@ -6090,3 +6090,21 @@ Grant a spell: the character knows it from now on and can pick it,Grant a spell:
 "Spells the DM granted, on top of the class list","Spells the DM granted, on top of the class list",Sınıf listesine ek olarak DM'in verdiği büyüler
 The character knows it from now on: it is offered when they choose or prepare spells.,The character knows it from now on: it is offered when they choose or prepare spells.,Karakter artık bu büyüyü bilir: büyü seçerken ya da hazırlarken sunulur.
 Why do they know it? (optional),Why do they know it? (optional),Neden biliyor? (isteğe bağlı)
+"Everything you know of it, in the Character view","Everything you know of it, in the Character view","Onun hakkında bildiğin her şey, Karakter görünümünde"
+Click a creature on the map or in the turn order to see it here.,Click a creature on the map or in the turn order to see it here.,Burada görmek için haritada ya da sırada bir yaratığa tıkla.
+Usually {0},Usually {0},Normalde {0}
+Proficient,Proficient,Yetkin
+Resists,Resists,Direnir
+Resists nonmagical,Resists nonmagical,Büyüsüz saldırılara direnir
+Immune to nonmagical,Immune to nonmagical,Büyüsüz saldırılara bağışık
+Immune to,Immune to,Durumlara bağışık
+"The lobby's battle log: every attack, spell and roll of its fight","The lobby's battle log: every attack, spell and roll of its fight","Lobinin savaş günlüğü: dövüşündeki her saldırı, büyü ve zar"
+See its stat block,See its stat block,İstatistik bloğunu gör
+Fly,Fly,Uçma
+Darkvision,Darkvision,Karanlık görüş
+Swim,Swim,Yüzme
+Climb,Climb,Tırmanma
+Burrow,Burrow,Kazma
+Blindsight,Blindsight,Kör görüş
+Tremorsense,Tremorsense,Titreşim algısı
+Gear,Gear,Teçhizat

@@ -127,7 +127,7 @@ function mapText(g, text, x, y) {
   g.save(); g.lineJoin = 'round'; g.lineWidth = 2.5; g.strokeStyle = LOOK.halo; g.strokeText(text, x, y); g.fillStyle = LOOK.pen; g.fillText(text, x, y); g.restore();
 }
 const FOLDS = new Set(store('folds') || []);   // the categories folded away on this device: spell levels, feature sources, action groups
-const SHUT = new Set(['skills:other', 'profs', 'world:packs', 'world:log', 'notes:details', 'tn:new']);   // folded until opened: the details, not the everyday
+const SHUT = new Set(['skills:other', 'profs', 'world:packs', 'world:log', 'notes:details', 'tn:new', 'card:lines']);   // folded until opened: the details, not the everyday
 const folded = k => FOLDS.has(k) !== SHUT.has(k);
 const flipFold = (k, redraw) => { FOLDS.has(k) ? FOLDS.delete(k) : FOLDS.add(k); store('folds', [...FOLDS]); redraw(); };
 // a category's heading that folds it away: ▾/▸, its name and how many it holds (Enter or Space from the keyboard too)
@@ -641,11 +641,14 @@ function applyRights() {
 }
 /** A wide screen's layout follows the scene (what the table is doing, not a click): a fight (the turn order a rail
  *  beside the map), the battle map out of a fight, the world (the sheet roomier). The table feed sits under the sheet
- *  in every one, so the map has the full height. Not the Adventurers or Battlegrounds faces; phones keep their views. */
+ *  in every one, so the map has the full height. Battlegrounds alike: a lobby's fight is a fight (its side column the
+ *  creature panel - creaturePanel - for a monster fighter or a spectator too), its lobby screens the explore scene
+ *  while I have a hero. Not the Adventurers face; phones keep their views. */
 function applyScene() {
   const b = document.body, mode = typeof mapMode === 'function' ? mapMode() : 'battle';
+  const bgf = typeof bgFight === 'function' && bgFight(), bgl = !bgf && typeof bgShown === 'function' && bgShown();
   const other = ST.edition === 'adventurers' || ST.edition === 'battlegrounds' || b.classList.contains('adv') || b.classList.contains('bgmode');
-  const scene = other || !ST.character || (mode !== 'battle' && mode !== 'world') ? ''
+  const scene = bgf ? 'fight' : bgl ? (ST.character || (typeof bgPickId === 'function' && bgPickId()) ? 'explore' : '') : other || !ST.character || (mode !== 'battle' && mode !== 'world') ? ''
     : mode === 'world' ? 'world' : ST.battle.status === 'active' ? 'fight' : 'explore';
   b.classList.toggle('desk', !!scene);
   if (scene) b.dataset.scene = scene; else delete b.dataset.scene;
@@ -676,7 +679,7 @@ function render() {
  *  temporary HP and conditions beside it; the rest on hover; a click opens the sheet. */
 function hpChip() {
   let el = $('hpchip');
-  const c = ST.character;
+  const c = ST.character || (typeof bgChipChar === 'function' ? bgChipChar() : null);    // (a Battlegrounds monster fighter: its board numbers)
   if (!c) { if (el) el.remove(); return; }
   if (!el) { el = h('button', { id: 'hpchip', class: 'flat', onclick: () => showView('sheet') }); $('who').after(el); }
   const pct = c.max_hp ? c.current_hp / c.max_hp : 0, look = badgeLook();
@@ -2157,13 +2160,19 @@ function hurt(at) {
 }
 
 // ---------------------------------------------------------------- the map
+/** A token's letters when it has no picture: the first letter of its first two words that start with one, the words in
+ *  brackets left out ('Ilsa (Alice)' -> 'I', not 'I('; 'Giant Crab 3' -> 'GC'). */
+function initials(name) {
+  const words = String(name || '').replace(/\([^)]*\)/g, ' ').split(/\s+/).filter(w => /^\p{L}/u.test(w));
+  return (words.length ? words : [String(name || '?')]).map(w => w[0]).join('').slice(0, 2).toUpperCase();
+}
 function tokenDisc(g, c, cx, cy, r) {                  // a token's picture (or initials) in its circle
   g.save(); g.beginPath(); g.arc(cx, cy, r, 0, Math.PI * 2); g.closePath();
   g.fillStyle = c.kind === 'pc' ? '#2f4a7a' : c.ally ? '#2f6a4a' : '#6a2f35'; g.fill();
   const im = c.token && (c.mine || vq() !== 'potato') ? image(c.id, c.token) : null;   // (Potato: only their own picture)
   if (im && im.complete && im.naturalWidth) { g.clip(); g.drawImage(im, cx - r, cy - r, r * 2, r * 2); }
   else { g.fillStyle = '#fff'; g.font = `600 ${Math.max(8, r * .8)}px Alegreya Sans, Segoe UI`; g.textAlign = 'center'; g.textBaseline = 'middle';
-    g.fillText(c.name.split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase(), cx, cy); }
+    g.fillText(initials(c.name), cx, cy); }
   g.restore();
 }
 /** [x, y, w, h] in tiles that the map fits to: the placed creatures with room around them (it only grows, so moving
@@ -2369,14 +2378,14 @@ function hpWords(c) {
 /** The target line above the map: the creature you target (or last tapped) - name, health, conditions, distance. */
 function targetInfo(b) {
   const id = UI.inspect || UI.target, c = b.combatants.find(x => x.id === id);
-  if (!c) return [];                                  // (nothing picked: the hint under the map says how)
+  if (!c || panelInSight()) return [];                // (nothing picked: the hint under the map says how; the side column shows it)
   const me = meInBattle() || b.combatants.find(x => x.mine && x.pos), look = badgeLook();
   const far = me && me.pos && c.pos && me.id !== c.id ? Geo.dist(me, c) : null;
   return [h('span', { class: 'tgt', tip: () => tokenCard(c), 'aria-label': (c.id === UI.target ? S('Target') : S('Selected')) + ': ' + c.name },
     c.id === UI.target ? '🎯 ' : '👁 ', h('b', null, c.name), ' · ', c.form ? `${c.form.name} ${c.form.hp}/${c.form.max_hp} · ` : '', hpWords(c),   // the rest on hover
     ...(c.badges || []).slice(0, 3).map(k => h('span', { class: 'bdg', style: `color:${inkc((look[k] || [])[1] || 'var(--warn)')}` }, gi(k, 'sm'))),
     far != null ? ' · ' + S('{0} ft', far) : null),
-    ' ', h('button', { class: 'sm flat', onclick: () => { UI.target = null; UI.inspect = null; renderMap(); }, 'aria-label': S('Clear the target') }, '✕')];
+    ' ', h('button', { class: 'sm flat', onclick: clearPick, 'aria-label': S('Clear the target') }, '✕')];
 }
 /** The initiative order beside the map. Whose turn it is: green = yours, red = an enemy's, yellow = another player's. */
 function renderOrder(b) {
@@ -3339,8 +3348,9 @@ function effectLines(c, look) {
 function renderKnown(b) {
   const box = $('known');
   if (!box) return;
-  // a target's card: on touch screens (with a mouse its hover card says the same, and the bar names the target)
-  const id = UI.inspect || (touch() ? UI.target : null), c = id != null ? b.combatants.find(x => x.id === id) : null;
+  // a target's card: on touch screens (with a mouse its hover card says the same, and the bar names the target); not
+  // while the side column beside the map shows the picked creature (the creature panel)
+  const id = panelInSight() ? null : UI.inspect || (touch() ? UI.target : null), c = id != null ? b.combatants.find(x => x.id === id) : null;
   box.classList.toggle('hide', !c);
   if (!c) { box.replaceChildren(); return; }
   const seen = c.seen || {}, look = badgeLook(), me = meInBattle() || b.combatants.find(x => x.mine && x.pos);
@@ -3352,22 +3362,26 @@ function renderKnown(b) {
   morphKids(box, [                                       // (a missing line is left out, never written "null")
     h('div', { class: 'kn-head' }, cv,
       h('div', { class: 'grow' }, h('b', null, c.name), h('div', { class: 'dim small' }, [side, seen.what, c.sub].filter(Boolean).join(' · '))),
-      h('button', { class: 'sm flat', onclick: () => { UI.target = null; UI.inspect = null; renderMap(); }, 'aria-label': S('Close') }, '✕')),
+      h('button', { class: 'sm flat', onclick: clearPick, 'aria-label': S('Close') }, '✕')),
     h('div', { class: 'small' }, h('span', { class: 'dim' }, S('Looks:') + ' '), c.out ? S('Down') : c.health,
       c.form ? h('span', { class: 'dim' }, ' · ' + S('in the shape of {0}', c.form.name)) : null),
     pct != null ? h('div', { class: 'hpbar' }, h('div', { style: `width:${pct}%;background:${pct > 50 ? 'var(--good)' : pct > 25 ? 'var(--warn)' : 'var(--bad)'}` })) : null,
     line(S('Wears:'), seen.wears), line(S('Holds:'), seen.holds),
     c.conc ? h('div', { class: 'small' }, S('Concentrating on {0}', c.conc.spell)) : null,
     ...effectLines(c, look),
-    me && me.pos && c.pos && me.id !== c.id ? h('div', { class: 'dim small' }, S('{0} ft away', Geo.dist(me, c))) : null]);
+    me && me.pos && c.pos && me.id !== c.id ? h('div', { class: 'dim small' }, S('{0} ft away', Geo.dist(me, c))) : null,
+    panelOn() ? h('div', { class: 'row kn-more' }, h('span', { class: 'grow' }), btn(S('Details') + ' ›', () => {   // (a phone: the Character view shows it)
+      PANEL.pick = c.id; PANEL.n = UI.pickN || 0; showView('sheet'); renderSheet(); return null; }, 'sm', S('Everything you know of it, in the Character view'))) : null]);
 }
 function tapToken(c) {
   if (isMover(c)) {                                          // my token: picked (its details shown) or let go
     const on = UI.sel === c.id; UI.sel = on ? null : c.id; UI.inspect = on ? null : c.id;
   } else if (c.mine || (c.untargetable && c.id !== UI.target)) UI.inspect = UI.inspect === c.id ? null : c.id;   // (out of reach: shown, not a target)
   else { UI.target = c.id === UI.target ? null : c.id; UI.inspect = null; }
+  UI.picked = c.id; UI.pickN = (UI.pickN || 0) + 1;      // the creature clicked last: the side column shows it (creaturePanel)
   if (UI.move) { UI.move = null; renderAimbar(); }
   renderMap();
+  if (panelOn()) renderSheet();
 }
 /** May I move my token now: on my turn in a fight; any time out of combat. */
 const canMove = b => !!b.settings.move_tokens && (b.status === 'active' ? !!b.my_turn : true);   // out of combat, before or after: free
@@ -4181,12 +4195,157 @@ function renderPending() {
   if (fresh) { const first = el.querySelector('.opts button'); if (first) first.focus({ preventScroll: true }); }
 }
 
+// ---------------------------------------------------------------- the creature panel: the side column as an inspector
+// While a battle map shows, the side column holds my character's sheet - or, after a click on a creature (on the map,
+// in the turn order), that creature's card. A strip of chips on top switches between my creatures (my characters in
+// the battle and what they summoned; my Battlegrounds fighter, a monster too) and the one picked last; it shows only
+// while there is more than my character to pick. A card: who it is, its health, conditions and effects, what it wears
+// and holds, how far it is (the board's, live) - and, where the table tells it (portal/creatures.py: api.examine for a
+// creature of my own in the campaign, bg_examine for anything in a Battlegrounds fight), its armour class, speed,
+// senses, abilities, defenses and what it can do: a stat block, or a hero's sheet in short.
+const PANEL = { pick: undefined, n: 0, cards: new Map(), last: new Map(), asking: new Set() };
+const panelBG = () => typeof bgFight === 'function' && bgFight();
+/** The campaign's battle map is on the page with creatures to look at, and a character of mine to come back to. */
+const panelCamp = () => !!ST.character && ST.edition !== 'adventurers' && !(typeof bgShown === 'function' && bgShown())
+  && (typeof mapMode !== 'function' || mapMode() === 'battle') && !!ST.battle && !ST.battle.hidden && ST.battle.combatants.length > 0;
+const panelOn = () => !!ST && (panelBG() || panelCamp());
+const ownish = c => !!c && !!(c.mine || c.my_summon);
+/** Does the side column show the creature panel where the player can see it (a wide screen, the column not tucked away)? */
+const panelInSight = () => panelOn() && !NARROW.matches && !document.body.classList.contains('nosheet');
+/** What the side column shows now: null (no battle map to look at: the sheet as usual), else { kids, sheet } - the strip
+ *  (when there is something to switch to) and the picked creature's card, or `sheet`: my character's sheet under it. */
+function creaturePanel() {
+  if (!panelOn()) return null;
+  const bg = panelBG(), b = ST.battle, all = b.combatants;
+  const main = bg ? all.find(c => c.id === b.fighter && c.mine) || null
+    : all.find(c => c.mine && c.character === ST.character.name) || null;
+  if (PANEL.n !== (UI.pickN || 0)) { PANEL.n = UI.pickN || 0; PANEL.pick = UI.picked; }    // a click on the map or the order: shown
+  const sel = [UI.inspect, UI.target].map(id => all.find(c => c.id === id)).find(c => c && !ownish(c)) || null;
+  let shown = PANEL.pick != null ? all.find(c => c.id === PANEL.pick) : null;
+  if (shown && !ownish(shown) && shown !== sel) shown = null;    // (let go: untargeted, cleared or gone - back to mine)
+  shown = shown || main;
+  const chips = [...(main ? [main] : []), ...all.filter(c => ownish(c) && c !== main), ...(sel ? [sel] : [])];
+  const strip = chips.length > 1 || (sel && !main) ? panelStrip(chips, shown, main, sel) : null;
+  if (shown && ST.character && shown.character && shown.character === ST.character.name) return { kids: [strip], sheet: true };
+  if (!shown && ST.character) return { kids: [strip], sheet: true };     // (my character isn't in this battle: its sheet all the same)
+  if (!shown) return { kids: [strip, h('div', { class: 'card dim small' }, S('Click a creature on the map or in the turn order to see it here.'))] };
+  return { kids: [strip, ...creatureCard(shown, bg)] };
+}
+/** Let go of the picked creature (the target line's ✕, the known card's, the strip's). */
+function clearPick() { UI.target = null; UI.inspect = null; renderMap(); if (panelOn()) renderSheet(); }
+/** A creature's token, drawn small (the strip, a card's head). */
+function tokenPic(c, px) {
+  const dpr = window.devicePixelRatio || 1;
+  const cv = h('canvas', { class: 'tpic', width: Math.round(px * dpr), height: Math.round(px * dpr), style: `width:${px}px;height:${px}px`, 'aria-hidden': 'true' });
+  const g = cv.getContext('2d'); g.scale(dpr, dpr); tokenDisc(g, c, px / 2, px / 2, px / 2 - 1);
+  return cv;
+}
+/** A creature's health in a few pixels: its bar when its numbers are shown to me, else a mark in its colour. */
+function hpPip(c) {
+  const pct = c.hp != null && c.max_hp ? Math.max(0, Math.min(100, 100 * c.hp / c.max_hp)) : null;
+  return pct != null ? h('span', { class: 'ph' }, h('i', { style: `width:${pct}%;background:${pct > 50 ? 'var(--good)' : pct > 25 ? 'var(--warn)' : 'var(--bad)'}` }))
+    : c.health_color ? h('span', { class: 'hpw pip', style: `background:${c.health_color}` }) : null;
+}
+function panelStrip(chips, shown, main, sel) {
+  return h('div', { class: 'pstrip', role: 'tablist', 'aria-label': S('Creatures') }, ...chips.map(c => {
+    const on = c === shown, picked = c === sel;
+    return h('span', { class: 'pchip' + (on ? ' on' : '') + (picked ? ' tg' : '') + (c.out ? ' out' : '') + (c.turn ? ' turn' : '') },
+      h('button', { class: 'pgo', role: 'tab', 'aria-selected': String(on), tip: [c.name, c.hp != null ? `${S('HP')} ${c.hp}/${c.max_hp}` : c.health || ''].filter(Boolean).join('\n'),
+        onclick: () => { PANEL.pick = c === main ? null : c.id; PANEL.n = UI.pickN || 0; tip(); renderSheet(); } },
+        tokenPic(c, 20), h('span', { class: 'pn' }, (picked ? '🎯 ' : '') + c.name), hpPip(c)),
+      picked ? h('button', { class: 'px flat', 'aria-label': S('Clear the target'), tip: S('Clear the target'), onclick: clearPick }, '✕') : null);
+  }));
+}
+/** The table's numbers for a creature's card ({error} when it refused), asked once per look of it: a new condition,
+ *  effect or shape asks again. null while the first answer comes, or when it isn't mine to know (the campaign: only
+ *  my own creatures' numbers). */
+function panelCard(c, bg, own) {
+  if (!bg && !own) return null;
+  const l = bg ? bgLobby() : null, id = `${bg ? `bg${l.id}.${l.fights}` : 'camp'}:${c.id}`;
+  const key = `${id}:${wordsLang}:` + JSON.stringify([c.name, c.sub || '', (c.effects || []).map(e => e.key), c.form ? c.form.name : '', !!c.out, c.conc ? c.conc.spell : '']);
+  if (PANEL.cards.has(key)) return PANEL.cards.get(key);
+  if (!PANEL.asking.has(key)) {
+    PANEL.asking.add(key);
+    api('/api/act', bg ? { action: 'bg_examine', room: l.id, cid: c.id } : { action: 'examine', cid: c.id })
+      .then(r => r.data || {}, e => (e.message === 'login' ? null : { error: e.message }))
+      .then(d => {
+        if (!d) return;
+        PANEL.cards.set(key, d); PANEL.last.set(id, d);
+        while (PANEL.cards.size > 80) PANEL.cards.delete(PANEL.cards.keys().next().value);
+        if (ST) keepFocus($('sheet'), renderSheet);
+      }).finally(() => PANEL.asking.delete(key));
+  }
+  return PANEL.last.get(id) || null;                  // (the one before while the new one comes: no blink)
+}
+/** A creature's card: its head, health and distance, its numbers (when told), conditions and effects, what it wears
+ *  and holds, then its abilities, defenses and what it can do - the long parts in folds kept on this device. */
+function creatureCard(c, bg, given) {                // given: its numbers already asked (a Battlegrounds monster pick)
+  const b = ST.battle, look = badgeLook(), own = ownish(c), card = given !== undefined ? given : panelCard(c, bg, own);
+  const me = meInBattle() || b.combatants.find(x => x.mine && x.pos), far = me && me.pos && c.pos && me.id !== c.id ? Geo.dist(me, c) : null;
+  const seen = c.seen || {}, member = !bg || !!(ST.bg && ST.bg.me);
+  const side = own ? S('Yours') : !member ? '' : c.ally || (!bg && c.kind === 'pc') ? S('Ally') : S('Enemy');
+  const pct = c.hp != null && c.max_hp ? Math.max(0, Math.min(100, 100 * c.hp / c.max_hp)) : null;
+  const line = (label, items) => items && items.length ? h('div', { class: 'small' }, h('span', { class: 'dim' }, label + ' '), items.join(', ')) : null;
+  const vit = (icon, words, value) => h('span', { class: 'vit', tip: words, 'aria-label': `${words.split('\n')[0]} ${value}` }, gi(icon, 'sm'), h('b', null, value));
+  const head = h('div', { class: 'card ccard' + (own ? ' own' : '') },
+    h('div', { class: 'chead' }, tokenPic(c, 44),
+      h('div', { class: 'grow' }, h('div', { class: 'cname' }, c.name),
+        h('div', { class: 'dim small' }, [side, bg && c.team != null ? S('Team {0}', c.team) : '', (card && card.what) || seen.what || c.sub, card && card.sub].filter(Boolean).join(' · '))),
+      far != null ? h('span', { class: 'cfar dim small' }, S('{0} ft away', far)) : null),
+    h('div', { class: 'chp' }, c.hp != null ? h('b', null, S('HP')) : h('span', { class: 'dim' }, S('Looks:')), ' ', c.out ? h('span', { class: 'bad' }, S('Down')) : hpWords(c),
+      c.form ? h('span', { class: 'dim' }, ' · ' + S('in the shape of {0}', c.form.name) + (c.form.max_hp ? ` ${c.form.hp}/${c.form.max_hp}` : '')) : null),
+    pct != null ? h('div', { class: 'hpbar' }, h('div', { style: `width:${pct}%;background:${pct > 50 ? 'var(--good)' : pct > 25 ? 'var(--warn)' : 'var(--bad)'}` })) : null,
+    card && !card.error ? h('div', { class: 'vitals cvit' },
+      vit('shield', [S('Armor Class'), card.ac_note, card.ac_plain != null ? S('Usually {0}', card.ac_plain) : ''].filter(Boolean).join('\n'), String(card.ac)),
+      card.speed ? vit('walking-boot', S('Speed'), card.speed) : null,
+      card.senses ? vit('surrounded-eye', S('Senses'), card.senses) : null) : null,
+    ...effectLines(c, look),
+    c.conc ? h('div', { class: 'small' }, S('Concentrating on {0}', c.conc.spell)) : null,
+    line(S('Wears:'), seen.wears), line(S('Holds:'), seen.holds),
+    ...(card ? cardBody(card) : own || bg ? [h('div', { class: 'dim small' }, '…')] : []));
+  return [head];
+}
+/** The numbers the table told: abilities (the save on hover), defenses as pictures, the stat block's or the sheet's
+ *  parts in folds (a hero's features folded until opened). */
+function cardBody(card) {
+  if (card.error) return [h('div', { class: 'dim small' }, card.error)];
+  const out = [], d = card.defenses || {};
+  if ((card.abilities || []).length) out.push(h('div', { class: 'tiles cab' }, ...card.abilities.map(a => h('div', { class: 'tile' + (a.prof ? ' prof' : ''),
+    tip: `${a.label} ${a.score}\n${S('Saving throw')} ${sign(a.save)}` + (a.prof ? '\n' + S('Proficient') : '') },
+  h('span', null, a.label.slice(0, 3).toLocaleUpperCase(wordsLang || undefined)), h('b', null, sign(a.mod)), h('span', { class: 'sv' }, gi('shield', 'xs'), sign(a.save))))));
+  const kinds = (label, list, cls) => list && list.length ? h('div', { class: 'cdef ' + cls }, h('span', { class: 'dim' }, label),
+    ...list.map(([k, w]) => DMG_ICON[k] ? h('span', { class: 'dt', tip: w, 'aria-label': w }, gi(DMG_ICON[k], 'sm')) : h('span', { class: 'dtw' }, w))) : null;
+  out.push(kinds(S('Resists'), d.resist, 'res'), kinds(S('Immune'), d.immune, 'imm'), kinds(S('Vulnerable'), d.vuln, 'vul'),
+    kinds(S('Resists nonmagical'), d.nm_resist, 'res'), kinds(S('Immune to nonmagical'), d.nm_immune, 'imm'),
+    (d.cond || []).length ? h('div', { class: 'cdef' }, h('span', { class: 'dim' }, S('Immune to')), ' ' + d.cond.join(', ')) : null);
+  const fold = (k, title, n, body) => h('div', { class: 'csec' }, h('div', { class: 'title' }, foldHead(k, title, n, renderSheet)), folded(k) ? null : body());
+  if ((card.lines || []).length) out.push(fold('card:lines', S('Details'), null, () => h('div', { class: 'clines small' },
+    ...card.lines.map(([k, v]) => h('div', null, h('span', { class: 'dim' }, k + ' '), v)))));
+  if ((card.attacks || []).length) out.push(fold('card:attacks', S('Attacks'), card.attacks.length, () => card.attacks.map(a =>
+    h('div', { class: 'li atk' }, h('span', { class: 'n' }, a.label), h('span', { class: 'dim small dmg' }, `${sign(a.attack)} · `, ...dmgIcons(a.damage))))));
+  for (const s of card.sections || []) {
+    const k = 'card:' + s.key;
+    if (s.key.startsWith('feat:')) SHUT.add(k);          // (a hero's features: folded until opened, like the sheet's details)
+    out.push(fold(k, s.title || S('Traits'), s.entries.length, () => [s.note ? h('div', { class: 'dim small' }, s.note) : null,
+      ...s.entries.map(e => h('div', { class: 'cent' }, e.name ? h('b', null, e.name + '. ') : null, e.text))]));
+  }
+  if ((card.spells || []).length) out.push(fold('card:spells', S('Spells'), card.spells.reduce((n, g) => n + g.spells.length, 0), () =>
+    card.spells.map(g => h('div', { class: 'small' }, h('span', { class: 'dim' }, g.title + ': '), g.spells.join(', ')))));
+  if ((card.items || []).length) out.push(fold('card:items', S('Inventory'), card.items.length, () =>
+    h('div', { class: 'small' }, card.items.map(i => (i.equipped ? '◆ ' : '') + i.label + (i.qty > 1 ? ` ×${i.qty}` : '')).join(', '))));
+  return out;
+}
+
 // ---------------------------------------------------------------- the character sheet
 const TAB_ICON = { overview: 'person', spells: 'spell-book', inventory: 'backpack', features: 'swords-power', notes: 'quill-ink', teamnotes: 'three-friends' };
 const TABS = () => [['overview', S('Overview')], ['spells', S('Spells')], ['inventory', S('Inventory')], ['features', S('Features')], ['notes', S('Notes')], ['teamnotes', S('Team notes')]];
 function renderSheet() {
   const c = ST.character, el = $('sheet');
-  document.body.classList.toggle('nochar', !c);           // (no character: a wide screen gives its column to the map or the lobbies)
+  const panel = creaturePanel();                         // a battle map on the page: the side column as an inspector
+  const pick = !c && !panel && typeof bgPickPanel === 'function' ? bgPickPanel() : null;   // a Battlegrounds monster pick before its fight
+  document.body.classList.toggle('nochar', !c && !panel && !pick);  // (no character: a wide screen gives its column to the map or the lobbies)
+  if (pick) { morphKids(el, pick); return; }
+  if (panel && !panel.sheet) { morphKids(el, panel.kids); return; }
   if (!c) { el.replaceChildren(h('div', { class: 'card' }, h('div', { class: 'title' }, S('Your characters')),
     typeof bgApp === 'function' && bgApp() && !bgMember() ? S('Join a lobby to get a hero: it shows here.')      // (the Battlegrounds app)
     : typeof bgMember === 'function' && bgMember() ? S('Battlegrounds: your hero shows here once you have one.')     // (a member's sheet is their lobby hero's)
@@ -4242,7 +4401,7 @@ function renderSheet() {
     h('button', { class: open === k ? 'on' : '', role: 'tab', 'aria-selected': String(open === k), 'aria-label': l, tip: open === k ? null : l,
       onclick: () => { tip(); UI.tab = k; store('tab', k); renderSheet(); } }, gi(TAB_ICON[k], 'sm'), open === k ? h('span', null, l) : null)));
   const body = { overview: overviewTab, spells: spellsTab, inventory: inventoryTab, features: featuresTab, notes: notesTab, teamnotes: teamNotesTab }[open](c);
-  morphKids(el, [...head, tabs, ...body]);              // (in place: only what changed is written - no blink, no jump)
+  morphKids(el, [...(panel ? panel.kids : []), ...head, tabs, ...body]);   // (in place: only what changed is written - no blink, no jump)
   el.querySelectorAll('textarea').forEach(fitText);
 }
 /** A note or detail box as tall as its text (one line while empty, up to ~12 lines, then it scrolls). */
@@ -4841,13 +5000,25 @@ function teamNotesTab() {
 // ---------------------------------------------------------------- the table feed: rolls and chat
 const FILTERS = () => [['all', S('All')], ['roll', S('Rolls')], ['chat', S('Chat')]];
 function renderFeed() {
-  const drawn = [ST.feed, UI.local, UI.local.length, UI.feed, wordsLang];   // a battle move leaves the feed as it was
+  const bglog = typeof bgLogShown === 'function' && bgLogShown() ? ST.bg.log : null;     // a Battlegrounds lobby's battle log: a filter too
+  const filters = FILTERS().concat(bglog ? [['log', S('Battle log'), S("The lobby's battle log: every attack, spell and roll of its fight")]] : []);
+  const want = filters.some(([k]) => k === UI.feed) ? UI.feed : 'all';                   // (a log filter kept from a lobby left since: All)
+  const drawn = [ST.feed, UI.local, UI.local.length, want, wordsLang, want === 'log' ? bglog : null, filters.length];   // a battle move leaves the feed as it was
   if (UI.feedDrawn && UI.feedDrawn.every((x, i) => x === drawn[i])) { unread(); return; }
   UI.feedDrawn = drawn;
-  $('feedfilter').replaceChildren(...FILTERS().map(([k, l]) => h('button', { class: UI.feed === k ? 'on' : '', onclick: () => { UI.feed = k; store('feed', k); renderFeed(); } }, l)));
+  $('feedfilter').replaceChildren(...filters.map(([k, l, words]) => h('button', { class: want === k ? 'on' : '', tip: words, onclick: () => { UI.feed = k; store('feed', k); renderFeed(); } },
+    k === 'log' ? '📜 ' + l : l)));
   const box = $('feed'), atEnd = box.scrollHeight - box.scrollTop - box.clientHeight < 30;
+  if (want === 'log') {                                 // (its lines: battlegrounds.js bgLogKids)
+    morphKids(box, bgLogKids(bglog));
+    if (atEnd || UI.feedLog !== true) box.scrollTop = box.scrollHeight;
+    UI.feedLog = true;
+    unread();
+    return;
+  }
+  UI.feedLog = false;
   const entries = [...ST.feed.map(e => ({ ...e, sort: e.id })), ...UI.local].sort((a, b) => a.sort - b.sort)
-    .filter(e => UI.feed === 'all' || (UI.feed === 'roll' ? e.kind === 'roll' || e.kind === 'xp' || e.kind === 'action' :e.kind === 'chat' || e.kind === 'private'));
+    .filter(e => want === 'all' || (want === 'roll' ? e.kind === 'roll' || e.kind === 'xp' || e.kind === 'action' : e.kind === 'chat' || e.kind === 'private'));
   // (the time: on hover; "only" lines - my creatures' own battle log, beside the table's lines that say the same - quieter)
   morphKids(box, entries.slice(-120).map(e => h('div', { class: `e ${e.kind}${e.dm ? ' dm' : ''}${e.uid === ST.me.id ? ' me' : ''}${e.only ? ' own' : ''}`, title: e.time },
     e.who ? h('span', { class: 'w' }, (e.dm ? '👑 ' : '') + e.who) : null, rich(e.text))));

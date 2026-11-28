@@ -118,6 +118,7 @@ function bgClasses() {
   b.classList.toggle('bgmode', bgMember() || bgApp());
   b.classList.toggle('bglobby', bgShown() && !bgFight());
   b.classList.toggle('bgfight', bgFight());
+  b.classList.toggle('bgwatch', !(ST && ST.bg && ST.bg.me));      // (looking on: no fighter of mine here)
 }
 const bgAct = (action, args = {}, quiet = true) => { const l = bgLobby(); return act(action, { room: l ? l.id : undefined, ...args }, quiet); };
 const bgRedo = () => renderBG(mapMode());
@@ -130,7 +131,7 @@ function buildBG() {
   if ($('bgbody')) return;
   $('map').querySelector('.mapbody').after(h('div', { id: 'bgbody', class: 'hide' }));
   $('round').after(h('span', { id: 'bgbar', class: 'hide' }, h('span', { id: 'bgback' }), h('span', { id: 'bgnote' }),
-    h('span', { id: 'bghost' }), btn('📜', () => { BG.flog = !BG.flog; bgRedo(); return null; }, 'sm', S('The battle log'))));
+    h('span', { id: 'bghost' }), btn('📜', () => { bgLogToggle(); return null; }, 'sm', S('The battle log'))));
   $('mapwrap').append(h('div', { id: 'bgflog', class: 'hide' }));
   // an open pick list closes on a click beside it or Escape, and follows its field when the page moves
   document.addEventListener('click', e => { const p = $('ddpop'); if (BG.dd && !(p && p.contains(e.target))) ddClose(); });
@@ -178,7 +179,7 @@ function bgBar(g, l) {
   const hostEl = $('bghost'), hosting = l && l.hosting && l.mode !== 'replay';
   hostEl.replaceChildren(...(!hosting ? [] : l.phase === 'battle' ? [btn('⏹', () => endDuel(l), 'sm', S('End the fight'))]
     : l.phase === 'over' ? [btn('✔ ' + S('Back to the lobby'), () => bgAct('bg_finish', {}, true), 'sm primary', S('Everyone rested, back in the lobby for another round'))] : []));
-  const [cls, text] = phaseText(g, l);
+  const [cls, text] = phaseText(g, l, NARROW.matches);          // (a phone: the round only - the header's chip says who)
   const note = $('bgnote');
   note.className = cls;
   note.textContent = text;
@@ -188,8 +189,9 @@ function replayWords(l) {
   const at = S('frame {0} of {1}', (p.frame || 0) + 1, p.frames || 0);
   return p.playing ? `▶ ${at} · ${p.speed || 1}×` : `⏸ ${at}`;
 }
-/** How the lobby stands, for me: [colour, words] - waiting, preparing, the round, the result, the replay's frame. */
-function phaseText(g, l) {
+/** How the lobby stands, for me: [colour, words] - waiting, preparing, the round, the result, the replay's frame.
+ *  short: a phone's fight bar (who I fight as left out). */
+function phaseText(g, l, short) {
   const me = g.me, r = l.result;
   if (l.mode === 'replay') return ['dim', '🎞 ' + replayWords(l)];
   const duel = l.mode === 'duel';
@@ -201,7 +203,7 @@ function phaseText(g, l) {
   if (l.phase === 'lobby') return ['dim', me ? (me.ready ? '✔ ' + S('Ready - waiting for the DM to start the battle') : '🕓 ' + S('Lobby - waiting for the DM to start the battle'))
     : '🕓 ' + S('Lobby - the players get ready')];
   if (l.phase === 'setup') return ['warn', '⏳ ' + (l.host ? S('The battle is being prepared') : S('The DM is preparing the battle'))];
-  if (l.phase === 'battle' && !r) return [me && me.fighting ? 'acc' : 'dim', me && me.fighting ? '🤺 ' + S('You fight as {0}', me.char || me.summary) + ' · ' + S('round {0}', l.round || 1)
+  if (l.phase === 'battle' && !r) return [me && me.fighting ? 'acc' : 'dim', me && me.fighting ? '🤺 ' + (short ? '' : S('You fight as {0}', bgFighterName(me)) + ' · ') + S('round {0}', l.round || 1)
     : '⚔ ' + S('Battle · round {0}', l.round || 1)];
   if (r) return [r.players_won && me ? 'good' : r.draw ? 'dim' : me ? 'bad' : 'acc', '🏁 ' + (me ? (r.players_won ? S('Victory!') : r.draw ? S('A draw.') : S('Defeat.')) + ' ' : '') + r.text];
   return ['dim', '🏁 ' + S('The battle is over')];
@@ -665,7 +667,8 @@ function fighterPane(g, l) {
   parts.push(h('div', { class: 'card hero mine' },
     h('div', { class: 'drow' }, h('span', { class: 'title' }, S('Your fighter')), h('b', { class: 'nm' }, me.char || me.summary), h('span', { class: 'grow' }),
       me.char && me.kind === 'hero' ? btn('✨', () => bgSpellPicker(l), 'sm', S('Spells…') + '\n' + S('Take a ready-made spell list, or pick your hero\'s spells one by one')) : null,
-      me.char ? btn('📜', () => { showView('sheet'); return null; }, 'sm', S('See my hero')) : null),
+      me.char ? btn('📜', () => { showView('sheet'); return null; }, 'sm', S('See my hero'))
+        : bgPickId() ? btn('📜', () => { showView('sheet'); return null; }, 'sm', S('See its stat block')) : null),
     me.char && me.summary ? h('div', { class: 'dim small' }, me.summary) : null),
   h('details', { class: 'more', open: BG.redo || null, ontoggle: e => { BG.redo = e.target.open; } },
     h('summary', null, S('Fight as something else'), h('span', { class: 'sup' }, ' ' + kinds.map(k => words[k][1]).join(' · '))), tabs, ...body));
@@ -1280,15 +1283,66 @@ async function duelForm(l) {
 }
 const endDuel = l => ask(S('End the fight now? Whoever is left standing wins (several teams: nobody).'), S('End it'), () => bgAct('bg_end', {}, true), 'danger');
 /** The lobby's battle log: actions and dice (no movement), coloured by kind, a marker when the round changes. */
-function bgLog(g, floating) {
-  const entries = g.log || [];
+/** The battle log's lines: a round's heading, then its entries (the log pane, the floating log, the table box's log). */
+function bgLogKids(entries) {
   const items = [];
   let round = null;
-  for (const e of entries) {
+  for (const e of entries || []) {
     if (e.round && e.round !== round) { round = e.round; items.push(h('div', { class: 'lround' }, S('Round {0}', e.round))); }
     items.push(h('div', { class: 'lentry lk-' + (e.kind || 'plain') }, rich(e.text)));
   }
-  const body = h('div', { class: 'lbody' }, ...(items.length ? items : [h('div', { class: 'dim small' }, S('Nothing yet.'))]));
+  return items.length ? items : [h('div', { class: 'dim small' }, S('Nothing yet.'))];
+}
+/** The table box can show the lobby's battle log in place of the table's lines (its log filter): while I look at a lobby
+ *  (its room, not the lobby list). */
+const bgLogShown = () => !!(ST && ST.bg && ST.bg.lobby) && bgScreen() === 'room';
+/** The fight bar's log button: a wide screen's table box (under the side column) switches to the battle log and back -
+ *  the map stays clear; a phone floats the log over the map. */
+function bgLogToggle() {
+  if (NARROW.matches || !document.body.classList.contains('desk') || document.body.classList.contains('nosheet')) { BG.flog = !BG.flog; bgRedo(); return; }
+  if (UI.feed === 'log') UI.feed = BG.feedWas || 'all';
+  else { BG.feedWas = UI.feed; UI.feed = 'log'; }
+  store('feed', UI.feed);
+  if (document.body.classList.contains('folded')) { document.body.classList.remove('folded'); store('folded', false); }
+  renderFeed();
+}
+/** My monster fighter's hit points for the header's chip (a hero's come from its sheet), while it fights. */
+function bgChipChar() {
+  if (!bgFight()) return null;
+  const b = ST.battle, f = b.combatants.find(c => c.id === b.fighter && c.mine);
+  return f && f.hp != null ? { name: f.name, current_hp: f.hp, max_hp: f.max_hp, temp_hp: 0, condition_info: [], exhaustion: 0 } : null;
+}
+/** The monster I picked to fight as (a lobby's room, before the fight), else null - a random one of a CR is known only
+ *  once the battle is prepared. */
+function bgPickId() {
+  const g = ST && ST.bg, me = g && g.me, l = bgLobby();
+  const mid = me && me.kind === 'monster' && me.pick && me.pick.monster;
+  return mid && l && l.phase === 'lobby' && bgShown() && bgScreen() === 'room' ? mid : null;
+}
+/** My monster pick before its fight: its stat block in the side column (bg_pick_card: what it can do), asked once per
+ *  pick and language; null when there is none to show. */
+function bgPickPanel() {
+  const mid = bgPickId(), me = mid ? ST.bg.me : null, l = bgLobby();
+  if (!mid) return null;
+  const key = `pick:${l.id}:${mid}:${wordsLang}`;
+  if (!PANEL.cards.has(key) && !PANEL.asking.has(key)) {
+    PANEL.asking.add(key);
+    api('/api/act', { action: 'bg_pick_card', room: l.id }).then(r => r.data || {}, e => (e.message === 'login' ? null : { error: e.message }))
+      .then(d => { if (d) { PANEL.cards.set(key, d); if (ST) keepFocus($('sheet'), renderSheet); } }).finally(() => PANEL.asking.delete(key));
+  }
+  const card = PANEL.cards.get(key) || null;
+  const c = { id: 'pick', name: (card && card.name) || me.pick.name || me.summary, kind: 'enemy', mine: true, hp: card && card.hp ? card.hp : null,
+    max_hp: card && card.hp ? card.hp : null, effects: [], seen: {}, team: me.team, token: null };
+  return creatureCard(c, true, card);
+}
+/** What I fight as, by its name on the map (a random monster's too), else my pick's words. */
+function bgFighterName(me) {
+  const b = bgBoard(), f = b && b.combatants.find(c => c.id === b.fighter);
+  return (f && f.name) || me.char || me.summary;
+}
+function bgLog(g, floating) {
+  const entries = g.log || [];
+  const body = h('div', { class: 'lbody' }, ...bgLogKids(entries));
   if (floating) {
     const el = h('div', { class: 'lfloat' }, h('div', { class: 'title' }, '📜 ' + S('Battle log'), h('span', { class: 'grow' }), btn('✕', () => { BG.flog = false; bgRedo(); return null; }, 'sm flat')), body);
     requestAnimationFrame(() => { body.scrollTop = body.scrollHeight; });
